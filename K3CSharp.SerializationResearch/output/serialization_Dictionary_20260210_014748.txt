@@ -1,0 +1,19 @@
+# Serialization Research: Dictionary (random examples)
+# Generated: 2026-02-10 01:47:50
+# Total examples: 10
+
+_bd `"éñ­¦";512976.896658;`"D";-147915 → -147915
+_bd `Xmd25e;"70fc.";`l;-285017;`"+P";664136.105728 → 664136.1
+_bd `_90I2;-569794.518768;`_1ju6;`NERct;`P6PG9U;"" → ""
+_bd `v;"v_";`_4IWIRT;`MH2;`" ";`"Ü" → `"\303\234"
+_bd `"fV¤";-424191.692126 → -424191.7
+_bd `f7hp;`"±Þ¾" → `"\302\261\303\236\302\276"
+_bd `"M©";`OPkVX → `OPkVX
+_bd `rktAb5;-686103;`fy3A4;"H:o" → "H:o"
+_bd `vl;-745435.339788;`"ZßóÕ";"VZs" → "VZs"
+_bd `g;-772641;`"ùìè";"\jw.oL" → "jw.oL"
+
+# Summary:
+# Successful examples: 10
+# Data type: Dictionary
+# Mode: Random generation
