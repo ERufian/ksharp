@@ -58,10 +58,8 @@
 ║ test_symbol_quoted.k                               │ `"hello"             │ `hello               │                      ║
 ║ test_character_single.k                            │ "a"                  │ "a"                  │                      ║
 ║ test_string_escape.k                               │ "hello
-world"        │ Error: Untermin...   │ "hello
-world"        ║
-║ test_symbol_escape.k                               │ `"hello\nworld"      │ `"hello
-world"       │                      ║
+world"        │ "hello\nworld"       │                      ║
+║ test_symbol_escape.k                               │ `"hello\nworld"      │ `"hello\nworld"      │                      ║
 ║ complex_function.k                                 │ distance:{[d0;v;a;t] d1:v*t; d2:a*t*t%2; d0+d1+d2}
 (distance) . (5 10 2 10) │ 205.0                │                      ║
 ║ count_operator.k                                   │ # (1 2 3)            │ 3                    │                      ║
@@ -1251,15 +1249,5 @@ _eval (`",";,`a`b`c;(`",";,`d;`v)) │ `a`b`c`d`e`f         │                 
 ║ test_eval_monadic_star.k                           │ _eval (`"*:";1 2 3 4) │ 1                    │                      ║
 ║ test_eval_monadic_star_atomic.k                    │ _eval (`"*:";,1)     │ 1                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 935/936 tests passed (99.9%)                                                                               ║
+║ SUMMARY: 936/936 tests passed (100.0%)                                                                              ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-FAILING TESTS DETAILS:
-═════════════════════════════════════════════════════════════════════════════════════
-Test: test_string_escape.k
-Input: "hello
-world"
-Expected: "hello
-world"
-Actual: Error: Unterminated string literal
-──────────────────────────────────────────────────────────────────────────

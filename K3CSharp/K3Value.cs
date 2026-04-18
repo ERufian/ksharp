@@ -850,7 +850,14 @@ namespace K3CSharp
             else
             {
                 // Symbol is not a valid variable name, display with quotes and backtick
-                return $"`\"{Value}\"";
+                // Escape special characters to match k.exe display behavior
+                var escaped = Value
+                    .Replace("\\", "\\\\")
+                    .Replace("\"", "\\\"")
+                    .Replace("\n", "\\n")
+                    .Replace("\r", "\\r")
+                    .Replace("\t", "\\t");
+                return $"`\"{escaped}\"";
             }
         }
         

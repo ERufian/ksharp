@@ -541,6 +541,17 @@ namespace K3CSharp
                         Advance();
                     }
                 }
+                else if (currentChar == '\r')
+                {
+                    // Per speclet: \r\n combinations are converted to \n inside strings
+                    Advance();
+                    if (currentChar == '\n')
+                    {
+                        value += '\n';
+                        Advance();
+                    }
+                    // standalone \r: ignore (omit from value)
+                }
                 else
                 {
                     value += currentChar;

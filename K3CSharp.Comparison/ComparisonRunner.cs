@@ -465,16 +465,12 @@ namespace K3CSharp.Comparison
                 accumulatedLine += line;
                 
                 // Check if the expression is incomplete (unbalanced delimiters) before attempting to parse.
-                // This prevents the legacy parser from silently accepting an incomplete brace group.
+                // Uses source-level scan to handle unterminated strings without Lexer exception.
+                if (ParserConfig.IsSourceIncomplete(accumulatedLine))
                 {
-                    var checkLexer = new Lexer(accumulatedLine);
-                    var checkTokens = checkLexer.Tokenize();
-                    if (ParserConfig.IsIncompleteExpressionWithConfig(checkTokens, accumulatedLine))
-                    {
-                        if (!accumulatedLine.EndsWith("\n"))
-                            accumulatedLine += "\n";
-                        continue;
-                    }
+                    if (!accumulatedLine.EndsWith("\n"))
+                        accumulatedLine += "\n";
+                    continue;
                 }
                 
                 // Try to parse and execute the accumulated line

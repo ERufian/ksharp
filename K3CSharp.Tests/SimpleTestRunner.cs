@@ -362,9 +362,9 @@ namespace K3CSharp.Tests
 
                 ("test_character_single.k", "\"a\""),
 
-                ("test_string_escape.k", "\"hello\nworld\""),
+                ("test_string_escape.k", "\"hello\\nworld\""),
 
-                ("test_symbol_escape.k", "`\"hello\nworld\""),
+                ("test_symbol_escape.k", "`\"hello\\nworld\""),
 
                 
 
@@ -2775,12 +2775,9 @@ namespace K3CSharp.Tests
 
 
 
-                            // Check if expression is complete (all delimiters balanced) - using configured parser
-                            var checkLexer = new Lexer(accumulatedLine);
-                            var checkTokens = checkLexer.Tokenize();
-
-                            // Use configured parser (LRS or legacy) for incomplete expression check
-                            bool isIncomplete = ParserConfig.IsIncompleteExpressionWithConfig(checkTokens, accumulatedLine);
+                            // Check if expression is complete (all delimiters balanced) using source-level scan.
+                            // This handles unterminated string literals without throwing a Lexer exception.
+                            bool isIncomplete = ParserConfig.IsSourceIncomplete(accumulatedLine);
 
                             if (isIncomplete)
                             {
