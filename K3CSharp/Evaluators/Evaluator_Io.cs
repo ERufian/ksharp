@@ -17,7 +17,7 @@ public partial class Evaluator
             0 => ReadText(operand),           // READ TEXT
             1 => ReadMemoryMappedKData(operand), // READ MEMORY MAPPED K DATA
             2 => ReadRawKData(operand),       // READ RAW K DATA
-            3 => OpenClosePort(operand),       // OPEN/CLOSE PORT
+            3 => OpenClosePort(operand),       // OPEN/CLOSE IPC CONNECTION
             4 => GetTypeCode(operand),         // TYPE (existing implementation)
             5 => StringRepresentation(operand), // STRING REPRESENTATION (existing implementation)
             6 => ReadBytes(operand),          // READ BYTES
@@ -36,8 +36,8 @@ public partial class Evaluator
             0 => WriteText(left, right),          // WRITE TEXT
             1 => WriteData(left, right),          // WRITE K DATA
             2 => WriteMemoryMappedKData(left, right), // WRITE MEMORY MAPPED K DATA (and FFI dynamic load)
-            3 => IpcGet(left, right),            // IPC GET
-            4 => IpcSet(left, right),            // IPC SET
+            3 => IpcSet(left, right),            // IPC SET
+            4 => IpcGet(left, right),            // IPC GET
             5 => AppendData(left, right),          // APPEND DATA
             6 => WriteBytes(left, right),          // WRITE BYTES
             7 => throw new NotImplementedException("7: reserved for future use (direct memory access and P/Invoke)"),
@@ -313,7 +313,13 @@ public partial class Evaluator
     
     private K3Value OpenClosePort(K3Value operand)
     {
-        throw new NotImplementedException("3: OPEN/CLOSE PORT not yet implemented");
+        if (TryGetHandle(operand, out int handle))
+        {
+            CloseIpcConnection(handle);
+            return new NullValue();
+        }
+
+        return new IntegerValue(OpenIpcConnection(operand));
     }
     
     private K3Value ReadBytes(K3Value operand)
@@ -677,12 +683,51 @@ public partial class Evaluator
     
     private K3Value IpcGet(K3Value left, K3Value right)
     {
-        throw new NotImplementedException("3: IPC GET not yet implemented");
+        if (TryGetHandle(left, out int handle))
+        {
+            return SendSyncIpc(handle, right);
+        }
+
+        if (IsSelfConnectionSpec(left))
+        {
+            return SendSyncSelfIpc(right);
+        }
+
+        int transientHandle = OpenIpcConnection(left);
+        try
+        {
+            return SendSyncIpc(transientHandle, right);
+        }
+        finally
+        {
+            CloseIpcConnection(transientHandle);
+        }
     }
     
     private K3Value IpcSet(K3Value left, K3Value right)
     {
-        throw new NotImplementedException("4: IPC SET not yet implemented");
+        if (TryGetHandle(left, out int handle))
+        {
+            SendAsyncIpc(handle, right);
+            return new NullValue();
+        }
+
+        if (IsSelfConnectionSpec(left))
+        {
+            SendAsyncSelfIpc(right);
+            return new NullValue();
+        }
+
+        int transientHandle = OpenIpcConnection(left);
+        try
+        {
+            SendAsyncIpc(transientHandle, right);
+            return new NullValue();
+        }
+        finally
+        {
+            CloseIpcConnection(transientHandle);
+        }
     }
     
     private K3Value AppendData(K3Value left, K3Value right)

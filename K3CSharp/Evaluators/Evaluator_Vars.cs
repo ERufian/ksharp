@@ -30,13 +30,8 @@ namespace K3CSharp
         
         private K3Value IndexFunction(K3Value operand)
         {
-            // _i (index) - return command line arguments
-            // When a script is called, _i will return a list of character vectors 
-            // that contain command line arguments passed after the script name.
-            // Otherwise it will return an empty list.
-            
-            // For now, return empty list since we don't have command line argument support
-            return new VectorValue(new List<K3Value>());
+            // _i - IPC listening port
+            return new IntegerValue(GetListeningPort());
         }
         
         private K3Value FunctionFunction(K3Value operand)
@@ -64,25 +59,14 @@ namespace K3CSharp
         
         private K3Value HostFunction(K3Value operand)
         {
-            // _h - hostname
-            // Return hostname of the machine as a symbol
-            try
-            {
-                var hostName = Dns.GetHostName();
-                return new SymbolValue(hostName ?? "");
-            }
-            catch
-            {
-                return new SymbolValue("");
-            }
+            // _h - preferred host for IPC connection tuples
+            return new SymbolValue(GetIpcHost());
         }
         
         private K3Value PortFunction(K3Value operand)
         {
             // _p - port number
-            // Return port number that REPL is using for IPC, or 0 if not using IPC
-            // For now, return 0 since we don't have IPC support
-            return new IntegerValue(0);
+            return new IntegerValue(GetListeningPort());
         }
         
         private K3Value ProcessIdFunction(K3Value operand)
@@ -94,10 +78,8 @@ namespace K3CSharp
         
         private K3Value WhoFunction(K3Value operand)
         {
-            // _w - IPC port
-            // Return integer port number of calling machine when responding to an IPC call
-            // If not using IPC, return 0
-            return new IntegerValue(0);
+            // _w - current incoming IPC handle
+            return new IntegerValue(GetCurrentIncomingHandle());
         }
         
         private K3Value UserFunction(K3Value operand)
@@ -111,9 +93,19 @@ namespace K3CSharp
         private K3Value AddressFunction(K3Value operand)
         {
             // _a - IPv4 address
-            // Return integer ipv4 address (as a 32-bit value) of calling machine
-            // If not using IPC, return 0
-            return new IntegerValue(0);
+            var address = GetCurrentIncomingAddress();
+            if (address == null || address.AddressFamily != AddressFamily.InterNetwork)
+            {
+                return new IntegerValue(0);
+            }
+
+            var bytes = address.GetAddressBytes();
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+
+            return new IntegerValue(BitConverter.ToInt32(bytes, 0));
         }
         
         private K3Value VersionFunction(K3Value operand)

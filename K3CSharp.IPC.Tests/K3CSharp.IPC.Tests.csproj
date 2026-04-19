@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors>CS1591</WarningsNotAsErrors>
+    <RootNamespace>K3CSharp.IPC.Tests</RootNamespace>
+    <AssemblyName>K3CSharp.IPC.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\K3CSharp.IPC\K3CSharp.IPC.csproj" />
+    <ProjectReference Include="..\K3CSharp\K3CSharp.csproj" />
+  </ItemGroup>
+
+</Project>

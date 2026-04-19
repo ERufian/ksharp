@@ -931,7 +931,11 @@ namespace K3CSharp
             
             int exitCode = 0; // Default for niladic case
             
-            if (operand != null && !(operand is NullValue))
+            bool isNiladic = operand is null
+                || operand is NullValue
+                || operand is VectorValue vec && vec.Elements.Count == 0;
+
+            if (!isNiladic)
             {
                 exitCode = operand switch
                 {
@@ -942,11 +946,8 @@ namespace K3CSharp
                 };
             }
             
-            // Exit the application with the specified code
-            Environment.Exit(exitCode);
-            
-            // This line will never be reached, but we need to return something for the type system
-            return new IntegerValue(exitCode);
+            RequestExit(exitCode);
+            throw new K3ExitException(exitCode);
         }
 
         // Helper methods for list operations

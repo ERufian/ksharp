@@ -241,9 +241,9 @@ namespace K3CSharp
             IOOperatorType.ReadText => new[] { 0, 1 }, // Can be monadic (read from stdin) or dyadic (read from file)
             IOOperatorType.WriteData => new[] { 2 },
             IOOperatorType.ReadData => new[] { 1 },
-            IOOperatorType.IPC => new[] { 2 },
+            IOOperatorType.IPC => new[] { 1, 2 },
             IOOperatorType.GetHandle => new[] { 1 },
-            IOOperatorType.Type => new[] { 1 },
+            IOOperatorType.Type => new[] { 1, 2 },
             IOOperatorType.StringRepresentation => new[] { 1 },
             _ => new[] { 1 }
         };

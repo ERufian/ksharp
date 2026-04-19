@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using K3CSharp.Parsing;
 
 namespace K3CSharp
@@ -13,75 +14,172 @@ namespace K3CSharp
         // Sentinel used in --mcp mode for reliable output framing.
         public const string McpSentinel = "\x01\x02";
 
-        static void Main(string[] args)
+        private sealed class RuntimeOptions
         {
-            bool mcpMode = args.Length > 0 && args[0] == "--mcp";
-            if (mcpMode)
-            {
-                args = args[1..]; // strip the flag
-            }
+            public bool McpMode { get; init; }
+            public int? IpcPort { get; init; }
+            public string? ScriptPath { get; init; }
+        }
 
+        static int Main(string[] args)
+        {
+            RuntimeOptions options = ParseArgs(args);
             var evaluator = new Evaluator();
 
-            if (args.Length > 0)
+            ConsoleCancelEventHandler cancelHandler = (_, e) =>
             {
-                // Execute file
-                try
+                evaluator.RequestExit(0);
+                e.Cancel = true;
+            };
+            Console.CancelKeyPress += cancelHandler;
+
+            try
+            {
+                if (options.IpcPort.HasValue)
                 {
-                    var content = File.ReadAllText(args[0]);
-                    var result = ExecuteLine(content, evaluator);
+                    evaluator.StartIpcServer(options.IpcPort.Value);
+                }
+
+                if (options.ScriptPath != null)
+                {
+                    RunScriptMode(options.ScriptPath, evaluator, keepServing: options.IpcPort.HasValue);
+                    return evaluator.ExitCode;
+                }
+
+                if (options.McpMode)
+                {
+                    RunMcpRepl(evaluator);
+                    return evaluator.ExitCode;
+                }
+
+                RunRepl(evaluator);
+                return evaluator.ExitCode;
+            }
+            catch (K3ExitException ex)
+            {
+                return ex.ExitCode;
+            }
+            finally
+            {
+                evaluator.StopIpcServer();
+                Console.CancelKeyPress -= cancelHandler;
+            }
+        }
+
+        private static RuntimeOptions ParseArgs(string[] args)
+        {
+            bool mcpMode = false;
+            int? ipcPort = null;
+            string? scriptPath = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "--mcp":
+                        mcpMode = true;
+                        break;
+
+                    case "-i":
+                        if (i + 1 >= args.Length || !int.TryParse(args[++i], out int port))
+                        {
+                            throw new ArgumentException("Usage: ksharp [-i PORT] [--mcp] [script.k]");
+                        }
+                        ipcPort = port;
+                        break;
+
+                    default:
+                        if (scriptPath != null)
+                        {
+                            throw new ArgumentException("Only one script path may be provided.");
+                        }
+                        scriptPath = args[i];
+                        break;
+                }
+            }
+
+            if (mcpMode && scriptPath != null)
+            {
+                throw new ArgumentException("Script execution and --mcp mode cannot be combined.");
+            }
+
+            return new RuntimeOptions
+            {
+                McpMode = mcpMode,
+                IpcPort = ipcPort,
+                ScriptPath = scriptPath,
+            };
+        }
+
+        private static void RunScriptMode(string scriptPath, Evaluator evaluator, bool keepServing)
+        {
+            try
+            {
+                string normalizedPath = scriptPath;
+                if (!Path.HasExtension(normalizedPath))
+                {
+                    normalizedPath += ".k";
+                }
+
+                var content = File.ReadAllText(normalizedPath);
+                var result = ExecuteLine(content, evaluator);
+                if (result is not NullValue)
+                {
                     Console.WriteLine(result);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                }
-                return;
             }
-
-            if (mcpMode)
+            catch (K3ExitException)
             {
-                RunMcpRepl(evaluator);
-                return;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
             }
 
-            // REPL mode
+            if (keepServing && !evaluator.IsExitRequested)
+            {
+                evaluator.WaitForShutdown();
+            }
+        }
+
+        private static void RunRepl(Evaluator evaluator)
+        {
             Console.WriteLine("K3 Interpreter - Version 1.0");
             Console.WriteLine("Type \\\\ to quit, \\ to cancel input, or \\help for help");
             Console.WriteLine("Use arrow keys for history, Ctrl+C to clear line");
             Console.WriteLine();
 
-            while (true)
+            while (!evaluator.IsExitRequested)
             {
                 Console.Write("  "); // Default prompt: two spaces
 
-                var input = ReadMultiLineInput();
-
+                var input = ReadLineOrShutdown(evaluator);
                 if (input == null) break;
-
-                if (input == "\\\\" || input == "_exit")
+                if (input == "\\\\")
                 {
                     Console.WriteLine("Goodbye!");
                     break;
                 }
-
                 if (string.IsNullOrWhiteSpace(input)) continue;
 
-                // Add to history if not empty and not duplicate of last
                 if (commandHistory.Count == 0 || commandHistory[^1] != input)
                 {
                     commandHistory.Add(input);
-                    if (commandHistory.Count > 100) // Keep last 100 commands
+                    if (commandHistory.Count > 100)
                     {
                         commandHistory.RemoveAt(0);
                     }
                 }
-                //historyIndex = -1;
 
                 try
                 {
                     var result = ExecuteLine(input, evaluator);
                     Console.WriteLine(result);
+                }
+                catch (K3ExitException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -100,9 +198,9 @@ namespace K3CSharp
             Console.Out.Flush();
 
             string? line;
-            while ((line = Console.ReadLine()) != null)
+            while (!evaluator.IsExitRequested && (line = ReadLineOrShutdown(evaluator)) != null)
             {
-                if (line == "\\\\" || line == "_exit") break;
+                if (line == "\\\\") break;
                 if (string.IsNullOrWhiteSpace(line))
                 {
                     Console.Out.Write(McpSentinel);
@@ -117,6 +215,10 @@ namespace K3CSharp
                     if (text.Length > 0)
                         Console.Out.Write(text);
                 }
+                catch (K3ExitException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     Console.Out.Write($"Error: {ex.Message}");
@@ -128,26 +230,31 @@ namespace K3CSharp
             }
         }
 
-        static string? ReadMultiLineInput()
+        static string? ReadLineOrShutdown(Evaluator evaluator)
         {
-            return Console.ReadLine();
+            var readTask = Task.Run(Console.ReadLine);
+            int signaled = WaitHandle.WaitAny(new[] { ((IAsyncResult)readTask).AsyncWaitHandle, evaluator.GetShutdownWaitHandle() });
+            return signaled == 0 ? readTask.Result : null;
         }
 
         public static K3Value ExecuteLine(string input, Evaluator evaluator)
         {
-            // Handle REPL commands (prefixed with backslash)
-            var trimmedInput = input.Trim().Trim('\uFEFF', '\u200B'); // Remove BOM and zero-width spaces
-            if (trimmedInput.StartsWith("\\"))
+            lock (evaluator.GetEvaluationLock())
             {
-                return HandleReplCommand(trimmedInput, evaluator);
+                // Handle REPL commands (prefixed with backslash)
+                var trimmedInput = input.Trim().Trim('\uFEFF', '\u200B'); // Remove BOM and zero-width spaces
+                if (trimmedInput.StartsWith("\\"))
+                {
+                    return HandleReplCommand(trimmedInput, evaluator);
+                }
+                
+                var lexer = new Lexer(input);
+                var tokens = lexer.Tokenize();
+                
+                // Use ParserConfig for consistent parser selection
+                var ast = ParserConfig.ParseWithConfig(tokens, input);
+                return evaluator.Evaluate(ast) ?? new NullValue();
             }
-            
-            var lexer = new Lexer(input);
-            var tokens = lexer.Tokenize();
-            
-            // Use ParserConfig for consistent parser selection
-            var ast = ParserConfig.ParseWithConfig(tokens, input);
-            return evaluator.Evaluate(ast) ?? new NullValue();
         }
 
         public static K3Value HandleReplCommand(string command, Evaluator evaluator)

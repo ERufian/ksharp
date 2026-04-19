@@ -346,6 +346,7 @@ namespace K3CSharp
                 TokenType.SIZE => "_size",
                 TokenType.BD => "_bd",
                 TokenType.DB => "_db",
+                TokenType.EXIT => "_exit",
                 TokenType.LT => "_lt",
                 TokenType.JD => "_jd",
                 TokenType.DJ => "_dj",

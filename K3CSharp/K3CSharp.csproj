@@ -30,4 +30,8 @@
     <None Remove="tools\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\K3CSharp.IPC\K3CSharp.IPC.csproj" />
+  </ItemGroup>
+
 </Project>
