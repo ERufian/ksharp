@@ -238,3 +238,20 @@ adverb_scan_monad_do_transpose :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact represe
 adverb_scan_monad_do_reverse :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 adverb_scan_monad_fixedpoint_first :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 variable_scoping_global_assignment :: regex:^\d+\n: :: Multi-line output, K3Sharp captures last result only
+idioms_03_536_rotate_rows_left :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_03_537_rotate_rows_right :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_03_444_drop_first_cols :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_03_204_array_and_negative :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_03_396_remove_cols :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_05_593_matrix_y_rows :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_05_614_array_shape_of_y :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_05_183_maximum_table :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_06_18_sort_strings_alpha :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_06_19_sort_char_matrix :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_06_33_sort_matrix_on_col :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_06_8_sort_rows_ascending :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_06_38_sort_matrix_descending :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_10_206_remove_duplicate_rows :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_10_225_remove_blank_rows :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_10_489_string_to_table :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_10_499_rows_starting_with :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation

@@ -124,13 +124,13 @@ namespace K3CSharp
                 }
             }
 
-            private void ThrowIfDisposed()
-            {
-                if (disposed)
-                {
-                    throw new ObjectDisposedException(nameof(K3IpcRuntime));
-                }
-            }
+            // private void ThrowIfDisposed()
+            // {
+            //     if (disposed)
+            //     {
+            //         throw new ObjectDisposedException(nameof(K3IpcRuntime));
+            //     }
+            // }
 
             public void Dispose()
             {
