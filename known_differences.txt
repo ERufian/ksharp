@@ -255,3 +255,5 @@ idioms_10_206_remove_duplicate_rows :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact re
 idioms_10_225_remove_blank_rows :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_10_489_string_to_table :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_10_499_rows_starting_with :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_15_46_transposed_formatted_integers :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_15_52_truth_table :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation

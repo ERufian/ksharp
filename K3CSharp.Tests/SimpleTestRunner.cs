@@ -2611,6 +2611,31 @@ namespace K3CSharp.Tests
 
                 // Chapter 14 idioms: Conversions between numbers and character vectors
                 ("idioms_14_111_count_format.k", "6"),
+
+                // Chapter 15 idioms: Numeric base conversions
+                ("idioms_15_46_transposed_formatted_integers.k", "(,\"1\";,\"2\";,\"3\";,\"4\";,\"5\")"),
+                ("idioms_15_49_hex_from_decimal.k", "\"ff\""),
+                ("idioms_15_52_truth_table.k", "(0 0 0 0 1 1 1 1;0 0 1 1 0 0 1 1;0 1 0 1 0 1 0 1)"),
+                ("idioms_15_53_decimal_digits.k", "1 2 3 4"),
+                ("idioms_15_54_represent_in_base.k", "1 4 4"),
+                ("idioms_15_56_hex_from_decimal_chars.k", "\"ff\""),
+                ("idioms_15_63_represent_mixed_radix.k", "0 1 984"),
+                ("idioms_15_66_selection_encoded_list.k", "(\"blue\"\n \"green\")"),
+                ("idioms_15_75_decimal_from_hex.k", "255"),
+                ("idioms_15_342_arabic_from_roman.k", "1909"),
+
+                // Chapter 16 idioms: Date and time manipulation
+                ("idioms_16_57_vector_from_date.k", "98 12 31"),
+                ("idioms_16_64_time_as_string.k", "\"13:37:21\""),
+                ("idioms_16_65_date_as_string.k", "\"98/12/31\""),
+                ("idioms_16_463_is_leap_year.k", "1"),
+                ("idioms_16_74_days_in_month.k", "29"),
+
+                // Chapter 17 idioms: Mathematical computations
+                ("idioms_17_457_is_integral.k", "1"),
+                ("idioms_17_62_fractional_part.k", "0.7"),
+                ("idioms_17_462_round_nearest_int.k", "4"),
+                ("idioms_17_470_divisible_by_y.k", "3 6 9"),
                 ("idioms_14_95_numeric_from_alphanumeric.k", "123 438"),
                 ("idioms_14_99_numeric_vector_rows.k", "(3 5;4 7)"),
                 ("idioms_14_101_sum_numbers_matrix.k", "10"),
@@ -2683,7 +2708,7 @@ namespace K3CSharp.Tests
 
                 ("idioms_12_240_matrix_product.k", "(22 28\n 49 64)"),
 
-                ("idioms_12_313_two_by_two_determinant.k", "valence error"),
+                ("idioms_12_313_two_by_two_determinant.k", "1"),
 
                 ("idioms_12_375_insert_row.k", "(1 2 3\n 4 5 6\n 7 8 9\n 13 14 15\n 10 11 12)"),
 

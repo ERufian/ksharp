@@ -1631,6 +1631,54 @@ sm'[x] │ Error: Each not...   │ (0 5 3;0 1 4;1 ...   ║
 cf 12.345
 cf -1
 cf 1e-12 │ 6                    │                      ║
+║ idioms_15_46_transposed_formatted_integers.k       │ x:5
++$1+!x           │ (,"1";,"2";,"3"...   │                      ║
+║ idioms_15_49_hex_from_decimal.k                    │ x:255
+h:"0123456789abcdef"
+h[16 _vs x] │ "ff"                 │                      ║
+║ idioms_15_52_truth_table.k                         │ x:3
+2 _vs !_2^x      │ (0 0 0 0 1 1 1 ...   │                      ║
+║ idioms_15_53_decimal_digits.k                      │ x:1234
+10 _vs x      │ 1 2 3 4              │                      ║
+║ idioms_15_54_represent_in_base.k                   │ x:100
+y:8
+y _vs x    │ 1 4 4                │                      ║
+║ idioms_15_56_hex_from_decimal_chars.k              │ x:"255"
+h:"0123456789abcdef"
+h[16 _vs 10 _sv _ic[x]-_ic"0"] │ Error: CreateNo...   │ "ff"                 ║
+║ idioms_15_63_represent_mixed_radix.k               │ x:1984
+10 100 1000 _vs x │ 0 1 984              │                      ║
+║ idioms_15_66_selection_encoded_list.k              │ x:("red";"green";"blue";"yellow")
+y:2 2#1 0 0 1
+x[2 _sv+y] │ Error: _sv: all...   │ ("blue"
+ "green")    ║
+║ idioms_15_75_decimal_from_hex.k                    │ h:"0123456789abcdef"
+x:"ff"
+16 _sv h?/:x │ Error: _sv: all...   │ 255                  ║
+║ idioms_15_342_arabic_from_roman.k                  │ ar:{+/_ a*-1^a<1!a:0,1000 500 100 50 10 5 1["MDCLXVI"?/:x]}
+ar["MCMIX"] │ Error: Function...   │ 1909                 ║
+║ idioms_16_57_vector_from_date.k                    │ x:19981231
+100 100 100 _vs x │ 98 12 31             │                      ║
+║ idioms_16_64_time_as_string.k                      │ x:133721
+1_,/":",'$100 100 100 _vs x │ ()                   │ "13:37:21"           ║
+║ idioms_16_65_date_as_string.k                      │ x:19981231
+t:$100 100 100 _vs x
+1_,/"/",'t │ ()                   │ "98/12/31"           ║
+║ idioms_16_463_is_leap_year.k                       │ x:2000
+((0=x!4)&~(0=x!100))|(0=x!400) │ 1                    │                      ║
+║ idioms_16_74_days_in_month.k                       │ x:2
+y:2000
+lp:((0=y!4)&~(0=y!100))|(0=y!400)
+(0 31 28 31 30 31 30 31 31 30 31 30 31+0,(0,lp,10#0))[x] │ 29                   │                      ║
+║ idioms_17_457_is_integral.k                        │ ii:{x=_ x}
+ii[3.0]   │ Error: Function...   │ 1                    ║
+║ idioms_17_62_fractional_part.k                     │ x:3.7
+x-_ x          │ 0.7                  │                      ║
+║ idioms_17_462_round_nearest_int.k                  │ x:3.7
+_ x+0.5        │ 4                    │                      ║
+║ idioms_17_470_divisible_by_y.k                     │ x:1 2 3 4 5 6 7 8 9 10
+y:3
+x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_14_95_numeric_from_alphanumeric.k           │ x:"123 438"
 d:"0123456789 "
 1 _ . "0 ",((#x)*&/x _lin d)#x │ 123 438              │                      ║
@@ -1703,9 +1751,9 @@ id 4  │ Error: Function...   │ (1 0 0 0
 y:(1 2;3 4;5 6)
 x _mul y │ (22 28;49 64)        │ (22 28
  49 64)       ║
-║ idioms_12_313_two_by_two_determinant.k             │ det:{-/y*|x}
-x:(13 21;34 55)
-det x │ Error: Function...   │ valence error        ║
+║ idioms_12_313_two_by_two_determinant.k             │ x:(13 21;34 55)
+det:{-/x[0]*|x[1]}
+det x │ 1                    │                      ║
 ║ idioms_12_375_insert_row.k                         │ y:4 3#1+!12
 x:13 14 15
 g:2
@@ -1746,7 +1794,7 @@ y:"efgh"
 #x          │ 17                   │                      ║
 ║ idioms_12_612_rank_of_array.k                      │ #^(1 2 3;4 5 6)      │ 2                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1051/1117 tests passed (94.1%)                                                                             ║
+║ SUMMARY: 1064/1136 tests passed (93.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2064,6 +2112,53 @@ Input: x:~3 6 5 7 2<\:1+!7
 Expected: ("*** ";"****** ";"***** ";"*******";"** ")
 Actual: Error: Negate operator cannot be applied to vector of type VectorValue
 ──────────────────────────────────────────────────────────────────────────
+Test: idioms_15_56_hex_from_decimal_chars.k
+Input: x:"255"
+h:"0123456789abcdef"
+h[16 _vs 10 _sv _ic[x]-_ic"0"]
+Expected: "ff"
+Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_15_66_selection_encoded_list.k
+Input: x:("red";"green";"blue";"yellow")
+y:2 2#1 0 0 1
+x[2 _sv+y]
+Expected: ("blue"
+ "green")
+Actual: Error: _sv: all elements in right argument must be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_15_75_decimal_from_hex.k
+Input: h:"0123456789abcdef"
+x:"ff"
+16 _sv h?/:x
+Expected: 255
+Actual: Error: _sv: all elements in right argument must be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_15_342_arabic_from_roman.k
+Input: ar:{+/_ a*-1^a<1!a:0,1000 500 100 50 10 5 1["MDCLXVI"?/:x]}
+ar["MCMIX"]
+Expected: 1909
+Actual: Error: Function expects 3 arguments, got 5
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_16_64_time_as_string.k
+Input: x:133721
+1_,/":",'$100 100 100 _vs x
+Expected: "13:37:21"
+Actual: ()
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_16_65_date_as_string.k
+Input: x:19981231
+t:$100 100 100 _vs x
+1_,/"/",'t
+Expected: "98/12/31"
+Actual: ()
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_457_is_integral.k
+Input: ii:{x=_ x}
+ii[3.0]
+Expected: 1
+Actual: Error: Function execution error: Cannot compare Float and Integer with =
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_14_456_number_digits.k
 Input: np:{1+_ log10 x+0=x}
 x:0 13 523 16008
@@ -2133,13 +2228,6 @@ x _mul y
 Expected: (22 28
  49 64)
 Actual: (22 28;49 64)
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_313_two_by_two_determinant.k
-Input: det:{-/y*|x}
-x:(13 21;34 55)
-det x
-Expected: valence error
-Actual: Error: Function execution error: Undefined variable: y
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_375_insert_row.k
 Input: y:4 3#1+!12
