@@ -240,6 +240,7 @@ adverb_scan_monad_fixedpoint_first :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact rep
 variable_scoping_global_assignment :: regex:^\d+\n: :: Multi-line output, K3Sharp captures last result only
 idioms_03_536_rotate_rows_left :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_03_537_rotate_rows_right :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
+idioms_03_10a_depth_v2 :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_03_444_drop_first_cols :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_03_204_array_and_negative :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_03_396_remove_cols :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation

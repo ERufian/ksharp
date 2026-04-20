@@ -1788,7 +1788,17 @@ namespace K3CSharp.Tests
 
                 ("string_parse.k", "30"),
 
-                
+                ("division_integer_zero_by_zero.k", "0"),
+                ("division_long_zero_by_zero.k", "0j"),
+                ("division_float_zero_by_zero.k", "0.0"),
+                ("division_mixed_int_float_zero_by_zero.k", "0.0"),
+                ("division_mixed_float_int_zero_by_zero.k", "0.0"),
+                ("division_mixed_long_float_zero_by_zero.k", "0.0"),
+                ("division_mixed_float_long_zero_by_zero.k", "0.0"),
+                ("division_vector_zero_by_zero_normal.k", "(10.0;0;10.0)"),
+                ("division_vector_zero_by_zero_large_positive.k", "(1e+308;0i;10)"),
+                ("division_vector_zero_by_zero_large_negative.k", "(-1e+308;-0i;10)"),
+
 
                 // K Tree tests - Following One Test Per File principle
 
@@ -2250,121 +2260,107 @@ namespace K3CSharp.Tests
 
                 ("ffi_complete_workflow.k", ".((`real;2.0;);(`imag;3.0;);(`magnitude;3.605551;);(`conj_real;2.0;);(`conj_imag;-3.0;);(`instance_more_than_5_methods;1;);(`type_more_than_20_methods;1;))"),
 
+                // KTree (K Tree namespace) tests
 
+                ("ktree_enumerate_relative_name.k", "`keyA`keyB"),
 
+                ("ktree_enumerate_relative_path.k", "`keyA`keyB"),
 
-                // Idioms Chapter 01: Direct Application of Verbs
+                ("ktree_enumerate_absolute_path.k", "`keyA`keyB"),
 
-                ("idioms_01_575_kronecker_delta.k", "1 0 0 1"),
+                ("ktree_enumerate_root.k", "`k`t"),
 
-                ("idioms_01_571_xbutnoty.k", "0 1 0 0"),
+                ("ktree_indexing_relative_name.k", "1 3 5"),
 
-                ("idioms_01_570_implies.k", "1 0 1 1"),
+                ("ktree_indexing_absolute_name.k", "1 2 3"),
 
-                ("idioms_01_573_exclusive_or.k", "0 1 1 0"),
+                ("ktree_indexing_relative_path.k", "1 2 3"),
 
-                ("idioms_01_41_indices_ones.k", "2 4 8"),
+                ("ktree_indexing_absolute_path.k", "1 3 5"),
 
-                ("idioms_01_516_multiply_columns.k", "(10 20 30 40 50 60;700 800 900 1000 1100 1200)"),
+                ("ktree_dot_apply_relative_name.k", "1 2 3"),
 
-                ("idioms_01_566_zero_boolean.k", "0 0 0 0 0 0 0 0 0 0 0"),
+                ("ktree_dot_apply_absolute_name.k", "1 3 5"),
 
-                ("idioms_01_624_zero_array.k", "(0 0 0;0 0 0)"),
+                ("ktree_dot_apply_relative_path.k", "1 2 3"),
 
-                ("idioms_01_622_retain_marked.k", "3 0 15 1 0"),
-
-                ("idioms_01_331_identity_max.k", "-1e+100"),
-
-                ("idioms_01_337_identity_min.k", "1e+100"),
-
-                ("idioms_01_357_match.k", "1"),
-
-                ("idioms_01_328_number_items.k", "4"),
-
-                ("idioms_01_411_number_rows.k", "2"),
-
-                ("idioms_01_445_number_columns.k", "3"),
-                
-                // Parse tree verb tests
+                ("ktree_dot_apply_absolute_path.k", "1 3 5"),
+                ("test_semicolon_parsing.k", "1 2 3"),
+                ("test_parse_monadic_star.k", $"(`\"*:\";1 2 3 4)"),
+                ("parse_atomic_value_no_verb.k", ",`a"),
+                ("parse_projection_dyadic_plus.k", "(`\"+\";::;::)"),
+                ("parse_projection_dyadic_plus_fixed_left.k", "(`\"+\";,1;::)"),
+                ("parse_projection_dyadic_plus_fixed_right.k", "(`\"+\";::;,2)"),
+                ("parse_monadic_shape_atomic.k", "(`\"^:\";(`\",:\";,`a))"),
+                ("parse_apply_and_assign.k", "(`\"+:\";`i;1)"),
                 ("test_parse_verb.k", "(`\"+\";,1;,2)"),
                 ("test_eval_verb.k", "3"),
                 ("test_parse_eval_together.k", "3"),
+                ("eval_dyadic_plus.k", "6 8 10 12"),
+                ("eval_monadic_star_nested.k", "22"),
+                ("eval_dot_execute_path.k", "`a`b`c`d`e`f"),
+                ("eval_dot_repl_dir.k", "``.k"),
+                ("eval_dot_parse_and_eval.k", "11"),
+                ("test_eval_monadic_star.k", "1"),
+                ("test_eval_monadic_star_atomic.k", "1"),
+
+                // Idioms Chapter 01: Direct Application of Verbs
+                ("idioms_01_575_kronecker_delta.k", "1 0 0 1"),
+                ("idioms_01_571_xbutnoty.k", "0 1 0 0"),
+                ("idioms_01_570_implies.k", "1 0 1 1"),
+                ("idioms_01_573_exclusive_or.k", "0 1 1 0"),
+                ("idioms_01_41_indices_ones.k", "2 4 8"),
+                ("idioms_01_516_multiply_columns.k", "(10 20 30 40 50 60;700 800 900 1000 1100 1200)"),
+                ("idioms_01_566_zero_boolean.k", "0 0 0 0 0 0 0 0 0 0 0"),
+                ("idioms_01_624_zero_array.k", "(0 0 0;0 0 0)"),
+                ("idioms_01_622_retain_marked.k", "3 0 15 1 0"),
+                ("idioms_01_331_identity_max.k", "-1e+100"),
+                ("idioms_01_337_identity_min.k", "1e+100"),
+                ("idioms_01_357_match.k", "1"),
+                ("idioms_01_328_number_items.k", "4"),
+                ("idioms_01_411_number_rows.k", "2"),
+                ("idioms_01_445_number_columns.k", "3"),               
                 ("idioms_01_388_drop_rows.k", "(6 7 8;9 10 11;12 13 14;15 16 17)"),
-
                 ("idioms_01_154_range.k", "\"wirls\""),
-
                 ("idioms_01_70_remove_duplicates.k", "(\"to\";\"be\";\"or\";\"not\")"),
-
                 ("idioms_01_143_indices_distinct.k", "(0 3 7;1 4 6;2 5)"),
-
                 ("idioms_01_228_is_row.k", "1"),
-
                 ("idioms_01_232_is_row_in.k", "1"),
-
                 ("idioms_01_559_first_marker.k", "2"),
-
                 ("idioms_01_78_eval_number.k", "1998 51"),
-
                 ("idioms_01_88_name_variable.k", "(0 1 2;3 4 5)"),
-
                 ("idioms_01_96_conditional_execution.k", "0 15"),
-
+                ("idioms_01_115_case_structure.k", "\"other\""),
+                ("idioms_01_117_case_structure_long.k", "\"four\""),
                 ("idioms_01_493_choose_boolean.k", "\"xyz\""),
-
                 ("idioms_01_434_replace_first.k", "\"tbbccdefcdab\""),
-
                 ("idioms_01_433_replace_last.k", "\"abbccdefcdat\""),
-
                 ("idioms_01_406_add_last.k", "1 2 3 4 105"),
-
                 ("idioms_01_449_limit_between.k", "(58 30 37 70 39 70;60 30 45 70 70 35;49 70 70 70 30 30;46 61 30 51 30 34;31 51 30 35 30 70)"),
-
                 ("idioms_01_495_indices_occurrences.k", "0 2 5 7"),
-
                 ("idioms_01_504_replace_satisfying.k", "\" bcd f  i \""),
-
                 ("idioms_01_569_change_to_one.k", "10 1 7 1 1"),
-
                 ("idioms_01_556_all_indices.k", "0 1 2 3"),
-
                 ("idioms_01_535_avoid_parentheses.k", "5 1"),
-
                 ("idioms_01_591_reshape_2column.k", "(\"ab\";\"cd\";\"ef\";\"gh\")"),
-
                 ("idioms_01_595_one_row_matrix.k", ",2 3 5 7 11"),
-
                 ("idioms_01_616_scalar_from_vector.k", "8"),
-
                 ("idioms_01_509_remove_y.k", "\"bcdebc\""),
-
                 ("idioms_01_510_remove_blanks.k", "\"bcdebc\""),
-
                 ("idioms_01_496_remove_punctuation.k", "\"oh no stop it you will\""),
-
                 ("idioms_01_177_string_search.k", "11 20 32"),
-
                 ("idioms_01_45_binary_representation.k", "1 0 0 0 0"),
-
                 ("idioms_01_84_scalar_boolean.k", "157"),
-
                 ("idioms_01_129_arctangent.k", "0.5235988"),
-
                 ("idioms_01_561_numeric_code.k", "32 97 65 48"),
-
                 ("idioms_01_241_sum_subsets.k", "(4 6 4;12 14 12;20 22 20)"),
-
+                ("idioms_01_245_randomize_seed.k", ""),
                 ("idioms_01_61_cyclic_counter.k", "1 2 3 4 5 6 7 8 1 2"),
-
                 ("idioms_01_384_drop_1st_postpend.k", "4 5 6 0"),
-
                 ("idioms_01_385_drop_last_prepend.k", "0 3 4 5"),
-
                 ("idioms_01_178_first_occurrence.k", "12"),
-
                 ("idioms_01_447_conditional_drop.k", "(0 1 2;3 4 5;6 7 8;9 10 11)"),
-
                 ("idioms_01_448_conditional_drop_last.k", "((0 1 2;3 4 5;6 7 8;9 10 11);(0 1 2;3 4 5;6 7 8))"),
-
                 ("idioms_01_549_alphabetic_comparison.k", "1"),
 
                 // Chapter 2 idioms: Extending verbs with adverbs
@@ -2382,16 +2378,6 @@ namespace K3CSharp.Tests
                 ("idioms_02_370_count_ones.k", "4"),
                 ("idioms_02_362_count_occur.k", "3"),
                 ("idioms_02_239_sum_recip.k", "39"),
-                ("division_integer_zero_by_zero.k", "0"),
-                ("division_long_zero_by_zero.k", "0j"),
-                ("division_float_zero_by_zero.k", "0.0"),
-                ("division_mixed_int_float_zero_by_zero.k", "0.0"),
-                ("division_mixed_float_int_zero_by_zero.k", "0.0"),
-                ("division_mixed_long_float_zero_by_zero.k", "0.0"),
-                ("division_mixed_float_long_zero_by_zero.k", "0.0"),
-                ("division_vector_zero_by_zero_normal.k", "(10.0;0;10.0)"),
-                ("division_vector_zero_by_zero_large_positive.k", "(1e+308;0i;10)"),
-                ("division_vector_zero_by_zero_large_negative.k", "(-1e+308;-0i;10)"),
                 ("idioms_02_242_sum_squares.k", "55"),
                 ("idioms_02_243_dot_product.k", "550"),
                 ("idioms_02_372_sum_columns.k", "15 18 21 24"),
@@ -2427,13 +2413,23 @@ namespace K3CSharp.Tests
                 ("idioms_02_249_offset_enum.k", "10 11 12"),
                 ("idioms_02_236_count_occur_matrix.k", "2"),
 
-                // Chapter 3 idioms: Applying operations at depth
+                // Claude made up various "idioms" that didn't actually exist in the idioms book
+                // Some are valid K. They are somewhat redundant but we can keep them as extra testing 
+                // (but I won't keep the fake idiom numbers)
 
+                ("idioms_02_xx1_count_occurrences.k", "3"),
+                ("idioms_02_xx2_sum_reciprocal.k", "2.283333"),
+                ("idioms_02_xx3_count_1s.k", "3"),
+
+                // Chapter 3 idioms: Applying operations at depth
+                
                 ("idioms_03_514_sum_cols.k", "10 26 42"),
                 ("idioms_03_536_rotate_rows_left.k", "(2 3 4 1;6 7 8 5;10 11 12 9)"),
                 ("idioms_03_537_rotate_rows_right.k", "(4 1 2 3;8 5 6 7;12 9 10 11)"),
                 ("idioms_03_444_drop_first_cols.k", "(,2;,5;,8;,11)"),
                 ("idioms_03_204_array_and_negative.k", "((3 -3;4 -4;5 -5;6 -6);(7 -7;8 -8;9 -9;10 -10);(11 -11;12 -12;13 -13;14 -14))"),
+                ("idioms_03_10a_depth.k", "(((\"abcde\";\"fghij\");(\"abcde\";\"fghij\");(\"abcde\";\"fghij\"));((\"abcde\";\"abcde\";\"abcde\");(\"fghij\";\"fghij\"; \"fghij\"));((\"aaa\";\"bbb\";\"ccc\";\"ddd\";\"eee\");(\"fff\";\"ggg\";\"hhh\";\"iii\";\"jjj\")))"),
+                ("idioms_03_10a_depth_v2.k", "(((\"abcde\";\"fghij\");(\"abcde\";\"fghij\");(\"abcde\";\"fghij\"));((\"abcde\";\"abcde\";\"abcde\");(\"fghij\";\"fghij\";\"fghij\"));((\"aaa\";\"bbb\";\"ccc\";\"ddd\";\"eee\");(\"fff\";\"ggg\";\"hhh\";\"iii\";\"jjj\")))"),
                 ("idioms_03_396_remove_cols.k", "((2 4;6 8;10 12);(14 16;18 20;22 24))"),
 
                 // Chapter 4 idioms: Set operations
@@ -2455,10 +2451,17 @@ namespace K3CSharp.Tests
                 ("idioms_05_172_ones_followed_by_zeros.k", "1 1 1 1 1 0 0 0 0"),
                 ("idioms_05_407_vector_x_ones.k", "1 1 1 1 1 0 0 0 0 0 0 0"),
                 ("idioms_05_250_replicate.k", "10 10 10"),
+
+
+
+
+
                 ("idioms_05_247_interlace.k", "1 0 0 1 1 1 0 0 0 0"),
                 ("idioms_05_252_alternate_takes.k", "1 0 0 1 1 1 0 0 0 0 1 1 1 1 1"),
+                
                 ("idioms_05_480_replace_in_y_by_zero.k", "1 0 3 0 5"),
                 ("idioms_05_481_replace_not_in_y_by_zero.k", "0 2 0 4 0"),
+                
                 ("idioms_05_593_matrix_y_rows.k", "(\"abcd\";\"abcd\";\"abcd\")"),
                 ("idioms_05_610_cyclic_repetitions.k", "\"abcdabcdabcd\""),
                 ("idioms_05_303_smear_ones.k", "0 1 1 1 1 0 1 1 1 0 1 1 0"),
@@ -2601,7 +2604,50 @@ namespace K3CSharp.Tests
                 ("idioms_11_540_markers_at_y_indices.k", "0 1 0 1 0 0 0 1 0 0"),
 
                 // Chapter 12 idioms: Matrices and Tensors
-                // Note: Chapter 12 tests use _mul which is not fully implemented
+                ("idioms_12_547_is_vector.k", "1"),
+                ("idioms_12_601_num_rows.k", "17"),
+
+                ("idioms_12_410_num_cols.k", "7"),
+
+
+                ("idioms_12_588_two_row_matrix.k", "(\"abcd\";\"efgh\")"),
+                ("idioms_12_50_connectivity_list.k", "(0 0 1 1;0 2 0 2)"),
+
+
+
+
+
+
+
+
+
+
+                ("idioms_12_525_main_diagonal.k", "1 6 11"),
+                ("idioms_12_429_matrix_with_diagonal.k", "(5 0 0 0 0;0 9 0 0 0;0 0 6 0 0;0 0 0 7 0;0 0 0 0 2)"),
+                ("idioms_12_197_identity_matrix.k", "(1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1)"),
+
+                ("idioms_12_195_upper_triangular.k", "(1 1 1 1;0 1 1 1;0 0 1 1;0 0 0 1)"),
+                ("idioms_12_196_lower_triangular.k", "(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1)"),
+
+
+
+
+
+
+                ("idioms_12_240_matrix_product.k", "(22 28;49 64)"),
+
+                ("idioms_12_313_two_by_two_determinant.k", "1"),
+                ("idioms_12_375_insert_row.k", "(1 2 3;4 5 6;7 8 9;13 14 15;10 11 12)"),
+                ("idioms_12_376_append_row.k", "(1 2 3;4 5 6;7 8 9;10 11 12;13 14 15)"),
+
+
+
+
+                ("idioms_12_528_cross_product.k", "4 28 46 -27 -41 39 45 3 -19 -58"),
+                ("idioms_12_555_all_axes.k", "0 1 2 3"),
+                ("idioms_12_583_array_and_negative.k", "(1 -1;-3 3;5 -5)"),
+
+                ("idioms_12_612_rank_of_array.k", "2"),
                 
                 // Chapter 13 idioms: Charting and drawing
                 ("idioms_13_572_division_by_zero.k", "5 0 0.0"),
@@ -2611,6 +2657,10 @@ namespace K3CSharp.Tests
 
                 // Chapter 14 idioms: Conversions between numbers and character vectors
                 ("idioms_14_111_count_format.k", "6"),
+                ("idioms_14_95_numeric_from_alphanumeric.k", "123 438"),
+                ("idioms_14_99_numeric_vector_rows.k", "(3 5;4 7)"),
+                ("idioms_14_101_sum_numbers_matrix.k", "10"),
+                ("idioms_14_456_number_digits.k", "1 2 3 5"),
 
                 // Chapter 15 idioms: Numeric base conversions
                 ("idioms_15_46_transposed_formatted_integers.k", "(,\"1\";,\"2\";,\"3\";,\"4\";,\"5\")"),
@@ -2620,7 +2670,7 @@ namespace K3CSharp.Tests
                 ("idioms_15_54_represent_in_base.k", "1 4 4"),
                 ("idioms_15_56_hex_from_decimal_chars.k", "\"ff\""),
                 ("idioms_15_63_represent_mixed_radix.k", "0 1 984"),
-                ("idioms_15_66_selection_encoded_list.k", "(\"blue\"\n \"green\")"),
+                ("idioms_15_66_selection_encoded_list.k", "(\"blue\";\"green\")"),
                 ("idioms_15_75_decimal_from_hex.k", "255"),
                 ("idioms_15_342_arabic_from_roman.k", "1909"),
 
@@ -2636,105 +2686,6 @@ namespace K3CSharp.Tests
                 ("idioms_17_62_fractional_part.k", "0.7"),
                 ("idioms_17_462_round_nearest_int.k", "4"),
                 ("idioms_17_470_divisible_by_y.k", "3 6 9"),
-                ("idioms_14_95_numeric_from_alphanumeric.k", "123 438"),
-                ("idioms_14_99_numeric_vector_rows.k", "(3 5;4 7)"),
-                ("idioms_14_101_sum_numbers_matrix.k", "10"),
-                ("idioms_14_456_number_digits.k", "1 2 3 5"),
-
-                // KTree (K Tree namespace) tests
-
-                ("ktree_enumerate_relative_name.k", "`keyA`keyB"),
-
-                ("ktree_enumerate_relative_path.k", "`keyA`keyB"),
-
-                ("ktree_enumerate_absolute_path.k", "`keyA`keyB"),
-
-                ("ktree_enumerate_root.k", "`k`t"),
-
-                ("ktree_indexing_relative_name.k", "1 3 5"),
-
-                ("ktree_indexing_absolute_name.k", "1 2 3"),
-
-                ("ktree_indexing_relative_path.k", "1 2 3"),
-
-                ("ktree_indexing_absolute_path.k", "1 3 5"),
-
-                ("ktree_dot_apply_relative_name.k", "1 2 3"),
-
-                ("ktree_dot_apply_absolute_name.k", "1 3 5"),
-
-                ("ktree_dot_apply_relative_path.k", "1 2 3"),
-
-                ("ktree_dot_apply_absolute_path.k", "1 3 5"),
-                ("test_semicolon_parsing.k", "1 2 3"),
-                ("test_parse_monadic_star.k", $"(`\"*:\";1 2 3 4)"),
-                ("parse_atomic_value_no_verb.k", ",`a"),
-                ("parse_projection_dyadic_plus.k", "(`\"+\";::;::)"),
-                ("parse_projection_dyadic_plus_fixed_left.k", "(`\"+\";,1;::)"),
-                ("parse_projection_dyadic_plus_fixed_right.k", "(`\"+\";::;,2)"),
-                ("parse_monadic_shape_atomic.k", "(`\"^:\";(`\",:\";,`a))"),
-                ("parse_apply_and_assign.k", "(`\"+:\";`i;1)"),
-                ("eval_dyadic_plus.k", "6 8 10 12"),
-                ("eval_monadic_star_nested.k", "22"),
-                ("eval_dot_execute_path.k", "`a`b`c`d`e`f"),
-                ("eval_dot_repl_dir.k", "``.k"),
-                ("eval_dot_parse_and_eval.k", "11"),
-                ("test_eval_monadic_star.k", "1"),
-                ("test_eval_monadic_star_atomic.k", "1"),
-
-                // Missing idioms tests - adding one at a time
-
-                ("idioms_01_115_case_structure.k", "\"one\""),
-
-                ("idioms_01_117_case_structure_long.k", "\"one\""),
-
-                ("idioms_01_245_randomize_seed.k", "domain"),
-
-                ("idioms_02_111_count_1s.k", "3"),
-
-                ("idioms_02_118_count_occurrences.k", "3"),
-
-                ("idioms_02_126_sum_reciprocal.k", "2.283333"),
-
-                ("idioms_02_141_sum_squares.k", "55"),
-
-                ("idioms_02_149_dot_product.k", "70"),
-
-                ("idioms_12_195_upper_triangular.k", "(1 1 1 1\n 0 1 1 1\n 0 0 1 1\n 0 0 0 1)"),
-
-                ("idioms_12_196_lower_triangular.k", "(1 0 0 0\n 1 1 0 0\n 1 1 1 0\n 1 1 1 1)"),
-
-                ("idioms_12_197_identity_matrix.k", "(1 0 0 0\n 0 1 0 0\n 0 0 1 0\n 0 0 0 1)"),
-
-                ("idioms_12_240_matrix_product.k", "(22 28\n 49 64)"),
-
-                ("idioms_12_313_two_by_two_determinant.k", "1"),
-
-                ("idioms_12_375_insert_row.k", "(1 2 3\n 4 5 6\n 7 8 9\n 13 14 15\n 10 11 12)"),
-
-                ("idioms_12_376_append_row.k", "(1 2 3\n 4 5 6\n 7 8 9\n 10 11 12\n 13 14 15)"),
-
-                ("idioms_12_410_num_cols.k", "7"),
-
-                ("idioms_12_429_matrix_with_diagonal.k", "(5 0 0 0 0\n 0 9 0 0 0\n 0 0 6 0 0\n 0 0 0 7 0\n 0 0 0 0 2)"),
-
-                ("idioms_12_50_connectivity_list.k", "(0 0 1 1\n 0 2 0 2)"),
-
-                ("idioms_12_525_main_diagonal.k", "1 6 11"),
-
-                ("idioms_12_528_cross_product.k", "4 28 46 -27 -41 39 45 3 -19 -58"),
-
-                ("idioms_12_547_is_vector.k", "1"),
-
-                ("idioms_12_555_all_axes.k", "0 1 2 3"),
-
-                ("idioms_12_583_array_and_negative.k", "(1 -1\n -3 3\n 5 -5)"),
-
-                ("idioms_12_588_two_row_matrix.k", "(\"abcd\"\n \"efgh\")"),
-
-                ("idioms_12_601_num_rows.k", "17"),
-
-                ("idioms_12_612_rank_of_array.k", "2"),
             };
 
             // Filter tests if a pattern was provided

@@ -1,1 +1,2 @@
-:[0;"zero";1;"one";2;"two";"other"]
+a:3
+:[a~0;"zero";a~1;"one";a~2;"two";"other"]
