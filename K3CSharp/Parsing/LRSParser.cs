@@ -388,7 +388,29 @@ namespace K3CSharp.Parsing
                             // Parse the base (prefix before first bracket)
                             var prefixTokens = expressionTokens.GetRange(0, firstBracket);
                             
-                            // Special case: r:f[x;y] — prefix is an assignment (IDENT COLON FUNC)
+                            // Check if prefix contains dyadic operators at depth 0
+                            // If so, skip bracket function call handling to preserve LRS semantics
+                            // e.g., y,x[&~x _lin y] should be y joined with x[...], not (y,x)[...]
+                            bool prefixHasDyadicOperator = false;
+                            int prefixDepth = 0;
+                            for (int i = 0; i < prefixTokens.Count; i++)
+                            {
+                                var tok = prefixTokens[i];
+                                if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE)
+                                    prefixDepth++;
+                                else if (tok.Type == TokenType.RIGHT_PAREN || tok.Type == TokenType.RIGHT_BRACKET || tok.Type == TokenType.RIGHT_BRACE)
+                                    prefixDepth--;
+                                else if (prefixDepth == 0 && OperatorDetector.SupportsDyadic(tok.Type))
+                                {
+                                    prefixHasDyadicOperator = true;
+                                    break;
+                                }
+                            }
+                            
+                            // When prefix has dyadic operator, skip bracket handling to allow normal dyadic parsing
+                            // This ensures LRS semantics: y,x[...] parses as y joined with x[...], not (y,x)[...]
+                            if (!prefixHasDyadicOperator)
+                            {
                             // Detect pattern: [IDENT, COLON, ...rest] in prefix, where rest is the function to call
                             // The bracket args belong to the function call, not to the assignment result
                             if (prefixTokens.Count >= 3 &&
@@ -469,7 +491,8 @@ namespace K3CSharp.Parsing
                                     }
                                 }
                                 return currentNode;
-                            }
+                            } // Close if (!prefixHasDyadicOperator) - bracket handling block
+                            } // Close else block for assignment special case
                         }
                     }
                 }
