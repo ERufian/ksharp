@@ -1796,4 +1796,30 @@ namespace K3CSharp
             return HashCode.Combine(AdverbName, Verb, RequiredArguments);
         }
     }
+
+    /// <summary>
+    /// Represents a deferred take-projection: n#f where f is a function/projection.
+    /// When applied to x, computes n#(f x) — used for patterns like 3#,: applied to a value.
+    /// </summary>
+    public class DeferredTakeProjection : K3Value
+    {
+        public IntegerValue Count { get; }
+        public K3Value Func { get; }
+        public Evaluator Evaluator { get; }
+
+        public DeferredTakeProjection(IntegerValue count, K3Value func, Evaluator evaluator)
+        {
+            Count = count;
+            Func = func;
+            Evaluator = evaluator;
+            Type = ValueType.Function;
+        }
+
+        public override K3Value Add(K3Value other) => throw new InvalidOperationException("Cannot add DeferredTakeProjection");
+        public override K3Value Subtract(K3Value other) => throw new InvalidOperationException("Cannot subtract DeferredTakeProjection");
+        public override K3Value Multiply(K3Value other) => throw new InvalidOperationException("Cannot multiply DeferredTakeProjection");
+        public override K3Value Divide(K3Value other) => throw new InvalidOperationException("Cannot divide DeferredTakeProjection");
+
+        public override string ToString() => $"{Count}#{Func}";
+    }
 }

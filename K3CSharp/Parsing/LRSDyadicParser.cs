@@ -350,11 +350,38 @@ namespace K3CSharp.Parsing
                 return new ASTNode(ASTNodeType.Vector, null, argNodes);
             }
             
+            // VERB + COLON: monadic projection e.g. ,: — must be checked BEFORE dyadic/monadic parsing
+            if (tokens.Count == 2 && IsDyadicOperatorDirect(tokens[0].Type) && tokens[1].Type == TokenType.COLON)
+            {
+                var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
+                projectedNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(tokens[0].Type));
+                projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
+                return projectedNode;
+            }
+            
             // Try dyadic operation first (monadic parsing is handled at main LRS level)
             var result = ParseDyadicOperation(tokens);
-            if (result == null)
-                return null;
-            return result;
+            if (result != null)
+                return result;
+            
+            // Try monadic operation: verb + operand (e.g. -x, *y)
+            if (tokens.Count == 2 && OperatorDetector.SupportsMonadic(tokens[0].Type))
+            {
+                var operandNode = CreateNodeFromToken(tokens[1]);
+                if (operandNode != null)
+                {
+                    var monadicNode = new ASTNode(ASTNodeType.DyadicOp);
+                    monadicNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(tokens[0].Type));
+                    monadicNode.Children.Add(operandNode);
+                    return monadicNode;
+                }
+            }
+            
+            // Delegate to parent parser if available
+            if (parentParser != null)
+                return parentParser.EvaluateFromRight(tokens);
+            
+            return null;
         }
         
         /// <summary>
@@ -598,6 +625,15 @@ namespace K3CSharp.Parsing
             var dyadicResult = ParseDyadicOperation(tokens);
             if (dyadicResult != null)
                 return dyadicResult;
+            
+            // VERB + COLON: monadic projection e.g. ,: — must be checked BEFORE generic monadic
+            if (tokens.Count == 2 && IsDyadicOperatorDirect(tokens[0].Type) && tokens[1].Type == TokenType.COLON)
+            {
+                var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
+                projectedNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(tokens[0].Type));
+                projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
+                return projectedNode;
+            }
             
             // If dyadic parsing failed and we have exactly 2 tokens (potential monadic: op + operand)
             // try monadic parsing directly

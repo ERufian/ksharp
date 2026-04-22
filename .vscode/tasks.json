@@ -14,6 +14,17 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build-dotnet",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/K3CSharp.csproj"
+            ], 
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "publish",
             "command": "dotnet",
             "type": "process",

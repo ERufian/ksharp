@@ -335,7 +335,7 @@ namespace K3CSharp.Parsing
             // Note: K3CSharp uses DyadicOp for all operators regardless of arity
             // The evaluator determines actual arity from the adverb type and verb characteristics
             // Evaluator expects: children[0] = verb, children[1] = leftArg (0 for monadic), children[2] = rightArg
-            var zeroNode = ASTNode.MakeLiteral(new IntegerValue(0));
+            var zeroNode = ASTNode.MakeLiteral(new NullValue());
             var children = new List<ASTNode> { leftArg, zeroNode, rightArg };
             return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(GetAdverbSymbol(adverbToken.Type)), children);
         }

@@ -1,7 +1,4 @@
 # Intake: update the project plan and documentation in preparation for further work
-[ ] First start running in the background a full comparison using the instructions in T:\\_src\\github.com\\ERufian\\ksharp\\K3CSharp.Comparison\\README.md. 
-    - This test may be slow and you want to leave it running while you are doing other work, that is why we want to start it at the beginning. 
-[ ] Check periodically if the full comparison that was running in the background has finished running
 [ ] Update the current project plan by comparing current functionality to the functionality described in T:\\_src\\github.com\\ERufian\\vibe-docs\\ksharp\\cleaned\\*.html 
     - Take into account that the UI and related attributes are excluded from the scope  
 [ ] Identify if there is new functionality that is not yet described in T:\\_src\\github.com\\ERufian\\ksharp\\README.md 
@@ -24,7 +21,3 @@
     - Ensure that the numbers for passing and failng tests and percentage of success is mentioned only once
     - If the numbers for passing and failng tests and/or percentage of success are mentioned multiple times then eliminate the redundant ones. 
     - Make sure you run the test runner from its folder, so that it can correctly find the latest test scripts with the correct path.
-[ ] If the full comparison that was started earlier is still running, wait for it to complete
-[ ] After the full comparison that was started earlier has finished running, use its summary results to update the numbers for compatibility statistics in T:\\_src\\github.com\\ERufian\\ksharp\\README.md
-    - Ensuring that the numbers for matching, differed skipped, errors and percentage of compatibility is mentioned only once
-    - If the numbers for matching, differed skipped, errors and percentage of compatibility are mentioned multiple times, then eliminate the redundant ones.

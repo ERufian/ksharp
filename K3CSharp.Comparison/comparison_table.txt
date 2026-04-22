@@ -1,15 +1,15 @@
 K3Sharp vs k.exe Comparison Report
 =================================
-Generated: 2026-04-14 19:20:13
+Generated: 2026-04-20 15:13:46
 
 SUMMARY:
 --------
-Total Tests:     929
-✅ Matched:       838
-❌ Differed:      63
+Total Tests:     1136
+✅ Matched:       996
+❌ Differed:      110
 ⚠️  Skipped:       23
-💥 Errors:        5
-Success Rate:    92.5%
+💥 Errors:        7
+Success Rate:    89.5%
 
 DETAILED RESULTS:
 -----------------
@@ -38,6 +38,9 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   adverb_scan_max.k                                  1 3 3 5 5                      1 3 3 5 5                                                                        
 ✅ PASS   adverb_scan_min.k                                  5 3 3 1 1                      5 3 3 1 1                                                                        
 ✅ PASS   adverb_scan_minus.k                                10 8 5 4                       10 8 5 4                                                                         
+✅ PASS   adverb_scan_monad_do_reverse.k                     (1 2 3 4 5;5 4 3 2 1)          (1 2 3 4 5;5 4 3 2 1)          Compact representation                            
+✅ PASS   adverb_scan_monad_do_transpose.k                   ((0 1 2;3 4 5);(0 3;1 4;2...   ((0 1 2;3 4 5);(0 3;1 4;2...   Compact representation                            
+✅ PASS   adverb_scan_monad_fixedpoint_first.k               ((((0 1;2 3);(4 5;6 7));(...   ((((0 1;2 3);(4 5;6 7));(...   Compact representation                            
 ✅ PASS   adverb_scan_multiply.k                             1 2 6 24                       1 2 6 24                                                                         
 ✅ PASS   adverb_scan_plus.k                                 1 3 6 10 15                    1 3 6 10 15                                                                      
 ✅ PASS   adverb_scan_power.k                                2 8 64                         2 8 64                         smart integer division, inverse and exponenti...  
@@ -247,7 +250,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   equal_operator.k                                   0                              0                                                                                
 ⚠️  SKIP eval_dot_execute_path.k                                                                                          k.exe doesn't support _parse/_eval                
 ✅ PASS   eval_dot_parse_and_eval.k                          11                             11                                                                               
-❌ FAIL   eval_dot_repl_dir.k                                                               ``.k                           Compact representation                            
+✅ PASS   eval_dot_repl_dir.k                                ``.k                           ``.k                           Compact representation                            
 ⚠️  SKIP eval_dyadic_plus.k                                                                                               k.exe doesn't support _parse/_eval                
 ⚠️  SKIP eval_monadic_star_nested.k                                                                                       k.exe doesn't support _parse/_eval                
 ⚠️  SKIP ffi_assembly_load.k                                                                                              k.exe doesn't support FFI                         
@@ -328,6 +331,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   function_call_simple.k                             12                             12                                                                               
 ✅ PASS   function_foo_chain.k                               20                             20                                                                               
 ✅ PASS   function_mul.k                                     32                             32                                                                               
+✅ PASS   function_projection_basic.k                        6                              6                                                                                
 ✅ PASS   function_variable_over_adverb.k                    0.01666667                     0.01666667                                                                       
 ✅ PASS   function_variable_scan_adverb.k                    (10;0.5;0.01666667)            (10;0.5;0.01666667)                                                              
 ✅ PASS   grade_down_no_parens.k                             1 2 3 4 0                      1 2 3 4 0                                                                        
@@ -336,6 +340,8 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   grade_up_operator.k                                0 4 2 3 1                      0 4 2 3 1                                                                        
 ✅ PASS   greater_than_operator.k                            0                              0                                                                                
 ✅ PASS   group_operator.k                                   (0 1 6;2 7 16;3 5 12 15 1...   (0 1 6;2 7 16;3 5 12 15 1...   Compact representation                            
+✅ PASS   idioms_01_115_case_structure.k                     "other"                        "other"                                                                          
+✅ PASS   idioms_01_117_case_structure_long.k                "four"                         "four"                                                                           
 ✅ PASS   idioms_01_129_arctangent.k                         0.5235988                      0.5235988                                                                        
 ✅ PASS   idioms_01_143_indices_distinct.k                   (0 3 7;1 4 6;2 5)              (0 3 7;1 4 6;2 5)              Compact representation                            
 ✅ PASS   idioms_01_154_range.k                              "wirls"                        "wirls"                                                                          
@@ -344,6 +350,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   idioms_01_228_is_row.k                             1                              1                                                                                
 ✅ PASS   idioms_01_232_is_row_in.k                          1                              1                                                                                
 ✅ PASS   idioms_01_241_sum_subsets.k                        (4 6 4;12 14 12;20 22 20)      (4 6 4;12 14 12;20 22 20)      Compact representation                            
+💥 ERROR idioms_01_245_randomize_seed.k                                                                                   k.exe error only                                  
 ✅ PASS   idioms_01_328_number_items.k                       4                              4                                                                                
 ✅ PASS   idioms_01_331_identity_max.k                       -1e+100                        -1e+100                                                                          
 ✅ PASS   idioms_01_337_identity_min.k                       1e+100                         1e+100                                                                           
@@ -390,9 +397,9 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   idioms_01_84_scalar_boolean.k                      157                            157                                                                              
 ✅ PASS   idioms_01_88_name_variable.k                       (0 1 2;3 4 5)                  (0 1 2;3 4 5)                  Compact representation                            
 ✅ PASS   idioms_01_96_conditional_execution.k               0 15                           0 15                                                                             
-❌ FAIL   idioms_02_098_exec_rows.k                          ("y1:x1";"y2:x2")              4 9                                                                              
+✅ PASS   idioms_02_098_exec_rows.k                          4 9                            4 9                                                                              
 ✅ PASS   idioms_02_189_add_each_row.k                       (3 5 7 9;7 9 11 13;11 13 ...   (3 5 7 9;7 9 11 13;11 13 ...   Compact representation                            
-❌ FAIL   idioms_02_192_add_each_col.k                       (3 4 5 6 7;8 9 10 11 12)       (4 5 6 7 8;10 11 12 13 14)     Compact representation                            
+✅ PASS   idioms_02_192_add_each_col.k                       (4 5 6 7 8;10 11 12 13 14)     (4 5 6 7 8;10 11 12 13 14)     Compact representation                            
 ✅ PASS   idioms_02_222_max_weighted.k                       9                              9                                                                                
 ✅ PASS   idioms_02_223_min_weighted.k                       5                              5                                                                                
 ✅ PASS   idioms_02_236_count_occur_matrix.k                 2                              2                                                                                
@@ -402,7 +409,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   idioms_02_249_offset_enum.k                        10 11 12                       10 11 12                                                                         
 ✅ PASS   idioms_02_273_join_scalar_each.k                   ("a0";"a1";"a2";"a3";"a4")     ("a0";"a1";"a2";"a3";"a4")     Compact representation                            
 ✅ PASS   idioms_02_282_index_first_blank.k                  2                              2                                                                                
-❌ FAIL   idioms_02_285_moving_sum.k                         1 3 6 10 15                    6 9 12                                                                           
+✅ PASS   idioms_02_285_moving_sum.k                         6 9 12                         6 9 12                                                                           
 ✅ PASS   idioms_02_306_invert_after_0.k                     1 1 0 0 0 0 0                  1 1 0 0 0 0 0                                                                    
 ✅ PASS   idioms_02_309_running_parity.k                     0 1 0 1 0 0 1 1 1              0 1 0 1 0 0 1 1 1                                                                
 ✅ PASS   idioms_02_310_running_sum.k                        1 21 321 4321                  1 21 321 4321                                                                    
@@ -413,7 +420,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   idioms_02_355_none.k                               1                              1                                                                                
 ✅ PASS   idioms_02_356_any.k                                1                              1                                                                                
 ✅ PASS   idioms_02_360_all.k                                0                              0                                                                                
-❌ FAIL   idioms_02_361_parity.k                             (,0;,1;1 0;1 1;1 0 0;1 0 ...   0 1 1 0 1 0 0 1                                                                  
+✅ PASS   idioms_02_361_parity.k                             0 1 1 0 1 0 0 1                0 1 1 0 1 0 0 1                                                                  
 ✅ PASS   idioms_02_362_count_occur.k                        3                              3                                                                                
 ✅ PASS   idioms_02_368_product.k                            120                            120                                                                              
 ✅ PASS   idioms_02_370_count_ones.k                         4                              4                                                                                
@@ -422,21 +429,249 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   idioms_02_373_sum_rows.k                           10 26 42                       10 26 42                                                                         
 ✅ PASS   idioms_02_374_sum.k                                15                             15                                                                               
 ✅ PASS   idioms_02_383_pairwise_diff.k                      6 -2 3 2                       6 -2 3 2                                                                         
-❌ FAIL   idioms_02_398_diag_from_cols.k                     (1 2 3 4 5;6 7 8 9 10;11 ...   (1 2 3 4 5;10 6 7 8 9;14 ...   Compact representation                            
-❌ FAIL   idioms_02_399_cols_from_diag.k                     (1 2 3 4 5;10 6 7 8 9;14 ...   (1 2 3 4 5;6 7 8 9 10;11 ...   Compact representation                            
-❌ FAIL   idioms_02_419_pairwise_ratios.k                    5.0 5.0 2.0                    5 5 2                          smart integer division                            
+✅ PASS   idioms_02_398_diag_from_cols.k                     (1 2 3 4 5;10 6 7 8 9;14 ...   (1 2 3 4 5;10 6 7 8 9;14 ...   Compact representation                            
+✅ PASS   idioms_02_399_cols_from_diag.k                     (1 2 3 4 5;6 7 8 9 10;11 ...   (1 2 3 4 5;6 7 8 9 10;11 ...   Compact representation                            
+💥 ERROR idioms_02_419_pairwise_ratios.k                    5.0 5.0 2.0                    5 5 2.0                        Unexpected comparison error                       
 ✅ PASS   idioms_02_431_differ_from_next.k                   1 0 1 0 0 1 1 1 1 1 1          1 0 1 0 0 1 1 1 1 1 1                                                            
 ✅ PASS   idioms_02_432_differ_from_prev.k                   1 1 0 1 0 0 1 1 1 1 1          1 1 0 1 0 0 1 1 1 1 1                                                            
 ✅ PASS   idioms_02_442_first_diff.k                         1 2 3 4 5                      1 2 3 4 5                                                                        
 ✅ PASS   idioms_02_484_right_left_scan.k                    15 14 12 9 5                   15 14 12 9 5                                                                     
 ✅ PASS   idioms_02_511_apply_over_all.k                     300                            300                                                                              
-❌ FAIL   idioms_02_518_cond_transpose.k                     (0 1 2;3 4 5)                  (0 3;1 4;2 5)                  Compact representation                            
-❌ FAIL   idioms_02_533_cond_reverse.k                       1 2 3 4 5                      5 4 3 2 1                                                                        
+✅ PASS   idioms_02_518_cond_transpose.k                     (0 3;1 4;2 5)                  (0 3;1 4;2 5)                  Compact representation                            
+✅ PASS   idioms_02_533_cond_reverse.k                       5 4 3 2 1                      5 4 3 2 1                                                                        
 ✅ PASS   idioms_02_562_index_y_in_x.k                       6 1 4 5 4 0 8 5 1 4            6 1 4 5 4 0 8 5 1 4                                                              
 ✅ PASS   idioms_02_589_2col_matrix.k                        ("ae";"bf";"cg";"dh")          ("ae";"bf";"cg";"dh")          Compact representation                            
 ✅ PASS   idioms_02_592_vector_from_array.k                  0 1 2 3 4 5 6 7                0 1 2 3 4 5 6 7                                                                  
 ✅ PASS   idioms_02_611_mult_rows_by_vec.k                   (1 20 300 40000;5 60 700 ...   (1 20 300 40000;5 60 700 ...   Compact representation                            
-❌ FAIL   idioms_02_615_first_atom.k                         ((0 1;4 9);(16 25;36 49))      0                                                                                
+✅ PASS   idioms_02_615_first_atom.k                         0                              0                                                                                
+✅ PASS   idioms_02_xx1_count_occurrences.k                  3                              3                                                                                
+✅ PASS   idioms_02_xx2_sum_reciprocal.k                     2.283333                       2.283333                                                                         
+✅ PASS   idioms_02_xx3_count_1s.k                           3                              3                                                                                
+❌ FAIL   idioms_03_10a_depth_v2.k                           ("abcde";"fghij")              ((("abcde";"fghij");("abc...   Compact representation                            
+❌ FAIL   idioms_03_10a_depth.k                              ("abcde";"fghij")              ((("abcde"
+   "fghij")
+  ...                                                     
+✅ PASS   idioms_03_204_array_and_negative.k                 ((3 -3;4 -4;5 -5;6 -6);(7...   ((3 -3;4 -4;5 -5;6 -6);(7...   Compact representation                            
+✅ PASS   idioms_03_396_remove_cols.k                        ((2 4;6 8;10 12);(14 16;1...   ((2 4;6 8;10 12);(14 16;1...   Compact representation                            
+✅ PASS   idioms_03_444_drop_first_cols.k                    (,2;,5;,8;,11)                 (,2;,5;,8;,11)                 Compact representation                            
+✅ PASS   idioms_03_514_sum_cols.k                           10 26 42                       10 26 42                                                                         
+✅ PASS   idioms_03_536_rotate_rows_left.k                   (2 3 4 1;6 7 8 5;10 11 12 9)   (2 3 4 1;6 7 8 5;10 11 12 9)   Compact representation                            
+✅ PASS   idioms_03_537_rotate_rows_right.k                  (4 1 2 3;8 5 6 7;12 9 10 11)   (4 1 2 3;8 5 6 7;12 9 10 11)   Compact representation                            
+✅ PASS   idioms_04_348_items_in_common.k                    1                              1                                                                                
+✅ PASS   idioms_04_351_is_subset.k                          1                              1                                                                                
+❌ FAIL   idioms_04_497_set_union.k                          "456"                          "4567890123"                                                                     
+✅ PASS   idioms_04_498_set_difference.k                     "123"                          "123"                                                                            
+✅ PASS   idioms_04_500_set_intersection.k                   "abcxyz"                       "abcxyz"                                                                         
+✅ PASS   idioms_04_552_not_in_y.k                           0 0 1 0 1 0 1 1 1 0            0 0 1 0 1 0 1 1 1 0                                                              
+✅ PASS   idioms_05_165_zeros_preceded_by_ones.k             1 1 1 1 0 0 0 0 0              1 1 1 1 0 0 0 0 0                                                                
+✅ PASS   idioms_05_167_ones_preceded_by_zeros.k             0 0 0 0 0 0 1 1 1              0 0 0 0 0 0 1 1 1                                                                
+✅ PASS   idioms_05_168_zeros_followed_by_ones.k             0 0 0 1 1 1 1 1 1              0 0 0 1 1 1 1 1 1                                                                
+✅ PASS   idioms_05_172_ones_followed_by_zeros.k             1 1 1 1 1 0 0 0 0              1 1 1 1 1 0 0 0 0                                                                
+✅ PASS   idioms_05_183_maximum_table.k                      (0 0 0 0 0;0 1 1 1 1;0 1 ...   (0 0 0 0 0;0 1 1 1 1;0 1 ...   Compact representation                            
+❌ FAIL   idioms_05_247_interlace.k                          2 4                            1 0 0 1 1 1 0 0 0 0                                                              
+✅ PASS   idioms_05_250_replicate.k                          10 10 10                       10 10 10                                                                         
+❌ FAIL   idioms_05_252_alternate_takes.k                    1 0 0 0 0 0 0 0 0 0 0 0 0...   1 0 0 1 1 1 0 0 0 0 1 1 1...                                                     
+✅ PASS   idioms_05_303_smear_ones.k                         0 1 1 1 1 0 1 1 1 0 1 1 0      0 1 1 1 1 0 1 1 1 0 1 1 0                                                        
+✅ PASS   idioms_05_407_vector_x_ones.k                      1 1 1 1 1 0 0 0 0 0 0 0        1 1 1 1 1 0 0 0 0 0 0 0                                                          
+✅ PASS   idioms_05_480_replace_in_y_by_zero.k               1 0 3 0 5                      1 0 3 0 5                                                                        
+✅ PASS   idioms_05_481_replace_not_in_y_by_zero.k           0 2 0 4 0                      0 2 0 4 0                                                                        
+❌ FAIL   idioms_05_513_empty_matrix.k                       ,1                             1 0                                                                              
+✅ PASS   idioms_05_563_empty_vector.k                       ,0                             ,0                                                                               
+✅ PASS   idioms_05_593_matrix_y_rows.k                      ("abcd";"abcd";"abcd")         ("abcd";"abcd";"abcd")         Compact representation                            
+✅ PASS   idioms_05_610_cyclic_repetitions.k                 "abcdabcdabcd"                 "abcdabcdabcd"                                                                   
+✅ PASS   idioms_05_614_array_shape_of_y.k                   ("abcd";"abcd";"abcd")         ("abcd";"abcd";"abcd")         Compact representation                            
+❌ FAIL   idioms_06_1_ascending_ordinals_shareable.k         11 17 12 13 13 13 13 18        0 6 1 2 2 2 2 7                                                                  
+✅ PASS   idioms_06_13_ascending_ordinals.k                  3 5 1 6 4 0 2                  3 5 1 6 4 0 2                                                                    
+✅ PASS   idioms_06_17_descending_ordinals.k                 2 1 4 0 3 6 5                  2 1 4 0 3 6 5                                                                    
+✅ PASS   idioms_06_18_sort_strings_alpha.k                  ("into";"more";"once")         ("into";"more";"once")         Compact representation                            
+✅ PASS   idioms_06_19_sort_char_matrix.k                    ("coins";"icons";"scion")      ("coins";"icons";"scion")      Compact representation                            
+✅ PASS   idioms_06_20_is_permutation.k                      1                              1                                                                                
+❌ FAIL   idioms_06_268_is_ascending.k                       0 1 1 1 7 8 9                  1                                                                                
+❌ FAIL   idioms_06_32_sort_indices_by_data.k                79 74 78 76 77 75 73 72 71     8 7 6 1 5 3 4 2 0                                                                
+❌ FAIL   idioms_06_33_sort_matrix_on_col.k                                                 (91 59 5 19 17 26;85 11 2...   Compact representation                            
+❌ FAIL   idioms_06_34_choose_grade_direction.k                                             2 6 7 8 3 5 1 4 0 9                                                              
+✅ PASS   idioms_06_35_sort_ascending.k                      9 31 37 39 42 58 63 84 84 95   9 31 37 39 42 58 63 84 84 95                                                     
+✅ PASS   idioms_06_36_sort_y_on_x.k                         11 8 17 6 7 16                 11 8 17 6 7 16                                                                   
+✅ PASS   idioms_06_37_invert_permutation.k                  0 1 2 3 4 5 6                  0 1 2 3 4 5 6                                                                    
+✅ PASS   idioms_06_38_sort_matrix_descending.k              ("aaaaab";"baaace";"dcdbd...   ("aaaaab";"baaace";"dcdbd...   Compact representation                            
+❌ FAIL   idioms_06_4_permutations_of_each_other.k           11 11 11 11 11 11 11           1                                                                                
+✅ PASS   idioms_06_44_sort_descending.k                     5 5 5 4 4 3 2 0                5 5 5 4 4 3 2 0                                                                  
+✅ PASS   idioms_06_5a_sort_ascending.k                      10 20 30 40                    10 20 30 40                                                                      
+✅ PASS   idioms_06_8_sort_rows_ascending.k                  (3 3 6 7 9;4 4 7 9 9;4 7 ...   (3 3 6 7 9;4 4 7 9 9;4 7 ...   Compact representation                            
+✅ PASS   idioms_07_11_mesh.k                                "1a23z4z56b7c8d9"              "1a23z4z56b7c8d9"                                                                
+✅ PASS   idioms_07_16_merge_by_g.k                          5 10 9 8 20 30 7 40 4 3        5 10 9 8 20 30 7 40 4 3                                                          
+❌ FAIL   idioms_07_26_insert_after_equals.k                 "abc=*****,d*****=,fgh=**...   "abc=*****,d=*****,fgh=**...                                                     
+❌ FAIL   idioms_07_28_insert_g_after_y.k                    "abcd=,def=,gh="               "abcd=xxxx,def=xxxx,gh=xxxx"                                                     
+❌ FAIL   idioms_07_29_insert_before_y.k                     "***************"              "*****1234,*****234,*****34"                                                     
+✅ PASS   idioms_07_30_grade_by_key.k                        " efgiilm"                     " efgiilm"                                                                       
+✅ PASS   idioms_07_31_merge.k                               "merging"                      "merging"                                                                        
+✅ PASS   idioms_07_482_merge_integers.k                     100 1 2 200 300 3 400 4 5...   100 1 2 200 300 3 400 4 5...                                                     
+❌ FAIL   idioms_08_181_classify.k                           1 1 1 1                        1 0 2 0 0 1 2 3 0 2                                                              
+✅ PASS   idioms_08_22_index_first_min.k                     4                              4                                                                                
+✅ PASS   idioms_08_23_index_first_max.k                     8                              8                                                                                
+✅ PASS   idioms_08_261_first_group_of_ones.k                0 1 0 0 0 0 0                  0 1 0 0 0 0 0                                                                    
+❌ FAIL   idioms_08_284_sum_marked.k                         1 1 1 2 2 3 3                  6 9 13                                                                           
+✅ PASS   idioms_08_305_invert_between_ones.k                0 1 0 0 0 0 1 1 0              0 1 0 0 0 0 1 1 0                                                                
+✅ PASS   idioms_08_307_invert_after_first_one.k             0 0 1 0 0 0                    0 0 1 0 0 0                                                                      
+✅ PASS   idioms_08_308_invert_after_first_zero.k            1 0 1 1 1 1                    1 0 1 1 1 1                                                                      
+✅ PASS   idioms_08_330_index_first_max.k                    2                              2                                                                                
+❌ FAIL   idioms_08_333_quick_membership.k                   0 1 1 0 0 1 1 0 1 1            1 0 0 1                                                                          
+✅ PASS   idioms_08_336_index_first_min.k                    3                              3                                                                                
+✅ PASS   idioms_08_338_locate_first_in_y.k                  1                              1                                                                                
+✅ PASS   idioms_08_381_first_one_in_groups.k                0 0 1 0 0 0 1 0 0 1            0 0 1 0 0 0 1 0 0 1                                                              
+✅ PASS   idioms_08_437_remove_leading_zeros.k               "2345600345000"                "2345600345000"                                                                  
+✅ PASS   idioms_08_438_first_one_after_y.k                  4                              4                                                                                
+✅ PASS   idioms_08_439_last_ones_in_groups.k                0 0 1 0 0 0 1 0 0 1            0 0 1 0 0 0 1 0 0 1                                                              
+✅ PASS   idioms_08_440_first_ones_in_groups.k               0 1 0 0 1 0 0 0 0 1            0 1 0 0 1 0 0 0 0 1                                                              
+✅ PASS   idioms_08_466_remove_every_yth.k                   5 6 8 9 11 12                  5 6 8 9 11 12                                                                    
+✅ PASS   idioms_08_467_select_every_yth.k                   4 7 10 13                      4 7 10 13                                                                        
+❌ FAIL   idioms_08_469_remove_every_second.k                "bccdddeeeefffffgggggghhh...   "bdfhjln"                                                                        
+❌ FAIL   idioms_08_471_circular_find_after_y.k              0 0 0                          2 12 14                                                                          
+✅ PASS   idioms_08_503_indices_all_occurrences.k            0 5                            0 5                                                                              
+✅ PASS   idioms_08_530_index_last_occurrence.k              8                              8                                                                                
+❌ FAIL   idioms_08_531_last_occurrence_index_each.k         "aabbbccccddd"                 1 1 4 4 4 8 8 8 8 0 0 0                                                          
+✅ PASS   idioms_08_532_last_occurrence_from_rear.k          5 6 6 4 3 1 0 2 6 6 5 6        5 6 6 4 3 1 0 2 6 6 5 6                                                          
+✅ PASS   idioms_08_551_first_differing_item.k               4                              4                                                                                
+✅ PASS   idioms_08_574_y_where_x_is_zero.k                  10 7 8 7 2                     10 7 8 7 2                                                                       
+✅ PASS   idioms_08_602_choosing_by_sign.k                   "-"                            "-"                                                                              
+❌ FAIL   idioms_08_607_vector_from_column.k                 (0 1 2 3;4 5 6 7;8 9 10 11)    0 4 8                                                                            
+❌ FAIL   idioms_08_623_conditional_change_of_sign.k         9                              9.0                                                                              
+❌ FAIL   idioms_08_79_index_last_nonblank.k                                                2                                                                                
+❌ FAIL   idioms_09_259_remove_leading_trailing_blanks.k     {x[&(|\a)&||\|a:~x= ]}         "abcd e  fg"                                                                     
+✅ PASS   idioms_09_266_remove_trailing_blanks.k             "  phrase 266"                 "  phrase 266"                                                                   
+✅ PASS   idioms_09_267_remove_leading_blanks.k              "phrase 267  "                 "phrase 267  "                                                                   
+✅ PASS   idioms_09_283_locate_field.k                       "abbb"                         "abbb"                                                                           
+✅ PASS   idioms_09_295_depth_of_parens.k                    0 1 1 2 3 3 3 2 2 2 1 1 0...   0 1 1 2 3 3 3 2 2 2 1 1 0...                                                     
+✅ PASS   idioms_09_377_fill_to_length.k                     "quizzzzzz"                    "quizzzzzz"                                                                      
+✅ PASS   idioms_09_382_insert_after_index.k                 10 20 30 40 1 2 3 50 60 70     10 20 30 40 1 2 3 50 60 70                                                       
+✅ PASS   idioms_09_386_shift_right_fill_zero.k              0 0 0 1 2 3 4 5 6 7 8 9        0 0 0 1 2 3 4 5 6 7 8 9                                                          
+✅ PASS   idioms_09_387_shift_left_fill_zero.k               4 5 6 7 8 9 10 11 12 0 0 0     4 5 6 7 8 9 10 11 12 0 0 0                                                       
+✅ PASS   idioms_09_401_first_word.k                         "twas"                         "twas"                                                                           
+✅ PASS   idioms_09_42_move_blanks_to_end.k                  "significant     "             "significant     "                                                               
+✅ PASS   idioms_09_424_single_blank.k                       "a b c d"                      "a b c d"                                                                        
+✅ PASS   idioms_09_43_move_marked_to_beginning.k            "jasmine"                      "jasmine"                                                                        
+✅ PASS   idioms_09_545_zero_not_in_x.k                      2 3 0 5 0 7 0 0 0 11           2 3 0 5 0 7 0 0 0 11                                                             
+✅ PASS   idioms_09_578_merge_alternately.k                  1 2 3 4 5 6 7 8                1 2 3 4 5 6 7 8                                                                  
+✅ PASS   idioms_09_581_insert_after_each.k                  "adbdcd"                       "adbdcd"                                                                         
+✅ PASS   idioms_09_73a_remove_trailing_blanks.k             "trailing blanks"              "trailing blanks"                                                                
+✅ PASS   idioms_09_76a_justify_right.k                      " trailing blanks"             " trailing blanks"                                                               
+✅ PASS   idioms_10_206_remove_duplicate_rows.k              ("abc";"def";"ghi";"jkl")      ("abc";"def";"ghi";"jkl")      Compact representation                            
+❌ FAIL   idioms_10_207_indices_of_rows.k                    3 3 3                          0 5 8 2                                                                          
+✅ PASS   idioms_10_225_remove_blank_rows.k                  ("aaa";"bbb";"ccc")            ("aaa";"bbb";"ccc")            Compact representation                            
+❌ FAIL   idioms_10_231_rows_different_from_y.k                                             1 1 0 1                                                                          
+❌ FAIL   idioms_10_359_locate_blank_rows.k                  0 0 0 0 0                      0 1 0 0 1 0                                                                      
+❌ FAIL   idioms_10_441_comma_separated.k                    ("Swift";"Austen";"Dickens")   "Swift,Austen,Dickens"                                                           
+✅ PASS   idioms_10_489_string_to_table.k                    ("each";"word";"in";,"a";...   ("each";"word";"in";,"a";...   Compact representation                            
+❌ FAIL   idioms_10_499_rows_starting_with.k                                                ("abcd";"ijkl")                Compact representation                            
+✅ PASS   idioms_10_576_prepend_y_items.k                    10 10 1 10 10 3 10 10 5        10 10 1 10 10 3 10 10 5                                                          
+✅ PASS   idioms_10_577_append_y_items.k                     1 10 10 3 10 10 5 10 10        1 10 10 3 10 10 5 10 10                                                          
+✅ PASS   idioms_11_14_subvector_maxima.k                    3 8 6 9 4                      3 8 6 9 4                                                                        
+❌ FAIL   idioms_11_15_subvector_grade_down.k                14 12 18 15 13 16 11 17        2 0 1 5 3 4 7 6                                                                  
+✅ PASS   idioms_11_2_max_scan_partition.k                   3 4 8 8 8 6 9 9 5 4            3 4 8 8 8 6 9 9 5 4                                                              
+✅ PASS   idioms_11_21_rotate_infixes_left.k                 "badecfhijg"                   "badecfhijg"                                                                     
+✅ PASS   idioms_11_255_running_sum_infixes.k                1 3 6 10 5 11 18 26 9          1 3 6 10 5 11 18 26 9                                                            
+✅ PASS   idioms_11_257_sums_of_infixes.k                    3 12 13 27                     3 12 13 27                                                                       
+✅ PASS   idioms_11_277_end_indicators_from_lengths.k        1 0 1 0 0 1 0 0 0 1 0 0 0...   1 0 1 0 0 1 0 0 0 1 0 0 0...                                                     
+✅ PASS   idioms_11_278_start_indicators_from_lengths.k      1 1 0 1 0 0 1 0 0 0 1 0 0...   1 1 0 1 0 0 1 0 0 0 1 0 0...                                                     
+✅ PASS   idioms_11_289_or_scan_infixes.k                    1 1 0 1 1 1 0 0                1 1 0 1 1 1 0 0                                                                  
+✅ PASS   idioms_11_290_and_scan_infixes.k                   1 0 0 0 0 0 0 0                1 0 0 0 0 0 0 0                                                                  
+✅ PASS   idioms_11_291_sums_infixes.k                       3 7 5                          3 7 5                                                                            
+✅ PASS   idioms_11_296_starting_positions_from_lengths.k    0 2 5 6                        0 2 5 6                                                                          
+✅ PASS   idioms_11_3_min_scan_partition.k                   3 4 4 2 2 6 6 4 5 4            3 4 4 2 2 6 6 4 5 4                                                              
+✅ PASS   idioms_11_300_gth_infix.k                          "fghi"                         "fghi"                                                                           
+✅ PASS   idioms_11_304_invert_zeros_after_first_one.k       0 0 1 1 1 1 1                  0 0 1 1 1 1 1                                                                    
+✅ PASS   idioms_11_40_reverse_infixes_partition.k           2 1 5 4 3 9 8 7 6 10           2 1 5 4 3 9 8 7 6 10                                                             
+✅ PASS   idioms_11_404_end_points_for_fields.k              0 0 1 0 0 1 0 0 1 0 0 1 0...   0 0 1 0 0 1 0 0 1 0 0 1 0...                                                     
+✅ PASS   idioms_11_405_start_points_for_fields.k            1 0 0 1 0 0 1 0 0 1 0 0 1...   1 0 0 1 0 0 1 0 0 1 0 0 1...                                                     
+❌ FAIL   idioms_11_415_lengths_of_one_infixes.k             1 2 2 2 2 2 2 1 1 2 2 2 1...   3 4 1                                                                            
+❌ FAIL   idioms_11_417_end_points_equal_infixes.k                                          1 0 1 1 0 0 1 1 1 0 1                                                            
+✅ PASS   idioms_11_418_start_points_equal_infixes.k         1 1 0 1 1 0 0 1 1 1 0          1 1 0 1 1 0 0 1 1 1 0                                                            
+❌ FAIL   idioms_11_423_lengths_from_start_indicator.k       1 0 1 0 0 1 0 0 0 1 0          2 3 4 2                                                                          
+✅ PASS   idioms_11_426_compress_multiple_infixes.k          "bcbceekl"                     "bcbceekl"                                                                       
+✅ PASS   idioms_11_491_or_reduce_infixes.k                  0 1 1                          0 1 1                                                                            
+✅ PASS   idioms_11_492_and_reduce_infixes.k                 0 1 0                          0 1 0                                                                            
+✅ PASS   idioms_11_5_sort_subvectors.k                      10 20 30 50 5 40 60            10 20 30 50 5 40 60                                                              
+✅ PASS   idioms_11_529_markers_at_y.k                       0 0 0 1 0 0 0 1 0 1 0 0 0 0    0 0 0 1 0 0 0 1 0 1 0 0 0 0                                                      
+❌ FAIL   idioms_11_539_zeros_at_x.k                                                        1 1 0 0 0 1 1 1 0 1                                                              
+✅ PASS   idioms_11_540_markers_at_y_indices.k               0 1 0 1 0 0 0 1 0 0            0 1 0 1 0 0 0 1 0 0                                                              
+✅ PASS   idioms_11_5b_indices_from_lengths.k                0 4                            0 4                                                                              
+✅ PASS   idioms_11_6_subvector_minima.k                     3 2 6 4 4                      3 2 6 4 4                                                                        
+❌ FAIL   idioms_11_7_subvector_grade_up.k                   14 12 18 16 13 15 11 17        1 0 2 4 5 3 6 7                                                                  
+❌ FAIL   idioms_12_195_upper_triangular.k                                                  (1 1 1 1
+ 0 1 1 1
+ 0 0 1 ...                                                     
+❌ FAIL   idioms_12_196_lower_triangular.k                                                  (1 0 0 0
+ 1 1 0 0
+ 1 1 1 ...                                                     
+❌ FAIL   idioms_12_197_identity_matrix.k                    {(!x)=\:!x}                    (1 0 0 0
+ 0 1 0 0
+ 0 0 1 ...                                                     
+❌ FAIL   idioms_12_240_matrix_product.k                     (22 28;49 64)                  (22 28
+ 49 64)                                                                   
+❌ FAIL   idioms_12_313_two_by_two_determinant.k             {-/x[0]*|x[1]}                 1                                                                                
+❌ FAIL   idioms_12_375_insert_row.k                         (1 2 3;4 5 6;7 8 9;10 11 12)   (1 2 3
+ 4 5 6
+ 7 8 9
+ 13 ...                                                     
+❌ FAIL   idioms_12_376_append_row.k                         (1 2 3;4 5 6;7 8 9;10 11 ...   (1 2 3
+ 4 5 6
+ 7 8 9
+ 10 ...                                                     
+✅ PASS   idioms_12_410_num_cols.k                           7                              7                                                                                
+❌ FAIL   idioms_12_429_matrix_with_diagonal.k               (5 9 6 7 2 0 0 0 0 0;5 9 ...   (5 0 0 0 0
+ 0 9 0 0 0
+ 0 ...                                                     
+❌ FAIL   idioms_12_50_connectivity_list.k                   (0 0 1 1;0 2 0 2)              (0 0 1 1
+ 0 2 0 2)                                                               
+❌ FAIL   idioms_12_525_main_diagonal.k                      ((1 2 3 4;1 2 3 4);(5 6 7...   1 6 11                                                                           
+✅ PASS   idioms_12_528_cross_product.k                      4 28 46 -27 -41 39 45 3 -...   4 28 46 -27 -41 39 45 3 -...                                                     
+❌ FAIL   idioms_12_547_is_vector.k                          0                              1                                                                                
+❌ FAIL   idioms_12_555_all_axes.k                           0 1 2                          0 1 2 3                                                                          
+❌ FAIL   idioms_12_583_array_and_negative.k                 (1 -1;-3 3;5 -5)               (1 -1
+ -3 3
+ 5 -5)                                                               
+❌ FAIL   idioms_12_588_two_row_matrix.k                     ("abcd";"efgh")                ("abcd"
+ "efgh")                                                                 
+✅ PASS   idioms_12_601_num_rows.k                           17                             17                                                                               
+✅ PASS   idioms_12_612_rank_of_array.k                      2                              2                                                                                
+❌ FAIL   idioms_13_174_move_first_quadrant.k                0 0 0                          (0 5 3
+ 0 1 4
+ 1 2 0)                                                            
+❌ FAIL   idioms_13_464_framing_matrix.k                     ("-|abcd|-";"-|efgh|-";"-...   ("------"
+ "|abcd|"
+ "|ef...                                                     
+❌ FAIL   idioms_13_572_division_by_zero.k                   5 0 0                          5 0 -0.0                                                                         
+❌ FAIL   idioms_13_605_plotting_chars.k                                                    ("***    "
+ "****** "
+ "*...                                                     
+✅ PASS   idioms_14_101_sum_numbers_matrix.k                 10                             10                                                                               
+❌ FAIL   idioms_14_111_count_format.k                       6                              6
+2
+5                                                                            
+❌ FAIL   idioms_14_456_number_digits.k                      0 13 523 16008                 2 14 524 16009                                                                   
+✅ PASS   idioms_14_95_numeric_from_alphanumeric.k           123 438                        123 438                                                                          
+❌ FAIL   idioms_14_99_numeric_vector_rows.k                 (3 5;4 7)                      (3 5
+ 4 7)                                                                       
+❌ FAIL   idioms_15_342_arabic_from_roman.k                  {+/_ a*-1^a<1!a:0,1000500...   1909                                                                             
+❌ FAIL   idioms_15_46_transposed_formatted_integers.k       (,"1";,"2";,"3";,"4";,"5")     ,"12345"                       Compact representation                            
+✅ PASS   idioms_15_49_hex_from_decimal.k                    "ff"                           "ff"                                                                             
+✅ PASS   idioms_15_52_truth_table.k                         (0 0 0 0 1 1 1 1;0 0 1 1 ...   (0 0 0 0 1 1 1 1;0 0 1 1 ...   Compact representation                            
+✅ PASS   idioms_15_53_decimal_digits.k                      1 2 3 4                        1 2 3 4                                                                          
+✅ PASS   idioms_15_54_represent_in_base.k                   1 4 4                          1 4 4                                                                            
+❌ FAIL   idioms_15_56_hex_from_decimal_chars.k                                             "ff"                                                                             
+✅ PASS   idioms_15_63_represent_mixed_radix.k               0 1 984                        0 1 984                                                                          
+❌ FAIL   idioms_15_66_selection_encoded_list.k              (1 0;0 1)                      ("blue"
+ "green")                                                                
+❌ FAIL   idioms_15_75_decimal_from_hex.k                                                   255                                                                              
+✅ PASS   idioms_16_463_is_leap_year.k                       1                              1                                                                                
+✅ PASS   idioms_16_57_vector_from_date.k                    98 12 31                       98 12 31                                                                         
+❌ FAIL   idioms_16_64_time_as_string.k                                                     "13:37:21"                                                                       
+❌ FAIL   idioms_16_65_date_as_string.k                      ("98";"12";"31")               "98/12/31"                                                                       
+✅ PASS   idioms_16_74_days_in_month.k                       29                             29                                                                               
+❌ FAIL   idioms_17_457_is_integral.k                        {x=_ x}                        1                                                                                
+✅ PASS   idioms_17_462_round_nearest_int.k                  4                              4                                                                                
+✅ PASS   idioms_17_470_divisible_by_y.k                     3 6 9                          3 6 9                                                                            
+✅ PASS   idioms_17_62_fractional_part.k                     0.7                            0.7                                                                              
 ✅ PASS   if_bracket_test.k                                                                                                                                                  
 ✅ PASS   if_simple_test.k                                                                                                                                                   
 ✅ PASS   if_true.k                                                                                                                                                          
@@ -446,9 +681,9 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   in.k                                               1                              1                                                                                
 ✅ PASS   integer_types_int.k                                42                             42                                                                               
 ✅ PASS   integer_types_long.k                               123456789j                     123456789j                                                                       
-❌ FAIL   io_append_basic.k                                                                 10                                                                               
+❌ FAIL   io_append_basic.k                                                                 15                                                                               
 💥 ERROR io_append_multiple.k                                                                                             k.exe error only                                  
-❌ FAIL   io_append_simple.k                                                                12                                                                               
+❌ FAIL   io_append_simple.k                                                                18                                                                               
 ✅ PASS   io_monadic_1_char_vector_index.k                   "h"                            "h"                                                                              
 ✅ PASS   io_monadic_1_char_vector_last_index.k              "d"                            "d"                                                                              
 ✅ PASS   io_monadic_1_char_vector.k                         "hello world"                  "hello world"                                                                    
@@ -490,7 +725,7 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   k_tree_retrieval_relative.k                        42                             42                             Compact representation                            
 ✅ PASS   k_tree_retrieve_absolute_foo.k                     42                             42                             Compact representation                            
 ✅ PASS   k_tree_test_bracket_indexing.k                     2                              2                              Compact representation                            
-❌ FAIL   k_tree_verify_root.k                               .()                                                           Compact representation                            
+✅ PASS   k_tree_verify_root.k                                                                                             Compact representation                            
 ✅ PASS   ktree_dot_apply_absolute_name.k                    1 3 5                          1 3 5                                                                            
 ✅ PASS   ktree_dot_apply_absolute_path.k                    1 3 5                          1 3 5                                                                            
 ✅ PASS   ktree_dot_apply_relative_name.k                    1 2 3                          1 2 3                                                                            
@@ -520,6 +755,8 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   list_sv_base10.k                                   1995                           1995                                                                             
 ✅ PASS   list_sv_base2.k                                    9                              9                                                                                
 ✅ PASS   list_sv_mixed.k                                    1995                           1995                                                                             
+❌ FAIL   list_vs_vector_right.k                             (0 0 0 0 1 1 1 1;0 0 1 1 ...   (0 0 0 0 1 1 1 1
+ 0 0 1 1...                                                     
 ✅ PASS   log.k                                              2.302585                       2.302585                                                                         
 ✅ PASS   lrs_adverb_parser_basic.k                          1 2 3 4 5                      1 2 3 4 5                                                                        
 ❌ FAIL   lrs_adverb_parser_each.k                           0.5 1.0 1.5                    0.5 1 1.5                                                                        
@@ -808,6 +1045,7 @@ Status   Test File                                          K3Sharp Output      
 ❌ FAIL   square_bracket_function.k                          2.0                            2                              smart integer division, inverse and exponenti...  
 ✅ PASS   square_bracket_vector_multiple.k                   14 16                          14 16                                                                            
 ✅ PASS   square_bracket_vector_single.k                     14                             14                                                                               
+✅ PASS   statement_amend_index_assign.k                     (1 2 3;104 5 106)              (1 2 3;104 5 106)              Compact representation                            
 ✅ PASS   statement_assignment_basic.k                                                                                                                                       
 ✅ PASS   statement_assignment_inline.k                      43                             43                                                                               
 ✅ PASS   statement_conditional_basic.k                      2                              2                                                                                
@@ -852,7 +1090,8 @@ Status   Test File                                          K3Sharp Output      
 ⚠️  SKIP test_parse_eval_together.k                                                                                       k.exe doesn't support _parse/_eval                
 ⚠️  SKIP test_parse_monadic_star.k                                                                                        k.exe doesn't support _parse/_eval                
 ⚠️  SKIP test_parse_verb.k                                                                                                k.exe doesn't support _parse/_eval                
-❌ FAIL   test_projected_function.k                          `"%"                           %                                                                                
+✅ PASS   test_projected_function_monadic.k                  %:                             %:                                                                               
+✅ PASS   test_projected_function.k                          %                              %                                                                                
 ✅ PASS   test_quoted_symbol_serialization.k                 "\001\000\000\000\006\000...   "\001\000\000\000\006\000...                                                     
 ✅ PASS   test_quoted_symbol.k                               `"."                           `"."                                                                             
 ❌ FAIL   test_semicolon_parsing.k                           1 2 3                                                                                                           
@@ -868,9 +1107,8 @@ Status   Test File                                          K3Sharp Output      
 ✅ PASS   test_specific_attr.k                               .((`format;,`n;);(`name;`...   .((`format;,`n;);(`name;`...   Compact representation                            
 ✅ PASS   test_ss_basic.k                                    ,6                             ,6                                                                               
 ✅ PASS   test_string_basic.k                                "hello"                        "hello"                                                                          
-❌ FAIL   test_string_escape.k                               "hello\r\nworld"               "hello\nworld"                                                                   
-❌ FAIL   test_symbol_escape.k                               `"hello
-world"                 `"hello\nworld"                                                                  
+✅ PASS   test_string_escape.k                               "hello\nworld"                 "hello\nworld"                                                                   
+✅ PASS   test_symbol_escape.k                               `"hello\nworld"                `"hello\nworld"                                                                  
 ✅ PASS   test_symbol_parsing.k                              0#`                            0#`                                                                              
 ✅ PASS   test_symbol_quoted.k                               `hello                         `hello                                                                           
 ✅ PASS   test_symbol_take.k                                 0#`                            0#`                                                                              
@@ -915,11 +1153,10 @@ world"                 `"hello\nworld"
 ✅ PASS   variable_assignment.k                                                                                                                                              
 ✅ PASS   variable_reassignment.k                            7.2 4.5                        7.2 4.5                                                                          
 ✅ PASS   variable_scoping_global_access.k                   150                            150                                                                              
-❌ FAIL   variable_scoping_global_assignment.k               {[y]globalVar::x+y}            30
-30                                                                            
-❌ FAIL   variable_scoping_global_unchanged.k                                               100                                                                              
-❌ FAIL   variable_scoping_local_hiding.k                                                   60                                                                               
-❌ FAIL   variable_scoping_nested_functions.k                {[y]globalVar+x+y}             140                                                                              
+✅ PASS   variable_scoping_global_assignment.k               30                             30                             Multi-line output, K3Sharp captures last resu...  
+✅ PASS   variable_scoping_global_unchanged.k                100                            100                                                                              
+✅ PASS   variable_scoping_local_hiding.k                    60                             60                                                                               
+✅ PASS   variable_scoping_nested_functions.k                140                            140                                                                              
 ✅ PASS   variable_usage.k                                   30                             30                                                                               
 ✅ PASS   vector_addition.k                                  4 6                            4 6                                                                              
 ✅ PASS   vector_division.k                                  0.3333333 0.5                  0.3333333 0.5                                                                    
@@ -1040,10 +1277,16 @@ File: division_vector_zero_by_zero_normal.k
 K3Sharp: (10.0;0;10.0)
 k.exe:   10 0n 10
 
-... and 43 more failed tests
+... and 90 more failed tests
 
 ERROR TESTS DETAILS:
 -------------------
+File: idioms_01_245_randomize_seed.k
+Error: k.exe Error: Failed to execute k.exe: k.exe execution timed out after 10000ms
+
+File: idioms_02_419_pairwise_ratios.k
+Error: Invalid pattern '\5\5.0' at offset 2. Reference to undefined group number 5.
+
 File: io_append_multiple.k
 Error: k.exe Error: Failed to execute k.exe: k.exe execution timed out after 10000ms
 
@@ -1062,6 +1305,10 @@ Error: k.exe Error: Failed to execute k.exe: k.exe execution timed out after 100
 
 K.EXE FAILING TESTS:
 --------------------
+Test: idioms_01_245_randomize_seed.k
+Input: \r _t
+Error: k.exe Error: Failed to execute k.exe: k.exe execution timed out after 10000ms
+
 Test: io_append_multiple.k
 Input: `test_io_append_multiple 0: "hello "; `test_io_append_multiple 5: "world "; `test_io_append_multiple 5: 1 2 3
 Error: k.exe Error: Failed to execute k.exe: k.exe execution timed out after 10000ms

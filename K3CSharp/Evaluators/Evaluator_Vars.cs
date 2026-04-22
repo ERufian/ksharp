@@ -36,10 +36,14 @@ namespace K3CSharp
         
         private K3Value FunctionFunction(K3Value operand)
         {
-            // _f (function) - return an anonymous function that is a copy of the current function
-            // This can be used to call the function recursively.
-            // For now, return the operand as-is since we don't have function introspection
-            return operand;
+            // _f - current function value for self-reference
+            // Inside a function body, _f[args] calls the currently-executing function.
+            if (currentFunctionValue != null)
+            {
+                return currentFunctionValue;
+            }
+            // Outside a function context, return the operand unchanged (no self to reference)
+            return operand ?? new NullValue();
         }
         
         private K3Value SpaceFunction(K3Value operand)

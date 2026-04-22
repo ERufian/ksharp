@@ -223,7 +223,7 @@ namespace K3CSharp
             }
             
             var verb = GetVerb(verbName);
-            var isSystemVar = verb?.Type == VerbType.SystemVariable;
+            var isSystemVar = verb?.Type == VerbType.SystemVariable || verb?.IsSystemVariable == true;
             systemVariableCache[verbName] = isSystemVar;
             return isSystemVar;
         }
@@ -763,20 +763,20 @@ namespace K3CSharp
             // _d(dir) _v(var) _i(index) _t(second) _f(function) _n(null) _s(space)
             // _h(host) _p(port) _P(PID) _w(who) _u(user) _a(address) _k(version) _T(time)
             // _o(os) _c(cores) _r(RAM) _m(mach id) _y(stack) _b(backtrace if enabled)
-            RegisterVerb("_d", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_v", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_i", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_f", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_n", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_s", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_h", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_p", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_P", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_w", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_u", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_a", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_k", VerbType.SystemVariable, new[] { 0 }, null);
-            RegisterVerb("_o", VerbType.SystemVariable, new[] { 0 }, null);
+            RegisterVerb("_d", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_v", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_i", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_f", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_n", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_s", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_h", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_p", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_P", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_w", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_u", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_a", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_k", VerbType.SystemVariable, new[] { 0 }, null, true);
+            RegisterVerb("_o", VerbType.SystemVariable, new[] { 0 }, null, true);
             RegisterVerb("_c", VerbType.SystemVariable, new[] { 0 }, null);
             RegisterVerb("_r", VerbType.SystemVariable, new[] { 0 }, null);
             RegisterVerb("_m", VerbType.SystemVariable, new[] { 0 }, null);

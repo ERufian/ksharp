@@ -611,50 +611,51 @@ namespace K3CSharp.Parsing
             
             // Check for function+adverb patterns BEFORE dyadic parsing
             // These have higher precedence than regular dyadic operations
-            // Pattern: {function}/vector or {function}\vector
-            if (tokens.Count >= 2)
+            // Pattern: {function}/vector or {function}\vector or {function}/ (noun form, no argument)
+            if (tokens.Count >= 2 && tokens[0].Type == TokenType.LEFT_BRACE)
             {
-                var potentialFunction = tokens[0];
-                var potentialAdverb = tokens[1];
-                // Check if first token is a function (LEFT_BRACE) and second is an adverb
-                if (potentialFunction.Type == TokenType.LEFT_BRACE && 
-                    VerbRegistry.IsAdverbToken(potentialAdverb.Type))
+                // Find the matching right brace for the function
+                int braceLevel = 1;
+                int functionEnd = -1;
+                for (int i = 1; i < tokens.Count; i++)
                 {
-                    // Find the matching right brace for the function
-                    int braceLevel = 1;
-                    int functionEnd = -1;
-                    for (int i = 1; i < tokens.Count; i++)
-                    {
-                        if (tokens[i].Type == TokenType.LEFT_BRACE)
-                            braceLevel++;
-                        else if (tokens[i].Type == TokenType.RIGHT_BRACE)
-                            braceLevel--;
-                        
-                        if (braceLevel == 0)
-                        {
-                            functionEnd = i;
-                            break;
-                        }
-                    }
+                    if (tokens[i].Type == TokenType.LEFT_BRACE)
+                        braceLevel++;
+                    else if (tokens[i].Type == TokenType.RIGHT_BRACE)
+                        braceLevel--;
                     
-                    if (functionEnd > 0)
+                    if (braceLevel == 0)
                     {
-                        // Parse the function (from 0 to functionEnd inclusive)
-                        var functionTokens = tokens.GetRange(0, functionEnd + 1);
-                        var functionNode = groupingParser.ParseBrackets(functionTokens);
-                        if (functionNode != null)
+                        functionEnd = i;
+                        break;
+                    }
+                }
+                
+                // Check if token right after the closing brace is an adverb
+                if (functionEnd > 0 && functionEnd + 1 < tokens.Count &&
+                    VerbRegistry.IsAdverbToken(tokens[functionEnd + 1].Type))
+                {
+                    var adverbToken = tokens[functionEnd + 1];
+                    // Parse the function (from 0 to functionEnd inclusive)
+                    var functionTokens = tokens.GetRange(0, functionEnd + 1);
+                    var functionNode = groupingParser.ParseBrackets(functionTokens);
+                    if (functionNode != null)
+                    {
+                        // Parse the remaining tokens after the adverb as the argument
+                        var remainingTokens = tokens.Skip(functionEnd + 2).ToList();
+                        if (remainingTokens.Count > 0)
                         {
-                            // Parse the remaining tokens as the adverb argument
-                            var remainingTokens = tokens.Skip(functionEnd + 1).ToList();
-                            if (remainingTokens.Count > 0)
+                            var argNode = BuildParseTreeFromRight(remainingTokens);
+                            if (argNode != null)
                             {
-                                var argNode = BuildParseTreeFromRight(remainingTokens);
-                                if (argNode != null)
-                                {
-                                    // Create adverb node: ADVERB(adverb, function, argument)
-                                    return CreateAdverbNode(potentialAdverb, functionNode, argNode);
-                                }
+                                // Create adverb node: ADVERB(adverb, function, argument)
+                                return CreateAdverbNode(adverbToken, functionNode, argNode);
                             }
+                        }
+                        else
+                        {
+                            // Noun form: no argument — create 1-child adverb node (e.g. {x'}/ for point-free)
+                            return CreateAdverbNode(adverbToken, functionNode, null);
                         }
                     }
                 }
@@ -769,9 +770,92 @@ namespace K3CSharp.Parsing
             // Handle monadic operations (2 tokens: verb + argument)
             if (tokens.Count == 2)
             {
+                // Special case: IDENTIFIER + ADVERB (noun form, e.g. x' in lambda body)
+                if (tokens[0].Type == TokenType.IDENTIFIER && VerbRegistry.IsAdverbToken(tokens[1].Type))
+                {
+                    var fnNode = CreateNodeFromToken(tokens[0]);
+                    if (fnNode != null)
+                        return CreateAdverbNode(tokens[1], fnNode, null);
+                }
+                // Special case: VERB + COLON (monadic projection disambiguation, e.g. ,:)
+                if (IsVerbToken(tokens[0].Type) && tokens[1].Type == TokenType.COLON)
+                {
+                    var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
+                    var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(tokens[0].Type);
+                    projectedNode.Value = new SymbolValue(operatorSymbol);
+                    projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
+                    return projectedNode;
+                }
                 return monadicParser.ParseMonadicOperator(tokens);
             }
             
+            // Handle identifier[bracketArgs] followed by additional tokens: e.g. d[x;y#,:]z
+            // Also handles function tokens like _f[expression] for recursion
+            // This is a bracket function call whose result is then applied to the remaining tokens.
+            // Detect: first token is IDENTIFIER or FUNCTION, second is '[', there's a matching ']', and more tokens follow.
+            if (tokens.Count >= 4 &&
+                (firstTok.Type == TokenType.IDENTIFIER || firstTok.Type == TokenType.FUNCTION) &&
+                tokens[1].Type == TokenType.LEFT_BRACKET)
+            {
+                int closingBracket = FindMatchingBracket(tokens, 1);
+                if (closingBracket > 0 && closingBracket < tokens.Count - 1)
+                {
+                    // Parse the bracket call: identifier[bracketContent]
+                    var bracketContent = tokens.GetRange(2, closingBracket - 2);
+                    var argGroups = SplitBracketArguments(bracketContent, 2);
+                    var argNodes = new List<ASTNode>();
+                    foreach (var ag in argGroups)
+                    {
+                        if (ag.Count == 0)
+                            argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                        else
+                        {
+                            var an = BuildParseTree ? BuildParseTreeFromRight(ag) : EvaluateFromRight(ag);
+                            if (an != null) argNodes.Add(an);
+                        }
+                    }
+                    var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                    funcCallNode.Children.Add(ASTNode.MakeVariable(firstTok.Lexeme));
+                    funcCallNode.Children.AddRange(argNodes);
+
+                    // Parse the remaining tokens as the argument to the result
+                    var afterBracket = tokens.GetRange(closingBracket + 1, tokens.Count - closingBracket - 1);
+                    ASTNode? afterNode = afterBracket.Count == 1
+                        ? CreateNodeFromToken(afterBracket[0])
+                        : (BuildParseTree ? BuildParseTreeFromRight(afterBracket) : EvaluateFromRight(afterBracket));
+                    if (afterNode != null)
+                    {
+                        // Apply the bracket-call result to the remaining argument
+                        var applyNode = new ASTNode(ASTNodeType.FunctionCall);
+                        applyNode.Children.Add(funcCallNode);
+                        applyNode.Children.Add(afterNode);
+                        return applyNode;
+                    }
+                    return funcCallNode;
+                }
+                else if (closingBracket > 0 && closingBracket == tokens.Count - 1)
+                {
+                    // Bracket is at end of expression - handle as function call
+                    var bracketContent = tokens.GetRange(2, closingBracket - 2);
+                    var argGroups = SplitBracketArguments(bracketContent, int.MaxValue);
+                    var argNodes = new List<ASTNode>();
+                    foreach (var ag in argGroups)
+                    {
+                        if (ag.Count == 0)
+                            argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                        else
+                        {
+                            var an = BuildParseTree ? BuildParseTreeFromRight(ag) : EvaluateFromRight(ag);
+                            argNodes.Add(an ?? ASTNode.MakeLiteral(new NullValue()));
+                        }
+                    }
+                    var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                    funcCallNode.Children.Add(ASTNode.MakeVariable(firstTok.Lexeme));
+                    funcCallNode.Children.AddRange(argNodes);
+                    return funcCallNode;
+                }
+            }
+
             // Try function call parsing only if dyadic/monadic parsing didn't handle it
             // This handles explicit function calls like f[x] or lambda applications
             if (LRSFunctionParser.CouldBeFunction(firstTok.Type))
@@ -985,7 +1069,33 @@ namespace K3CSharp.Parsing
             {
                 return CreateNodeFromToken(expressionTokens[0]);
             }
-            
+
+            // 2-token special cases (mirrors BuildParseTreeFromRight)
+            if (expressionTokens.Count == 2)
+            {
+                // VERB + COLON: monadic projection e.g. ,:  returns ProjectedFunction
+                if (IsVerbToken(expressionTokens[0].Type) && expressionTokens[1].Type == TokenType.COLON)
+                {
+                    var projNode = new ASTNode(ASTNodeType.ProjectedFunction);
+                    projNode.Value = new SymbolValue(expressionTokens[0].Lexeme);
+                    projNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
+                    return projNode;
+                }
+                // IDENTIFIER + ADVERB: noun-form adverb e.g. x'
+                if (expressionTokens[0].Type == TokenType.IDENTIFIER && VerbRegistry.IsAdverbToken(expressionTokens[1].Type))
+                {
+                    var fnNode = CreateNodeFromToken(expressionTokens[0]);
+                    if (fnNode != null)
+                        return CreateAdverbNode(expressionTokens[1], fnNode, null);
+                }
+                // COLON + IDENTIFIER: disambiguation marker followed by argument
+                // e.g., in ,:z the right operand is :z, where : is monadic disambiguation
+                if (expressionTokens[0].Type == TokenType.COLON && expressionTokens[1].Type == TokenType.IDENTIFIER)
+                {
+                    return CreateNodeFromToken(expressionTokens[1]);
+                }
+            }
+
             // Check for function+adverb patterns FIRST
             // Pattern: {function}/vector or {function}\vector
             if (expressionTokens.Count >= 2 && expressionTokens[0].Type == TokenType.LEFT_BRACE)
@@ -1033,7 +1143,8 @@ namespace K3CSharp.Parsing
                             }
                             else
                             {
-                                // No arguments - nominalized adverb
+                                // Noun form: no argument — create 1-child adverb node for point-free projection
+                                return CreateAdverbNode(potentialAdverb, functionNode, null);
                             }
                         }
                         else
@@ -1046,6 +1157,7 @@ namespace K3CSharp.Parsing
             
             // Check for function variable + adverb patterns
             // Pattern: f/vector or f\vector where f is a function variable
+            // Also: f' or f/ with no argument (noun form — e.g. x' in lambda body)
             if (expressionTokens.Count >= 2 && expressionTokens[0].Type == TokenType.IDENTIFIER)
             {
                 var potentialAdverb = expressionTokens[1];
@@ -1067,6 +1179,12 @@ namespace K3CSharp.Parsing
                                 var adverbNode = CreateAdverbNode(potentialAdverb, functionNode, argNode);
                                 return adverbNode;
                             }
+                        }
+                        else
+                        {
+                            // Noun form: no argument after adverb (e.g. x' in lambda body)
+                            // Create a 1-child adverb node representing the adverb applied to identifier
+                            return CreateAdverbNode(potentialAdverb, functionNode, null);
                         }
                     }
                 }
@@ -1258,14 +1376,66 @@ namespace K3CSharp.Parsing
                 return adverbResult;
             }
             
-            // Check for bracket indexing pattern: identifier[expression] or identifier[a;b;...]
-            // Only fires when the bracket group spans to the end of the token list.
+            // Handle identifier[bracketArgs] followed by additional tokens: e.g. d[x;y#,:]z
+            // This is a bracket function call whose result is then applied to the remaining tokens.
+            // SKIP if the remaining tokens start with a dyadic operator (e.g., sum[3;4]*2 should be multiplication, not function call)
             if (expressionTokens.Count >= 4 &&
                 expressionTokens[0].Type == TokenType.IDENTIFIER &&
                 expressionTokens[1].Type == TokenType.LEFT_BRACKET)
             {
+                var closingBracketEFR = FindMatchingBracket(expressionTokens, 1);
+                if (closingBracketEFR > 0 && closingBracketEFR < expressionTokens.Count - 1)
+                {
+                    // Check if tokens after bracket start with a dyadic operator
+                    var afterBracketTokens = expressionTokens.GetRange(closingBracketEFR + 1, expressionTokens.Count - closingBracketEFR - 1);
+                    if (afterBracketTokens.Count > 0 && OperatorDetector.SupportsDyadic(afterBracketTokens[0].Type))
+                    {
+                        // Tokens after bracket start with a dyadic operator - fall through to dyadic parsing
+                        // This ensures sum[3;4]*2 is parsed as multiplication, not as function call with *2 as argument
+                    }
+                    else
+                    {
+                        var bracketContentEFR = expressionTokens.GetRange(2, closingBracketEFR - 2);
+                    var argGroupsEFR = SplitBracketArguments(bracketContentEFR, 2);
+                    var argNodesEFR = new List<ASTNode>();
+                    foreach (var ag in argGroupsEFR)
+                    {
+                        if (ag.Count == 0)
+                            argNodesEFR.Add(ASTNode.MakeLiteral(new NullValue()));
+                        else
+                        {
+                            var an = BuildParseTreeFromRight(ag);
+                            argNodesEFR.Add(an ?? ASTNode.MakeLiteral(new NullValue()));
+                        }
+                    }
+                    var funcCallNodeEFR = new ASTNode(ASTNodeType.FunctionCall);
+                    funcCallNodeEFR.Children.Add(ASTNode.MakeVariable(expressionTokens[0].Lexeme));
+                    funcCallNodeEFR.Children.AddRange(argNodesEFR);
+
+                    var afterBracketEFR = expressionTokens.GetRange(closingBracketEFR + 1, expressionTokens.Count - closingBracketEFR - 1);
+                    ASTNode? afterNodeEFR = afterBracketEFR.Count == 1
+                        ? CreateNodeFromToken(afterBracketEFR[0])
+                        : BuildParseTreeFromRight(afterBracketEFR);
+                    if (afterNodeEFR != null)
+                    {
+                        var applyNodeEFR = new ASTNode(ASTNodeType.FunctionCall);
+                        applyNodeEFR.Children.Add(funcCallNodeEFR);
+                        applyNodeEFR.Children.Add(afterNodeEFR);
+                        return applyNodeEFR;
+                    }
+                    return funcCallNodeEFR;
+                    } // Close else block for dyadic operator check
+                }
+            }
+
+            // Check for bracket indexing pattern: identifier[expression] or identifier[a;b;...]
+            // Also handles function tokens like _f[expression] for recursion
+            // Only fires when the bracket group spans to the end of the token list.
+            if (expressionTokens.Count >= 4 &&
+                (expressionTokens[0].Type == TokenType.IDENTIFIER || expressionTokens[0].Type == TokenType.FUNCTION) &&
+                expressionTokens[1].Type == TokenType.LEFT_BRACKET)
+            {
                 var bracketEnd = FindMatchingBracket(expressionTokens, 1);
-                
                 if (bracketEnd != -1 && bracketEnd == expressionTokens.Count - 1)
                 {
                     var identifier = expressionTokens[0];
@@ -2167,7 +2337,7 @@ namespace K3CSharp.Parsing
             {
                 // Dyadic verb: 3-child structure (verb, left, right)
                 // Add dummy left argument (0) for now
-                adverbNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(0)));
+                adverbNode.Children.Add(ASTNode.MakeLiteral(new NullValue()));
                 
                 if (argNode != null)
                 {
@@ -2300,7 +2470,7 @@ namespace K3CSharp.Parsing
             var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
             adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
             adverbNode.Children.Add(verbNode);
-            adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new IntegerValue(0))); // left argument (dummy)
+            adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left argument (dummy)
             
             // Add all arguments as the right argument (as a vector)
             if (arguments.Count > 0)
@@ -2322,7 +2492,7 @@ namespace K3CSharp.Parsing
             else
             {
                 // No arguments, add dummy
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new IntegerValue(0)));
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue()));
             }
             
             return adverbNode;
@@ -2377,7 +2547,7 @@ namespace K3CSharp.Parsing
         /// <param name="functionNode">The function node (verb)</param>
         /// <param name="argumentNode">The argument node</param>
         /// <returns>AST node representing the adverb operation</returns>
-        private ASTNode CreateAdverbNode(Token adverbToken, ASTNode functionNode, ASTNode argumentNode)
+        private ASTNode CreateAdverbNode(Token adverbToken, ASTNode functionNode, ASTNode? argumentNode)
         {
             // Get adverb symbol for token type (same as LRSAdverbParser)
             string adverbSymbol = GetAdverbSymbol(adverbToken.Type);
@@ -2386,7 +2556,8 @@ namespace K3CSharp.Parsing
             var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
             adverbNode.Value = new SymbolValue(adverbSymbol);
             adverbNode.Children.Add(functionNode);
-            adverbNode.Children.Add(argumentNode);
+            if (argumentNode != null)
+                adverbNode.Children.Add(argumentNode);
             
             return adverbNode;
         }

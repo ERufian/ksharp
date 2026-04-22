@@ -607,18 +607,31 @@ namespace K3CSharp.Parsing
         /// <returns>Function body text only</returns>
         private string ExtractBodyFromOriginalSource(string originalSourceText)
         {
-            // Find the closing bracket ']' of the parameter list
-            var bracketIndex = originalSourceText.IndexOf(']');
-            if (bracketIndex >= 0)
-            {
-                // Return everything after the closing bracket
-                return originalSourceText.Substring(bracketIndex + 1).Trim();
-            }
-            
-            // If no parameter list found, strip any leading '{' and return the body
+            // Strip any leading '{' first
             var body = originalSourceText.Trim();
             if (body.StartsWith("{"))
                 body = body.Substring(1).Trim();
+            
+            // Strip parameter list '[...]' only if it appears at the very start of the body
+            // (i.e., the function has explicit parameters like {[x;y] x+y})
+            if (body.TrimStart().StartsWith("["))
+            {
+                // Find the matching closing bracket at depth 0
+                int depth = 0;
+                for (int i = 0; i < body.Length; i++)
+                {
+                    if (body[i] == '[') depth++;
+                    else if (body[i] == ']')
+                    {
+                        depth--;
+                        if (depth == 0)
+                        {
+                            return body.Substring(i + 1).Trim();
+                        }
+                    }
+                }
+            }
+            
             return body;
         }
         

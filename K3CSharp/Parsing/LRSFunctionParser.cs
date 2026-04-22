@@ -282,7 +282,8 @@ namespace K3CSharp.Parsing
             var verbName = VerbRegistry.TokenTypeToVerbName(tokenType);
             var verb = VerbRegistry.GetVerb(verbName);
             
-            // System functions are always treated as functions, even if monadic
+            // System functions and system variables are always treated as functions
+            // System variables like _f need to be recognized as functions for recursion
             if (verb != null && (verb.Type == VerbType.SystemFunction || verb.Type == VerbType.SystemVariable))
                 return true;
             

@@ -79,12 +79,12 @@ namespace K3CSharp
                     }
                 }
                 
-                // Create the proper adverb structure: ADVERB(verb, 0, arguments)
-                // Use 0 as initialization to signal "consume first element" for monadic derived verbs
+                // Create the proper adverb structure: ADVERB(verb, ::, arguments)
+                // Use :: as initialization to signal "consume first element" for monadic derived verbs
                 var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
                 adverbNode.Value = new SymbolValue(adverbType.ToString().Replace("TokenType.", ""));
                 if (verb != null) adverbNode.Children.Add(verb);
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new IntegerValue(0))); // Use 0 for monadic derived verbs
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // Use :: for monadic derived verbs
                 if (arguments != null) adverbNode.Children.Add(arguments);
                 
                 // Recursively check for more adverbs (derived verbs)
@@ -126,11 +126,11 @@ namespace K3CSharp
                     }
                 }
                 
-                // Create the proper adverb structure: ADVERB(derivedVerb, 0, arguments)
+                // Create the proper adverb structure: ADVERB(derivedVerb, ::, arguments)
                 var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
                 adverbNode.Value = new SymbolValue(adverbType.ToString().Replace("TokenType.", ""));
                 adverbNode.Children.Add(derivedVerb);
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new IntegerValue(0))); // Use 0 for monadic derived verbs
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // Use :: for monadic derived verbs
                 if (arguments != null) adverbNode.Children.Add(arguments);
                 
                 // Recursively check for more adverbs

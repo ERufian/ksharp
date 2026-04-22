@@ -2686,6 +2686,10 @@ namespace K3CSharp.Tests
                 ("idioms_17_62_fractional_part.k", "0.7"),
                 ("idioms_17_462_round_nearest_int.k", "4"),
                 ("idioms_17_470_divisible_by_y.k", "3 6 9"),
+
+                // Self-referent lambda _f tests
+                ("test_f_rec.k", "120"),
+                ("test_f_var.k", "6"),
             };
 
             // Filter tests if a pattern was provided

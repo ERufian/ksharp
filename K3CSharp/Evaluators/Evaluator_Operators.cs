@@ -742,6 +742,15 @@ namespace K3CSharp
         {
             if (count is IntegerValue intCount)
             {
+                // n#f where f is a function/projection: create deferred projection (n#,:) style
+                // When applied to x, computes n#(f x)
+                if (data is FunctionValue || data is AdverbProjectedFunctionValue || data is ProjectedFunctionValue)
+                {
+                    var capturedCount = intCount;
+                    var capturedFunc = data;
+                    return new DeferredTakeProjection(capturedCount, capturedFunc, this);
+                }
+
                 if (data is VectorValue dataVec)
                 {
                     // Take from vector

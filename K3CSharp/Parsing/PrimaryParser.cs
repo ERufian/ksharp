@@ -388,7 +388,6 @@ namespace K3CSharp
             {
                 tokens.RemoveAt(tokens.Count - 1);
             }
-            
             // Reset position for LRS processing
             context.Current = startPos;
             

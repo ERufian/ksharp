@@ -52,7 +52,7 @@ namespace K3CSharp.Parsing
         {
             var verbName = VerbRegistry.TokenTypeToVerbName(tokenType);
             var verb = VerbRegistry.GetVerb(verbName);
-            return verb?.Type == VerbType.Function || verb?.Type == VerbType.SystemFunction;
+            return verb?.Type == VerbType.Function || verb?.Type == VerbType.SystemFunction || verb?.Type == VerbType.SystemVariable;
         }
         
         /// <summary>

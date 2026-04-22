@@ -43,6 +43,8 @@ namespace K3CSharp
         public Evaluator(Evaluator parent)
         {
             parentEvaluator = parent;
+            // Inherit currentFunctionValue from parent for _f recursion support
+            currentFunctionValue = parent?.currentFunctionValue;
             adverbAwareEvaluator = new AdverbAwareEvaluator(this);
         }
 
@@ -97,6 +99,9 @@ namespace K3CSharp
         /// </summary>
         private K3Value EvaluateSystemVariable(string name)
         {
+            var debugPath = @"T:\_src\github.com\ERufian\ksharp\K3CSharp.Tests\kdebug_f.txt";
+            try { File.AppendAllText(debugPath, $"EvaluateSystemVariable called for {name}{Environment.NewLine}"); } catch { }
+            
             return name switch
             {
                 "_d" => DirectoryFunction(new NullValue()),
@@ -136,6 +141,12 @@ namespace K3CSharp
                     var name = node.Value is SymbolValue symbol ? symbol.Value : node.Value?.ToString() ?? "";
                     // Strip leading backtick if present (symbol literals like `_d)
                     var cleanName = name.StartsWith("`") ? name.Substring(1) : name;
+                    // Special handling for _f (function self-reference)
+                    // Must check before general system variable handling
+                    if (cleanName == "_f")
+                    {
+                        return FunctionFunction(new NullValue());
+                    }
                     // Check if this is a system variable (like _d, _n, _t, etc.)
                     if (VerbRegistry.IsSystemVariable(cleanName))
                     {
@@ -507,6 +518,13 @@ namespace K3CSharp
                 return new SymbolValue(variableName);
             }
             
+            // Special handling for _f (function self-reference)
+            // _f should return the current function value for recursion, not be evaluated as a verb
+            if (variableName == "_f")
+            {
+                return FunctionFunction(new NullValue());
+            }
+            
             // Check if this is a niladic system variable (e.g., _t, _d, _T)
             if (VerbRegistry.IsSystemVariable(variableName))
             {
@@ -677,9 +695,9 @@ namespace K3CSharp
                 // For over/scan: left argument is the initialization value (per spec)
                 case "over": return Over(left, left, right);
                 case "scan": return Scan(left, left, right);
-                case "each": return HandleAdverbTick(left, new IntegerValue(0), right);
-                case "/:": return EachRight(left, new IntegerValue(0), right);
-                case "\\:": return EachLeft(left, new IntegerValue(0), right);
+                case "each": return HandleAdverbTick(left, new NullValue(), right);
+                case "/:": return EachRight(left, new NullValue(), right);
+                case "\\:": return EachLeft(left, new NullValue(), right);
                 case "TYPE": return IoVerbDyadic(left, right, 4);
                 case "STRING_REPRESENTATION": return IoVerbMonadic(right, 5);
                 case "IO_VERB_0": return IoVerbDyadic(left, right, 0);
@@ -709,6 +727,36 @@ namespace K3CSharp
         private K3Value EvaluateDyadicOp(ASTNode node)
         {
             if (node.Value is not SymbolValue op) throw new Exception("Dyadic operator must have a symbol value");
+
+            // Handle nominalized adverbs with one child BEFORE the monadic operator switch.
+            // This covers patterns like DyadicOp("/", [FunctionNode]) produced by {x'}/ noun form.
+            if (node.Children.Count == 1 &&
+                (op.Value == "each-right" || op.Value == "each-left" ||
+                 op.Value == "each-prior" || op.Value == "each" ||
+                 op.Value == "over" || op.Value == "scan" ||
+                 op.Value == "/" || op.Value == "\\" || op.Value == "'" ||
+                 op.Value == "/:" || op.Value == "\\:" || op.Value == "':"))
+            {
+                var innerVerbValue1 = Evaluate(node.Children[0]);
+                string adverbName1 = op.Value switch
+                {
+                    "/" => "over", "\\" => "scan", "'" => "each",
+                    "/:" => "each-right", "\\:" => "each-left", "':" => "each-prior",
+                    var s => s
+                };
+                string innerVerbStr1 = innerVerbValue1 is SymbolValue sv1 ? sv1.Value : innerVerbValue1?.ToString() ?? "";
+                string encoded1 = adverbName1 switch
+                {
+                    "each-right" => $"EACH_RIGHT:{innerVerbStr1}",
+                    "each-left"  => $"EACH_LEFT:{innerVerbStr1}",
+                    "each-prior" => $"EACH_PRIOR:{innerVerbStr1}",
+                    "each"       => $"EACH:{innerVerbStr1}",
+                    "over"       => $"OVER:{innerVerbStr1}",
+                    "scan"       => $"SCAN:{innerVerbStr1}",
+                    _            => $"{adverbName1}:{innerVerbStr1}"
+                };
+                return new FunctionValue(encoded1, new List<string> { "x", "y" });
+            }
 
             // Handle monadic operators (which are implemented as dyadic ops with one child)
             if (node.Children.Count == 1)
@@ -822,12 +870,12 @@ namespace K3CSharp
                     "_not" => MathNot(operand),
                     "MIN" => operand, // Identity operation for monadic min
                     "MAX" => operand, // Identity operation for monadic max
-                    "over" => ApplyAdverbSlash(operand, new IntegerValue(0), new IntegerValue(0)),
-                    "scan" => ApplyAdverbBackslash(operand, new IntegerValue(0), new IntegerValue(0)),
-                    "each" => ApplyAdverbTick(operand, new IntegerValue(0), new IntegerValue(0)),
-                    "each-right" => ApplyAdverbSlashColon(operand, new IntegerValue(0), new IntegerValue(0)),
-                    "each-left" => ApplyAdverbBackslashColon(operand, new IntegerValue(0), new IntegerValue(0)),
-                    "each-prior" => ApplyAdverbTickColon(operand, new IntegerValue(0), new IntegerValue(0)),
+                    "over" => ApplyAdverbSlash(operand, new NullValue(), new NullValue()),
+                    "scan" => ApplyAdverbBackslash(operand, new NullValue(), new NullValue()),
+                    "each" => ApplyAdverbTick(operand, new NullValue(), new NullValue()),
+                    "each-right" => ApplyAdverbSlashColon(operand, new NullValue(), new NullValue()),
+                    "each-left" => ApplyAdverbBackslashColon(operand, new NullValue(), new NullValue()),
+                    "each-prior" => ApplyAdverbTickColon(operand, new NullValue(), new NullValue()),
                     "_parse" => Verbs.ParseVerbHandler.Parse(new[] { operand }),
                     "_eval" => EvaluateEvalVerb(operand),
                     "GETHINT" => GetHintFunction(new List<K3Value> { operand }),
@@ -851,7 +899,7 @@ namespace K3CSharp
                 var argsVector = Evaluate(node.Children[1]);
                 
                 // Handle the ' adverb (each) - pass the verb and all arguments
-                return HandleAdverbTick(verbValue, new IntegerValue(0), argsVector);
+                return HandleAdverbTick(verbValue, new NullValue(), argsVector);
             }
 
             // Special handling for / adverb (over) with 2 children: {func}/args
@@ -866,7 +914,7 @@ namespace K3CSharp
                 if (verbValue == null) throw new Exception("Adverb verb cannot be null");
                 
                 // Apply the over adverb
-                return ApplyAdverbSlash(verbValue, new IntegerValue(0), argument);
+                return ApplyAdverbSlash(verbValue, new NullValue(), argument);
             }
 
             // Special handling for \ adverb (scan) with 2 children: {func}\args
@@ -881,9 +929,30 @@ namespace K3CSharp
                 if (verbValue == null) throw new Exception("Adverb verb cannot be null");
                 
                 // Apply the scan adverb
-                return ApplyAdverbBackslash(verbValue, new IntegerValue(0), argument);
+                return ApplyAdverbBackslash(verbValue, new NullValue(), argument);
             }
             
+            // Special handling for 'each' (') with 3 children: DyadicOp("each", [verb, leftArg, rightArg])
+            // This is the dyadic each form: x f' y — broadcast scalar or pair elements
+            if (op.Value.ToString() == "each" && node.Children.Count == 3)
+            {
+                var verbNode3 = node.Children[0];
+                var leftArg3 = Evaluate(node.Children[1]);
+                var rightArg3 = Evaluate(node.Children[2]);
+                
+                // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
+                // route to dyadic chained-adverb handler.
+                bool isModifiedVerb3 = verbNode3.Type == ASTNodeType.DyadicOp &&
+                    verbNode3.Children.Count == 1 && verbNode3.Value is SymbolValue;
+                if (isModifiedVerb3)
+                {
+                    return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNode3, leftArg3, rightArg3);
+                }
+                
+                var verbValue3 = Evaluate(verbNode3);
+                return HandleAdverbTick(verbValue3, leftArg3, rightArg3);
+            }
+
             // Special handling for two-glyph adverbs with multiple children (adverb evaluation)
             if ((op.Value.ToString() == "each-right" || 
                  op.Value.ToString() == "each-left" || 
@@ -891,9 +960,21 @@ namespace K3CSharp
             {
                 // This is an adverb operation: ADVERB(verb, 0, args)
                 // Handle this using the adverb evaluation pipeline
+                var verbNodeTw = node.Children[0];
+                
+                // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
+                // route to dyadic chained-adverb handler.
+                bool isModifiedVerbTw = verbNodeTw.Type == ASTNodeType.DyadicOp &&
+                    verbNodeTw.Children.Count == 1 && verbNodeTw.Value is SymbolValue;
+                if (isModifiedVerbTw)
+                {
+                    var leftTw = Evaluate(node.Children[1]);
+                    var rightTw = Evaluate(node.Children[2]);
+                    return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNodeTw, leftTw, rightTw);
+                }
                 
                 // Get the verb (first child)
-                var verbValue = Evaluate(node.Children[0]);
+                var verbValue = Evaluate(verbNodeTw);
                 
                 // Get the dummy left argument (second child)
                 var leftArg = Evaluate(node.Children[1]);
@@ -938,7 +1019,7 @@ namespace K3CSharp
                 
                 var arg2val = Evaluate(node.Children[1]);
                 var verbValue2 = Evaluate(verbNode2);
-                var monadicLeft2 = new IntegerValue(0);
+                var monadicLeft2 = new NullValue();
                 return op.Value.ToString() switch
                 {
                     "over" => ApplyAdverbSlash(verbValue2, monadicLeft2, arg2val),
@@ -1057,9 +1138,9 @@ namespace K3CSharp
                 {
                     // Fallback to legacy evaluation for simple cases
                     // 2-child structure comes from disambiguating colon (verb:' args) = monadic context
-                    // Use 0 as left argument to signal monadic context to adverb handlers
+                    // Use :: as left argument to signal monadic context to adverb handlers
                     var verbValue = Evaluate(verbNode);
-                    var monadicLeft = new IntegerValue(0);
+                    var monadicLeft = new NullValue();
                     return op.Value.ToString() switch
                     {
                         "over" or "/" => ApplyAdverbSlash(verbValue, monadicLeft, argument),
@@ -1080,6 +1161,17 @@ namespace K3CSharp
                 var verbNode = node.Children[0];
                 var leftArg = Evaluate(node.Children[1]);
                 var rightArg = Evaluate(node.Children[2]);
+                
+                // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
+                // only consume the outermost adverb here and leave the inner modified verb intact.
+                // For each element of the iteration, build a temp 3-child node with the inner
+                // modified verb and the elements, then evaluate it recursively.
+                bool isModifiedVerb = verbNode.Type == ASTNodeType.DyadicOp &&
+                    verbNode.Children.Count == 1 && verbNode.Value is SymbolValue;
+                if (isModifiedVerb)
+                {
+                    return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNode, leftArg, rightArg);
+                }
                 
                 // Parse the verb with adverbs
                 var verbWithAdverbs = VerbAdverbParser.ParseVerbWithAdverbs(verbNode);
@@ -1111,15 +1203,23 @@ namespace K3CSharp
             else if (node.Children.Count == 1 &&
                     (op.Value.ToString() == "each-right" || op.Value.ToString() == "each-left" ||
                      op.Value.ToString() == "each-prior" || op.Value.ToString() == "each" ||
-                     op.Value.ToString() == "over" || op.Value.ToString() == "scan"))
+                     op.Value.ToString() == "over" || op.Value.ToString() == "scan" ||
+                     op.Value.ToString() == "/" || op.Value.ToString() == "\\" || op.Value.ToString() == "'" ||
+                     op.Value.ToString() == "/:" || op.Value.ToString() == "\\:" || op.Value.ToString() == "':"))
             {
                 // Nominalized modified verb: adverb node with only the verb child and no arguments.
                 // This occurs when a multi-adverb expression like ,/:\: builds the inner
                 // modified verb (,/:) as an argument to the outer adverb (\:).
+                // Also occurs for point-free projections like {x'}/ assigned to a variable.
                 // Evaluate the inner verb and wrap it in a FunctionValue encoding so
                 // EachLeft/EachRight can call it with each element as the reduced verb.
                 var innerVerbValue = Evaluate(node.Children[0]);
-                string adverbName = op.Value.ToString();
+                string adverbName = op.Value.ToString() switch
+                {
+                    "/" => "over", "\\" => "scan", "'" => "each",
+                    "/:" => "each-right", "\\:" => "each-left", "':" => "each-prior",
+                    var s => s
+                };
                 string innerVerbStr = innerVerbValue is SymbolValue sv ? sv.Value : innerVerbValue?.ToString() ?? "";
                 string encoded = adverbName switch
                 {
@@ -1282,6 +1382,137 @@ namespace K3CSharp
                 
                 default:
                     throw new Exception($"Unknown adverb in one-adverb-at-a-time: {adverbName}");
+            }
+        }
+
+        /// <summary>
+        /// One-adverb-at-a-time dyadic: apply only the outermost adverb, keeping the inner modified
+        /// verb as an AST node that gets re-evaluated for each element during iteration.
+        /// Handles dyadic chained-adverb expressions like x,''-x or y _di\:\: 0 2.
+        /// </summary>
+        private K3Value ApplyOuterAdverbWithModifiedVerbDyadic(string adverbName, ASTNode modifiedVerbNode, K3Value left, K3Value right)
+        {
+            // Helper: apply the modified verb dyadically by building a temp 3-child AST node
+            // The inner modified verb is (adverb, verb) with 1 child; we wrap it as (adverb, verb, L, R)
+            K3Value ApplyInner(K3Value innerLeft, K3Value innerRight)
+            {
+                var tempNode = new ASTNode(ASTNodeType.DyadicOp);
+                tempNode.Value = modifiedVerbNode.Value;
+                tempNode.Children.Add(modifiedVerbNode.Children[0]);
+                tempNode.Children.Add(ASTNode.MakeLiteral(innerLeft));
+                tempNode.Children.Add(ASTNode.MakeLiteral(innerRight));
+                return Evaluate(tempNode);
+            }
+
+            switch (adverbName)
+            {
+                case "each" or "'":
+                {
+                    // Each: pair-wise iteration; both args must be vectors of same length
+                    if (left is VectorValue lv && right is VectorValue rv)
+                    {
+                        if (lv.Elements.Count != rv.Elements.Count)
+                            throw new Exception($"length error: {lv.Elements.Count} != {rv.Elements.Count}");
+                        var results = new List<K3Value>();
+                        for (int i = 0; i < lv.Elements.Count; i++)
+                            results.Add(ApplyInner(lv.Elements[i], rv.Elements[i]));
+                        return new VectorValue(results);
+                    }
+                    // Scalar broadcast: left scalar, right vector
+                    if (right is VectorValue rvs)
+                    {
+                        var results = new List<K3Value>();
+                        foreach (var r in rvs.Elements)
+                            results.Add(ApplyInner(left, r));
+                        return new VectorValue(results);
+                    }
+                    // left vector, right scalar
+                    if (left is VectorValue lvs)
+                    {
+                        var results = new List<K3Value>();
+                        foreach (var l in lvs.Elements)
+                            results.Add(ApplyInner(l, right));
+                        return new VectorValue(results);
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                case "each-left" or "\\:":
+                {
+                    // Each-left: iterate over left, use full right each time
+                    if (left is VectorValue lv)
+                    {
+                        var results = new List<K3Value>();
+                        foreach (var l in lv.Elements)
+                            results.Add(ApplyInner(l, right));
+                        return new VectorValue(results);
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                case "each-right" or "/:":
+                {
+                    // Each-right: iterate over right, use full left each time
+                    if (right is VectorValue rv)
+                    {
+                        var results = new List<K3Value>();
+                        foreach (var r in rv.Elements)
+                            results.Add(ApplyInner(left, r));
+                        return new VectorValue(results);
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                case "over" or "/":
+                {
+                    // Over (dyadic): n f/ x means apply f n-times with f being dyadic
+                    // For modified verb chained adverbs, treat as fold with left as seed
+                    if (right is VectorValue rv)
+                    {
+                        var acc = left;
+                        foreach (var r in rv.Elements)
+                            acc = ApplyInner(acc, r);
+                        return acc;
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                case "scan" or "\\":
+                {
+                    // Scan (dyadic): like Over but collect intermediate results
+                    if (right is VectorValue rv)
+                    {
+                        var results = new List<K3Value>();
+                        var acc = left;
+                        foreach (var r in rv.Elements)
+                        {
+                            acc = ApplyInner(acc, r);
+                            results.Add(acc);
+                        }
+                        return new VectorValue(results);
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                case "each-prior" or "':":
+                {
+                    // Each-prior (dyadic): use left as initial, then pair consecutive elements
+                    if (right is VectorValue rv && rv.Elements.Count > 0)
+                    {
+                        var results = new List<K3Value>();
+                        var prev = left;
+                        foreach (var r in rv.Elements)
+                        {
+                            results.Add(ApplyInner(r, prev));
+                            prev = r;
+                        }
+                        return new VectorValue(results);
+                    }
+                    return ApplyInner(left, right);
+                }
+
+                default:
+                    throw new Exception($"Unknown adverb in one-adverb-at-a-time dyadic: {adverbName}");
             }
         }
         
@@ -1453,6 +1684,7 @@ namespace K3CSharp
             }
 
             var functionNode = node.Children[0];
+            var fnName = functionNode.Value is SymbolValue fs ? fs.Value : functionNode.Value?.ToString() ?? "";
             var arguments = new List<K3Value>();
             
             for (int i = 1; i < node.Children.Count; i++)
@@ -1476,6 +1708,26 @@ namespace K3CSharp
             {
                 return MakeFunction(arguments[0]);
             }
+
+            // Handle DeferredTakeProjection: (n#f) x => n # (f x)
+            if (leftValue is DeferredTakeProjection dtp)
+            {
+                K3Value innerArg = arguments.Count == 1 ? arguments[0] : (K3Value)new VectorValue(arguments);
+                K3Value funcResult;
+                if (dtp.Func is FunctionValue dtpFv)
+                {
+                    var tmpNode = new ASTNode(ASTNodeType.Function);
+                    tmpNode.Value = dtpFv;
+                    funcResult = CallDirectFunction(tmpNode, new List<K3Value> { innerArg });
+                }
+                else if (dtp.Func is ProjectedFunctionValue dtpPfv)
+                    funcResult = CallProjectedFunction(dtpPfv, new List<K3Value> { innerArg });
+                else if (dtp.Func is AdverbProjectedFunctionValue dtpApfv)
+                    funcResult = CallAdverbProjectedFunction(dtpApfv, new List<K3Value> { innerArg });
+                else
+                    funcResult = innerArg;
+                return Take(dtp.Count, funcResult);
+            }
             
             // Check if this should be treated as indexing instead of function call
             if (leftValue is VectorValue || leftValue is DictionaryValue)
@@ -1485,7 +1737,7 @@ namespace K3CSharp
                 {
                     throw new Exception("Indexing requires exactly one argument");
                 }
-                return VectorIndex(leftValue, arguments[0]);
+                return VectorIndex(leftValue!, arguments[0]);
             }
             
             // Handle SymbolValue: may be a KTree path or a variable name that resolves to a dict/vector
@@ -1517,6 +1769,14 @@ namespace K3CSharp
                     var tempFunctionNode = new ASTNode(ASTNodeType.Function);
                     tempFunctionNode.Value = functionValue;
                     return CallDirectFunction(tempFunctionNode, arguments);
+                }
+                else if (function is AdverbProjectedFunctionValue apfv)
+                {
+                    return CallAdverbProjectedFunction(apfv, arguments);
+                }
+                else if (function is ProjectedFunctionValue pfv)
+                {
+                    return CallProjectedFunction(pfv, arguments);
                 }
                 else if (function.Type == ValueType.Symbol)
                 {
@@ -1607,11 +1867,14 @@ namespace K3CSharp
             
             var parameters = functionValue.Parameters;
             var bodyText = functionValue.BodyText;
-            
-                        
             // Vector argument unpacking: if we have 1 vector argument but need multiple parameters, unpack it
             // Also unpack for implicit-param functions when the vector contains NullValue slots (projection)
-            if (arguments.Count == 1 && arguments[0] is VectorValue vectorArg && vectorArg.Elements.Count > 1)
+            // Skip unpacking for encoded adverb FVs (OVER:, SCAN:, EACH:, etc.) — they handle args via adverb dispatch
+            bool isEncodedAdverb = bodyText.StartsWith("OVER:") || bodyText.StartsWith("SCAN:") ||
+                                   bodyText.StartsWith("EACH:") || bodyText.StartsWith("EACH_RIGHT:") ||
+                                   bodyText.StartsWith("EACH_LEFT:") || bodyText.StartsWith("EACH_PRIOR:");
+            bool skipUnpack = bodyText.StartsWith("EACH:");
+            if (!skipUnpack && arguments.Count == 1 && arguments[0] is VectorValue vectorArg && vectorArg.Elements.Count > 1)
             {
                 if (parameters.Count > 1 ||
                     (parameters.Count == 0 && vectorArg.Elements.Any(e => e is NullValue)))
@@ -1639,19 +1902,19 @@ namespace K3CSharp
             }
 
             // Check for projection: fewer arguments than expected valence
-            if (arguments.Count < parameters.Count)
+            // Skip for encoded adverb FVs — they handle partial application via adverb dispatch
+            if (!isEncodedAdverb && arguments.Count < parameters.Count)
             {
                 return CreateProjectedFunction(functionValue, arguments);
             }
 
-            if (arguments.Count != parameters.Count)
+            if (!isEncodedAdverb && arguments.Count != parameters.Count)
             {
                 throw new Exception($"Function expects {parameters.Count} arguments, got {arguments.Count}");
             }
             
             // Create a new evaluator scope for this function call
-            var functionEvaluator = new Evaluator();
-            functionEvaluator.parentEvaluator = this; // Set parent for global access
+            var functionEvaluator = new Evaluator(this); // Pass parent to inherit currentFunctionValue
             
             // Copy local variables to function scope (for nested functions)
             foreach (var kvp in localVariables)
@@ -1659,8 +1922,8 @@ namespace K3CSharp
                 functionEvaluator.localVariables[kvp.Key] = kvp.Value;
             }
             
-            // Bind parameters to arguments (in local scope)
-            for (int i = 0; i < parameters.Count; i++)
+            // Bind parameters to arguments (in local scope) — preliminary bind before kTree is set
+            for (int i = 0; i < Math.Min(parameters.Count, arguments.Count); i++)
             {
                 functionEvaluator.SetVariable(parameters[i], arguments[i]);
             }
@@ -1675,13 +1938,25 @@ namespace K3CSharp
             functionEvaluator.kTree = functionValue.AssociatedKTree; // Pass the associated K tree
             
             // Bind parameters to arguments (in local scope)
-            for (int i = 0; i < parameters.Count; i++)
+            var bindCount = Math.Min(parameters.Count, arguments.Count);
+            for (int i = 0; i < bindCount; i++)
             {
                 functionEvaluator.SetVariable(parameters[i], arguments[i]);
+            }
+            // For encoded adverbs called with fewer args than params, set unbound params to NullValue
+            // to prevent GetVariable from climbing to parent and finding stale values
+            if (isEncodedAdverb)
+            {
+                for (int i = bindCount; i < parameters.Count; i++)
+                    functionEvaluator.SetVariable(parameters[i], new NullValue());
             }
             
             // Set the current function value for AST caching optimization
             functionEvaluator.currentFunctionValue = functionValue;
+            
+            // DEBUG: Verify functionValue is set correctly
+            if (functionEvaluator.currentFunctionValue == null)
+                throw new InvalidOperationException("CallDirectFunction: currentFunctionValue is null after setting");
             
             // Execute the function body using recursive text evaluation
             return ExecuteFunctionBody(bodyText, functionEvaluator, functionValue.PreParsedTokens);
@@ -1689,6 +1964,9 @@ namespace K3CSharp
 
         private K3Value ExecuteFunctionBody(string bodyText, Evaluator functionEvaluator, List<Token>? preParsedTokens = null)
         {
+            // DEBUG: Check if currentFunctionValue is set
+            if (functionEvaluator.currentFunctionValue == null)
+                throw new InvalidOperationException("ExecuteFunctionBody: currentFunctionValue is null");
                         
             if (string.IsNullOrWhiteSpace(bodyText))
             {
@@ -1700,6 +1978,96 @@ namespace K3CSharp
                 HintSystem.IsMemberHint(hint.Value))
             {
                 return ExecuteFFIFunction(functionEvaluator.currentFunctionValue, functionEvaluator);
+            }
+            
+            // Handle depth-based each projections: EACH_DEPTH:n (created by 0', 1', 2', etc.)
+            // These are created when an integer each is used as a projected function
+            if (bodyText.StartsWith("EACH_DEPTH:"))
+            {
+                string depthStr = bodyText.Substring("EACH_DEPTH:".Length);
+                if (int.TryParse(depthStr, out int depth))
+                {
+                    // Get the data argument from the function scope
+                    K3Value? data = null;
+                    try { data = functionEvaluator.GetVariable("y"); } catch { }
+                    if (data == null || data is NullValue)
+                        try { data = functionEvaluator.GetVariable("x"); } catch { }
+                    
+                    if (data != null && !(data is NullValue))
+                    {
+                        if (depth == 0)
+                        {
+                            // 0' is identity - return data unchanged
+                            return data;
+                        }
+                        // Apply each at the specified depth
+                        return ApplyEachAtDepth(data, depth);
+                    }
+                    // No data provided - return the function itself (projected)
+                    return new FunctionValue(bodyText, new List<string> { "x", "y" });
+                }
+            }
+            
+            // Handle point-free adverb projections: OVER:verbStr, SCAN:verbStr, EACH:verbStr, etc.
+            // These are created when a verb+adverb expression with no argument is assigned (e.g. d:{x'}/)
+            // When called with 2 args (x=left, y=right), apply: left adverb(innerVerb) right
+            // When called with 1 arg  (x=right only), apply monadically: adverb(innerVerb) right
+            {
+                string? adverbKind = null;
+                string? innerVerbText = null;
+                foreach (var prefix in new[] { "OVER:", "SCAN:", "EACH:", "EACH_RIGHT:", "EACH_LEFT:", "EACH_PRIOR:" })
+                {
+                    if (bodyText.StartsWith(prefix))
+                    {
+                        adverbKind = prefix.TrimEnd(':');
+                        innerVerbText = bodyText.Substring(prefix.Length);
+                        break;
+                    }
+                }
+                if (adverbKind != null && innerVerbText != null)
+                {
+                    // Evaluate the inner verb string in the function scope
+                    K3Value innerVerb;
+                    // If the inner verb text is itself an encoded adverb body, wrap it as a FunctionValue directly
+                    // (parsing it as K would misinterpret "EACH:..." as an assignment expression)
+                    bool innerIsEncodedAdverb = innerVerbText.StartsWith("OVER:") || innerVerbText.StartsWith("SCAN:") ||
+                                               innerVerbText.StartsWith("EACH:") || innerVerbText.StartsWith("EACH_RIGHT:") ||
+                                               innerVerbText.StartsWith("EACH_LEFT:") || innerVerbText.StartsWith("EACH_PRIOR:");
+                    if (innerIsEncodedAdverb)
+                    {
+                        innerVerb = new FunctionValue(innerVerbText, new List<string> { "x", "y" });
+                    }
+                    else
+                    {
+                        var lexer2 = new Lexer(innerVerbText);
+                        var tokens2 = lexer2.Tokenize();
+                        var ast2 = ParserConfig.ParseWithConfig(tokens2, innerVerbText);
+                        innerVerb = ast2 != null ? (functionEvaluator.Evaluate(ast2) ?? new NullValue()) : new SymbolValue(innerVerbText);
+                    }
+
+                    // Get left (x) and right (y) from the function scope
+                    K3Value? xVal = null, yVal = null;
+                    try { xVal = functionEvaluator.GetVariable("x"); } catch { }
+                    try { yVal = functionEvaluator.GetVariable("y"); } catch { }
+                    bool hasLeft  = xVal != null && !(xVal is NullValue);
+                    bool hasRight = yVal != null && !(yVal is NullValue);
+
+                    var sentinelLeft  = new NullValue();
+                    var sentinelRight = new NullValue();
+                    var left2  = hasLeft  ? xVal! : sentinelLeft;
+                    var right2 = hasRight ? yVal! : sentinelRight;
+
+                    return adverbKind switch
+                    {
+                        "OVER"       => ApplyAdverbSlash(innerVerb, left2, right2),
+                        "SCAN"       => ApplyAdverbBackslash(innerVerb, left2, right2),
+                        "EACH"       => HandleAdverbTick(innerVerb, left2, right2),
+                        "EACH_RIGHT" => ApplyAdverbSlashColon(innerVerb, left2, right2),
+                        "EACH_LEFT"  => ApplyAdverbBackslashColon(innerVerb, left2, right2),
+                        "EACH_PRIOR" => ApplyAdverbTickColon(innerVerb, left2, right2),
+                        _ => throw new Exception($"Unknown encoded adverb projection: {adverbKind}")
+                    };
+                }
             }
             
             try
@@ -2007,7 +2375,16 @@ namespace K3CSharp
             // Check if it's a system variable first
             try
             {
-                return GetSystemVariable(functionName);
+                var sysVarResult = GetSystemVariable(functionName);
+                // If the system variable returns a FunctionValue (like _f), call it with arguments
+                if (sysVarResult is FunctionValue sysFunc)
+                {
+                    var tempNode = new ASTNode(ASTNodeType.Function);
+                    tempNode.Value = sysFunc;
+                    var result = CallDirectFunction(tempNode, arguments);
+                    return result ?? new NullValue();
+                }
+                return sysVarResult ?? new NullValue();
             }
             catch (Exception)
             {
@@ -2284,7 +2661,6 @@ namespace K3CSharp
             
             // Check if it's a user-defined function stored in a variable
             var functionValue = GetVariable(functionName);
-            
             if (functionValue is FunctionValue userFunction)
             {
                 // Create a temporary AST node for the function to reuse CallDirectFunction
@@ -2301,6 +2677,25 @@ namespace K3CSharp
             {
                 // This might be dictionary indexing using square bracket syntax
                 return AtIndexOperation(dictValue, arguments[0]);
+            }
+            else if (functionValue is DeferredTakeProjection dtp)
+            {
+                // Handle DeferredTakeProjection: (n#f) x => n # (f x)
+                K3Value innerArg = arguments.Count == 1 ? arguments[0] : (K3Value)new VectorValue(arguments);
+                K3Value funcResult;
+                if (dtp.Func is FunctionValue dtpFv)
+                {
+                    var tmpNode = new ASTNode(ASTNodeType.Function);
+                    tmpNode.Value = dtpFv;
+                    funcResult = CallDirectFunction(tmpNode, new List<K3Value> { innerArg });
+                }
+                else if (dtp.Func is ProjectedFunctionValue dtpPfv)
+                    funcResult = CallProjectedFunction(dtpPfv, new List<K3Value> { innerArg });
+                else if (dtp.Func is AdverbProjectedFunctionValue dtpApfv)
+                    funcResult = CallAdverbProjectedFunction(dtpApfv, new List<K3Value> { innerArg });
+                else
+                    funcResult = innerArg;
+                return Take(dtp.Count, funcResult);
             }
             throw new Exception($"Variable '{functionName}' is not a function");
         }
@@ -2706,6 +3101,23 @@ namespace K3CSharp
             // Handle symbol as path to a dictionary or function
             if (data is SymbolValue sym)
             {
+                // Special handling for _f (function self-reference)
+                if (sym.Value == "_f")
+                {
+                    if (currentFunctionValue != null)
+                    {
+                        // Apply the current function to the index
+                        if (currentFunctionValue is FunctionValue func)
+                        {
+                            var tempNode = new ASTNode(ASTNodeType.Function);
+                            tempNode.Value = func;
+                            var args = new List<K3Value> { index };
+                            return CallDirectFunction(tempNode, args);
+                        }
+                        return currentFunctionValue;
+                    }
+                }
+                
                 // Per spec: f[x] is (f).,(x) — if symbol names a known verb,
                 // call it as a function with the index as a single argument
                 if (VerbRegistry.GetVerb(sym.Value) != null)
@@ -2885,6 +3297,27 @@ namespace K3CSharp
             if (data is VectorValue vector)
             {
                 return VectorIndex(vector, index ?? throw new ArgumentNullException(nameof(index)));
+            }
+            
+            // Handle DeferredTakeProjection via bracket notation
+            if (data is DeferredTakeProjection dtp)
+            {
+                // Convert index to function argument
+                K3Value innerArg = index ?? throw new ArgumentNullException(nameof(index));
+                K3Value funcResult;
+                if (dtp.Func is FunctionValue dtpFv)
+                {
+                    var tmpNode = new ASTNode(ASTNodeType.Function);
+                    tmpNode.Value = dtpFv;
+                    funcResult = CallDirectFunction(tmpNode, new List<K3Value> { innerArg });
+                }
+                else if (dtp.Func is ProjectedFunctionValue dtpPfv)
+                    funcResult = CallProjectedFunction(dtpPfv, new List<K3Value> { innerArg });
+                else if (dtp.Func is AdverbProjectedFunctionValue dtpApfv)
+                    funcResult = CallAdverbProjectedFunction(dtpApfv, new List<K3Value> { innerArg });
+                else
+                    funcResult = innerArg;
+                return Take(dtp.Count, funcResult);
             }
             
             // Handle function calls via bracket notation
@@ -3590,29 +4023,33 @@ namespace K3CSharp
         
         private K3Value EvaluateConditionalExpression(List<ASTNode> args)
         {
-            // Conditional expression: :[condition;true_expr;false_expr]
-            // Returns the value of true_expr if condition is non-zero, otherwise false_expr
-            // This is different from if[] which returns null
+            // Conditional expression: :[cond;true;false] or multi-condition form
+            // Even arg count: :[c1;t1;c2;t2;...;cN;tN]  — no else branch
+            // Odd arg count:  :[c1;t1;c2;t2;...;cN;tN;else]
+            // Short-circuits: returns result of first true branch, or else/null if none match
             
             if (args.Count < 2)
             {
                 throw new Exception("Conditional expression requires at least 2 arguments: condition and true expression");
             }
             
-            // Evaluate condition
-            var conditionValue = Evaluate(args[0]);
-            var condition = ToInteger(conditionValue);
+            // Determine the index of the optional else branch
+            // Odd count => last arg is else; even count => no else
+            int pairCount = args.Count / 2;
+            bool hasElse = args.Count % 2 == 1;
             
-            if (condition != 0)
+            for (int i = 0; i < pairCount; i++)
             {
-                // Condition is true, evaluate and return true expression
-                return Evaluate(args[1]);
+                var conditionValue = Evaluate(args[i * 2]);
+                var condition = ToInteger(conditionValue);
+                if (condition != 0)
+                {
+                    return Evaluate(args[i * 2 + 1]);
+                }
             }
-            else
-            {
-                // Condition is false, evaluate and return false expression if provided, otherwise null
-                return args.Count >= 3 ? Evaluate(args[2]) : new NullValue();
-            }
+            
+            // No condition matched — return else branch or null
+            return hasElse ? Evaluate(args[args.Count - 1]) : new NullValue();
         }
         
         private K3Value EvaluateIfStatement(List<ASTNode> args)
@@ -4264,7 +4701,7 @@ namespace K3CSharp
             {
                 // Make dictionary from operand (expects list of triplets)
                 var result = ConvertVectorToDictionary(operand ?? throw new ArgumentNullException(nameof(operand)));
-                return result ?? throw new InvalidOperationException("ConvertVectorToDictionary returned null");
+                return (K3Value?)(result) ?? throw new InvalidOperationException("ConvertVectorToDictionary returned null");
             }
         }
 
@@ -4385,12 +4822,22 @@ namespace K3CSharp
         }
 
         /// <summary>
+        /// Returns the current function value for _f recursion support
+        /// </summary>
+        private K3Value GetCurrentFunctionValue()
+        {
+            return currentFunctionValue is not null ? currentFunctionValue : new NullValue();
+        }
+
+        /// <summary>
         /// Get system variable value - handles system variables as true variables
         /// </summary>
         public K3Value GetSystemVariable(string variableName)
         {
+            
             var verb = VerbRegistry.GetVerb(variableName);
-            if (verb != null && verb.Type == VerbType.SystemVariable)
+            // Use the same logic as IsSystemVariable: check both Type and IsSystemVariable property
+            if (verb != null && (verb.Type == VerbType.SystemVariable || verb.IsSystemVariable == true))
             {
                 // Handle system variables based on their names
                 return variableName switch
@@ -4398,7 +4845,7 @@ namespace K3CSharp
                     "_d" => kTree.CurrentBranch ?? new SymbolValue(""), // Current K-Tree branch
                     "_v" => new IntegerValue(1), // K3 version placeholder
                     "_i" => new IntegerValue(1), // Session ID placeholder
-                    "_f" => new IntegerValue(0), // File handle placeholder
+                    "_f" => GetCurrentFunctionValue(), // Current function for self-reference
                     "_n" => new IntegerValue(0), // Null placeholder
                     "_s" => new IntegerValue(0), // Seconds placeholder
                     "_h" => new IntegerValue(DateTime.Now.Hour),

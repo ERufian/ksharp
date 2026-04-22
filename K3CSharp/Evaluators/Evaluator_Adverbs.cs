@@ -54,137 +54,12 @@ namespace K3CSharp
         
         private K3Value ExecuteFunction(FunctionValue func, List<K3Value> arguments)
         {
-            // Execute the function with the provided arguments
-            // This handles lambda functions like {x*%y}
-            
-            if (func.BodyText.Contains(","))
-            {
-                // Handle comma functions specially
-                return ApplySymbolVerb(",", arguments[0], arguments.Count > 1 ? arguments[1] : new IntegerValue(0));
-            }
-            else
-            {
-                // Handle all other functions as lambda functions
-                return ExecuteLambdaFunction(func, arguments);
-            }
+            // Execute the function using the full function call machinery
+            var tempNode = new ASTNode(ASTNodeType.Function);
+            tempNode.Value = func;
+            return CallDirectFunction(tempNode, arguments);
         }
         
-        /// <summary>
-        /// Execute lambda function like {x*%y} with provided arguments
-        /// </summary>
-        /// <param name="func">The lambda function</param>
-        /// <param name="arguments">Arguments to pass to the function</param>
-        /// <returns>Result of function execution</returns>
-        private K3Value ExecuteLambdaFunction(FunctionValue func, List<K3Value> arguments)
-        {
-            // Extract the function body without braces
-            var body = func.BodyText.Substring(1, func.BodyText.Length - 2).Trim();
-            
-            // Special case for x*%y pattern - the parser doesn't handle this correctly
-            // x*%y means x * (%y) where %y is reciprocal of y
-            if (body.Contains("*") && body.Contains("%"))
-            {
-                var xValue = arguments.Count > 0 ? arguments[0] : new IntegerValue(0);
-                var yValue = arguments.Count > 1 ? arguments[1] : new IntegerValue(1);
-                
-                // x*%y means x * (1/y)
-                var reciprocal = Reciprocal(yValue);
-                return xValue.Multiply(reciprocal);
-            }
-            
-            // For simple lambda like {x+y}, we need to:
-            // 1. Extract parameter names (x, y)
-            // 2. Bind arguments to parameters
-            // 3. Evaluate the expression
-            
-            // Simple parameter extraction for common patterns
-            var parameters = ExtractLambdaParameters(body);
-            
-            if (parameters.Count == 0 && arguments.Count > 0)
-            {
-                // Implicit parameter x for single argument functions
-                parameters.Add("x");
-            }
-            
-            // Create a new evaluator scope for the function
-            var functionEvaluator = new Evaluator(this);
-            
-            // Bind arguments to parameters
-            for (int i = 0; i < Math.Min(parameters.Count, arguments.Count); i++)
-            {
-                functionEvaluator.SetVariable(parameters[i], arguments[i]);
-            }
-            
-            // Evaluate the function body by parsing and evaluating the expression
-            // Create a lexer and parser for the function body
-            var lexer = new Lexer(body);
-            var tokens = lexer.Tokenize();
-            var ast = ParserConfig.ParseWithConfig(tokens, body);
-            
-            if (ast == null)
-            {
-                throw new Exception($"Failed to parse lambda function body: {body}");
-            }
-            
-            // Evaluate the parsed AST
-            return functionEvaluator.Evaluate(ast);
-        }
-        
-        /// <summary>
-        /// Extract parameter names from lambda function body
-        /// </summary>
-        /// <param name="body">Function body without braces</param>
-        /// <returns>List of parameter names</returns>
-        private List<string> ExtractLambdaParameters(string body)
-        {
-            var parameters = new List<string>();
-            
-            // Simple parameter extraction for common patterns
-            // Look for identifiers that appear before operators
-            var matches = System.Text.RegularExpressions.Regex.Matches(body, @"\b([a-zA-Z][a-zA-Z0-9_]*)\b");
-            
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                var param = match.Groups[1].Value;
-                if (!parameters.Contains(param) && IsLikelyParameter(body, param))
-                {
-                    parameters.Add(param);
-                }
-            }
-            
-            return parameters;
-        }
-        
-        /// <summary>
-        /// Determine if an identifier is likely a parameter vs a verb/operator
-        /// </summary>
-        /// <param name="body">Function body</param>
-        /// <param name="identifier">Identifier to check</param>
-        /// <returns>True if likely a parameter</returns>
-        private bool IsLikelyParameter(string body, string identifier)
-        {
-            // Common single-letter parameters
-            if (identifier.Length == 1 && "xyzabcdfghijklmnopqrstuvw".Contains(identifier))
-                return true;
-                
-            // Check if it's used like a variable (not as a verb)
-            // This is a simplified heuristic
-            var pattern = $@"\b{identifier}\b";
-            var matches = System.Text.RegularExpressions.Regex.Matches(body, pattern);
-            
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                var index = match.Index;
-                var prevChar = index > 0 ? body[index - 1] : ' ';
-                var nextChar = index + identifier.Length < body.Length ? body[index + identifier.Length] : ' ';
-                
-                // If it's surrounded by operators or spaces, it's likely a parameter
-                if ("+-*/%^!&|<>=^,_?#~ ".Contains(prevChar) || "+-*/%^!&|<>=^,_?#~ ".Contains(nextChar))
-                    return true;
-            }
-            
-            return false;
-        }
 
         private K3Value ApplyMonadicVerb(string verbName, K3Value operand)
         {
@@ -287,7 +162,7 @@ namespace K3CSharp
         /// </summary>
         internal K3Value OverMonad(string verbName, K3Value left, K3Value x)
         {
-            bool leftSentinel = left is IntegerValue lv0 && lv0.Value == 0;
+            bool leftSentinel = left is NullValue;
 
             // n f/ x — Adverbial Do: apply n times
             if (!leftSentinel && left is IntegerValue nVal)
@@ -299,7 +174,7 @@ namespace K3CSharp
             }
 
             // b f/ x — Adverbial While: apply while b[current] != 0
-            if (!leftSentinel && (left is FunctionValue || left is SymbolValue))
+            if (!leftSentinel && (left is FunctionValue || left is SymbolValue || left is ProjectedFunctionValue || left is AdverbProjectedFunctionValue))
             {
                 var current = x;
                 const int maxIter = 1000000;
@@ -362,10 +237,46 @@ namespace K3CSharp
             // If left is vector and right is vector, use Each (e.g., (1 2 3) %/ (4 5 6))
             // If only right argument, use Over (e.g., %/ 1 2 3)
 
-            bool leftSentinel = left is IntegerValue lv && lv.Value == 0;
-            bool rightSentinel = right is IntegerValue rv && rv.Value == 0;
+            bool leftSentinel = left is NullValue;
+            bool rightSentinel = right is NullValue;
 
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
+
+            // FunctionValue verb: n {lambda}/ x — adverbial do with lambda
+            // Applies the lambda function n times starting from x.
+            // n=0 means apply 0 times (return x unchanged).
+            // This must be checked before sentinel disambiguation since n=0 is valid (not a sentinel here).
+            if (verb is FunctionValue funcVerb)
+            {
+                // Noun form: both sentinels — return projected function placeholder
+                if (leftSentinel && rightSentinel)
+                    return new AdverbProjectedFunctionValue("over", funcVerb.BodyText, 2);
+                
+                // n {lambda}/ x — apply lambda n times to x (n != 0, since 0 is sentinel for 'no left arg')
+                if (left is IntegerValue nInt && !leftSentinel)
+                {
+                    var current = right;
+                    for (int i = 0; i < nInt.Value; i++)
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                    return current;
+                }
+                
+                // {lambda}/ x — fixed-point iteration with lambda (monadic only)
+                // For dyadic functions, fall through to standard Over handling
+                if (leftSentinel && funcVerb.Valence == 1)
+                {
+                    var prev = right;
+                    var curr2 = ExecuteFunction(funcVerb, new List<K3Value> { prev });
+                    const int maxIter2 = 1000000;
+                    for (int i = 0; i < maxIter2; i++)
+                    {
+                        if (ValuesMatch(curr2, prev)) return prev;
+                        prev = curr2;
+                        curr2 = ExecuteFunction(funcVerb, new List<K3Value> { prev });
+                    }
+                    return prev;
+                }
+            }
 
             // Over Monad dispatch: verb is monadic (ends with ':' or registry says monadic-only)
             // Handles: f:/ x (fixed-point), n f:/ x (adverbial do), b f:/ x (adverbial while)
@@ -402,7 +313,7 @@ namespace K3CSharp
             }
             
             // Default case: use Over
-            return Over(verb, left ?? new IntegerValue(0), right ?? new IntegerValue(0));
+            return Over(verb, left ?? new NullValue(), right ?? new NullValue());
         }
 
         /// <summary>
@@ -413,7 +324,7 @@ namespace K3CSharp
         /// </summary>
         internal K3Value ScanMonad(string verbName, K3Value left, K3Value x)
         {
-            bool leftSentinel = left is IntegerValue lv0 && lv0.Value == 0;
+            bool leftSentinel = left is NullValue;
 
             // n f:\ x — Adverbial Do: collect x, f[x], ..., f^n[x]
             if (!leftSentinel && left is IntegerValue nVal)
@@ -429,7 +340,7 @@ namespace K3CSharp
             }
 
             // b f:\ x — Adverbial While: collect values while b[current] != 0
-            if (!leftSentinel && (left is FunctionValue || left is SymbolValue))
+            if (!leftSentinel && (left is FunctionValue || left is SymbolValue || left is ProjectedFunctionValue || left is AdverbProjectedFunctionValue))
             {
                 var results = new List<K3Value> { x };
                 var current = x;
@@ -470,8 +381,8 @@ namespace K3CSharp
         private K3Value ApplyAdverbBackslash(K3Value verb, K3Value left, K3Value right)
         {
             // Noun form: both args are sentinel 0 — return projected function (e.g. +\ used as a value)
-            bool leftSentinel = left is IntegerValue lv && lv.Value == 0;
-            bool rightSentinel = right is IntegerValue rv && rv.Value == 0;
+            bool leftSentinel = left is NullValue;
+            bool rightSentinel = right is NullValue;
 
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
 
@@ -488,11 +399,149 @@ namespace K3CSharp
                 return new AdverbProjectedFunctionValue("scan", verbName, 1);
             }
             // Natural nested evaluation: call Scan with the verb and arguments
-            return Scan(verb, left ?? new IntegerValue(0), right ?? new IntegerValue(0));
+            return Scan(verb, left ?? new NullValue(), right ?? new NullValue());
         }
 
         public K3Value HandleAdverbTick(K3Value verb, K3Value left, K3Value right)
         {
+            // Handle AdverbProjectedFunctionValue (e.g. ,' as inner verb of ,'')
+            // Apply the projected adverb recursively to each corresponding element pair
+            if (verb is AdverbProjectedFunctionValue apfv)
+            {
+                var innerVerbSymbol = new SymbolValue(apfv.Verb);
+                bool isMonadicContext = left is NullValue;
+                if (!isMonadicContext && left is VectorValue leftRows && right is VectorValue rightRows)
+                {
+                    if (leftRows.Elements.Count != rightRows.Elements.Count)
+                        throw new Exception($"length error: {leftRows.Elements.Count} != {rightRows.Elements.Count}");
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < leftRows.Elements.Count; i++)
+                        result.Add(HandleAdverbTick(innerVerbSymbol, leftRows.Elements[i], rightRows.Elements[i]));
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+                if (isMonadicContext && right is VectorValue dataVec)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in dataVec.Elements)
+                        result.Add(HandleAdverbTick(innerVerbSymbol, new NullValue(), element));
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+                return HandleAdverbTick(innerVerbSymbol, left, right);
+            }
+
+            // Handle FunctionValue verb: apply function to each element (monadic each)
+            if (verb is FunctionValue fvVerb)
+            {
+                bool isMonadicCtx = left is NullValue;
+                bool rightIsSentinel = right is NullValue;
+                // right=data, left=sentinel: monadic each over right
+                if (isMonadicCtx && right is VectorValue dataVecFv)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in dataVecFv.Elements)
+                        result.Add(ExecuteFunction(fvVerb, new List<K3Value> { element }));
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+                // left=data, right=sentinel: monadic each over left
+                if (rightIsSentinel && left is VectorValue leftVecFv2)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in leftVecFv2.Elements)
+                        result.Add(ExecuteFunction(fvVerb, new List<K3Value> { element }));
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+                // Dyadic each: left and right are parallel vectors
+                if (left is VectorValue leftVecFv && right is VectorValue rightVecFv)
+                {
+                    if (leftVecFv.Elements.Count != rightVecFv.Elements.Count)
+                        throw new Exception($"length error");
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < leftVecFv.Elements.Count; i++)
+                        result.Add(ExecuteFunction(fvVerb, new List<K3Value> { leftVecFv.Elements[i], rightVecFv.Elements[i] }));
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+            }
+
+            // Handle DeferredTakeProjection verb: apply DTP to each element
+            if (verb is DeferredTakeProjection dtpVerb)
+            {
+                bool isMonadicCtx = left is NullValue;
+                K3Value dataToIter = isMonadicCtx ? right : left;
+                if (dataToIter is VectorValue dataVecDtp)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in dataVecDtp.Elements)
+                    {
+                        var args = new List<K3Value> { element };
+                        // Apply DTP: n#(f element)
+                        K3Value funcRes;
+                        if (dtpVerb.Func is ProjectedFunctionValue dtpPfvI)
+                            funcRes = CallProjectedFunction(dtpPfvI, args);
+                        else if (dtpVerb.Func is FunctionValue dtpFvI)
+                        {
+                            var tmpN = new ASTNode(ASTNodeType.Function); tmpN.Value = dtpFvI;
+                            funcRes = CallDirectFunction(tmpN, args);
+                        }
+                        else
+                            funcRes = element;
+                        result.Add(Take(dtpVerb.Count, funcRes));
+                    }
+                    return new VectorValue(result, DetermineVectorType(result));
+                }
+                else
+                {
+                    // Scalar data: apply DTP directly to the single element
+                    var args = new List<K3Value> { dataToIter };
+                    K3Value funcRes;
+                    if (dtpVerb.Func is ProjectedFunctionValue dtpPfvS)
+                        funcRes = CallProjectedFunction(dtpPfvS, args);
+                    else if (dtpVerb.Func is FunctionValue dtpFvS)
+                    {
+                        var tmpN = new ASTNode(ASTNodeType.Function); tmpN.Value = dtpFvS;
+                        funcRes = CallDirectFunction(tmpN, args);
+                    }
+                    else
+                        funcRes = dataToIter;
+                    return Take(dtpVerb.Count, funcRes);
+                }
+            }
+
+            // Handle IntegerValue verb: depth-based each (0', 1', 2', etc.)
+            // 0' = identity (depth 0), 1' = each at depth 1, 2' = each at depth 2, etc.
+            if (verb is IntegerValue intVerb)
+            {
+                int depth = intVerb.Value;
+                bool leftIsDummy = left is NullValue;
+                bool rightIsDummy = right is NullValue;
+                
+                // Noun form: both args are dummy - return projected function
+                if (leftIsDummy && rightIsDummy)
+                {
+                    // Return an encoded function value for depth-based each
+                    // Format: EACH_DEPTH:n where n is the depth (0, 1, 2, etc.)
+                    return new FunctionValue($"EACH_DEPTH:{depth}", new List<string> { "x", "y" });
+                }
+                
+                // Monadic form: left is dummy, right is data
+                if (leftIsDummy && !rightIsDummy)
+                {
+                    if (depth == 0)
+                    {
+                        // 0' is identity - return data unchanged
+                        return right;
+                    }
+                    return ApplyEachAtDepth(right, depth);
+                }
+                
+                // Dyadic form: both are data (or left is data, right is dummy)
+                // For integer each, treat as monadic with left as data
+                if (depth == 0)
+                {
+                    return left ?? new NullValue();
+                }
+                return ApplyEachAtDepth(left, depth);
+            }
+
             // Determine verb arity using VerbRegistry
             int arity = 2; // Default to dyadic
             if (verb is SymbolValue vs)
@@ -503,14 +552,14 @@ namespace K3CSharp
                 // These are monadic system verbs - use monadic Each
                 if (verbName == "_ci" || verbName == "_ic")
                 {
-                    return Each(verb, right ?? new IntegerValue(0));
+                    return Each(verb, right ?? new NullValue());
                 }
                 
                 var verbInfo = VerbRegistry.GetVerb(verbName);
                 if (verbInfo != null)
                 {
                     // Check if verb supports monadic and if we're in monadic context
-                    bool isMonadicContext = left is IntegerValue leftInt && leftInt.Value == 0;
+                    bool isMonadicContext = left is NullValue;
                     if (isMonadicContext && verbInfo.SupportedArities.Contains(1))
                     {
                         arity = 1;
@@ -527,25 +576,22 @@ namespace K3CSharp
             if (arity == 1)
             {
                 // Monadic verb with each
-                return Each(verb, right ?? new IntegerValue(0));
+                return Each(verb, right ?? new NullValue());
             }
             else
             {
                 // Dyadic verb with each (or higher arity treated as dyadic for now)
-                return Each(verb, left, right ?? new IntegerValue(0));
+                return Each(verb, left, right ?? new NullValue());
             }
         }
 
         private K3Value ApplyAdverbTick(K3Value verb, K3Value left, K3Value right)
         {
             // Check if this is a monadic verb with each (left and right are dummy values)
-            if ((left is IntegerValue leftInt && leftInt.Value == 0) && 
-                (right is IntegerValue rightInt && rightInt.Value == 0) && 
-                verb is SymbolValue)
+            if (left is NullValue && right is NullValue && verb is SymbolValue vs)
             {
-                // This is a monadic verb with each - call 2-argument Each
-                // The data will be provided by the caller
-                return Each(verb, new IntegerValue(0)); // Dummy data for now
+                // Noun form: return projected function (e.g. ,' used as a value / inner adverb)
+                return new AdverbProjectedFunctionValue("each", vs.Value, 2);
             }
             
             // For dyadic verbs, call 3-argument Each
@@ -557,8 +603,8 @@ namespace K3CSharp
             // One-adverb-at-a-time: consume just the outer adverb (/:), preserve inner verb for next step
             // Check if this is a nested adverb call (has verb, left, right arguments)
             // Use sentinel values to distinguish between "no arguments" and "actual arguments"
-            bool hasLeftArg = !(left is IntegerValue leftInt && leftInt.Value == 0);
-            bool hasRightArg = !(right is IntegerValue rightInt && rightInt.Value == 0);
+            bool hasLeftArg = left is not NullValue;
+            bool hasRightArg = right is not NullValue;
             
             if (hasLeftArg && hasRightArg)
             {
@@ -579,7 +625,7 @@ namespace K3CSharp
             // One-adverb-at-a-time: consume just the outer adverb (\:), preserve inner verb for next step
             // Natural nested evaluation: call EachLeft with the verb and arguments
             // This creates natural nested evaluation without complex chaining
-            return EachLeft(verb, left ?? new IntegerValue(0), right ?? new IntegerValue(0));
+            return EachLeft(verb, left ?? new NullValue(), right ?? new NullValue());
         }
         
         private K3Value ApplyAdverbTickColon(K3Value verb, K3Value left, K3Value right)
@@ -620,8 +666,8 @@ namespace K3CSharp
                 return HandleEmptyVectorOver(verb, initialization);
             }
             
-            // If initialization is 0, use first element as initialization (K behavior for / without explicit init)
-            if (initialization is IntegerValue intInit && intInit.Value == 0 && dataVec.Elements.Count > 0)
+            // If initialization is :: (null/sentinel), use first element as initialization (K behavior for / without explicit init)
+            if (initialization is NullValue && dataVec.Elements.Count > 0)
             {
                 return OverVectorWithFirstElementInit(verb, dataVec);
             }
@@ -755,8 +801,8 @@ namespace K3CSharp
         
         private K3Value ScanVector(K3Value verb, K3Value initialization, VectorValue dataVec)
         {
-            // If initialization is 0, use first element as initialization (K behavior for \ without explicit init)
-            if (initialization is IntegerValue intInit && intInit.Value == 0 && dataVec.Elements.Count > 0)
+            // If initialization is :: (null/sentinel), use first element as initialization (K behavior for \ without explicit init)
+            if (initialization is NullValue && dataVec.Elements.Count > 0)
             {
                 return ScanVectorWithFirstElementInit(verb, dataVec);
             }
@@ -829,6 +875,72 @@ namespace K3CSharp
         private K3Value Each(K3Value verb, K3Value left, K3Value right)
         {
             // New structure: Each(verbSymbol, leftVector, rightVector)
+            
+            // Handle FunctionValue verbs first (e.g., from {x'}/)
+            if (verb is FunctionValue func)
+            {
+                // This is a function-based adverb (like {x'}/) - call it for each element
+                
+                // Monadic case: left is dummy value, right is the data vector
+                if (left is IntegerValue leftInt && leftInt.Value == 0 && right is VectorValue dataVec)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in dataVec.Elements)
+                    {
+                        // Execute the function with the element as argument
+                        var funcResult = ExecuteFunction(func, new List<K3Value> { element });
+                        result.Add(funcResult);
+                    }
+                    int vectorType = DetermineVectorType(result);
+                    return new VectorValue(result, vectorType);
+                }
+                
+                // Dyadic case: left is scalar, right is vector
+                if (IsScalar(left) && right is VectorValue rightVecFunc)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var rightElement in rightVecFunc.Elements)
+                    {
+                        var funcResult = ExecuteFunction(func, new List<K3Value> { left, rightElement });
+                        result.Add(funcResult);
+                    }
+                    int vectorType = DetermineVectorType(result);
+                    return new VectorValue(result, vectorType);
+                }
+                
+                // Dyadic case: left is vector, right is scalar
+                if (left is VectorValue leftVecFunc && IsScalar(right))
+                {
+                    var result = new List<K3Value>();
+                    foreach (var leftElement in leftVecFunc.Elements)
+                    {
+                        var funcResult = ExecuteFunction(func, new List<K3Value> { leftElement, right });
+                        result.Add(funcResult);
+                    }
+                    int vectorType = DetermineVectorType(result);
+                    return new VectorValue(result, vectorType);
+                }
+                
+                // Dyadic case: both are vectors
+                if (left is VectorValue leftVec2Func && right is VectorValue rightVec2Func)
+                {
+                    // Check if vectors have different lengths - should throw length error
+                    if (leftVec2Func.Elements.Count != rightVec2Func.Elements.Count)
+                    {
+                        throw new Exception($"length error: {leftVec2Func.Elements.Count} != {rightVec2Func.Elements.Count}");
+                    }
+                    
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < leftVec2Func.Elements.Count; i++)
+                    {
+                        var funcResult = ExecuteFunction(func, new List<K3Value> { leftVec2Func.Elements[i], rightVec2Func.Elements[i] });
+                        result.Add(funcResult);
+                    }
+                    int vectorType = DetermineVectorType(result);
+                    return new VectorValue(result, vectorType);
+                }
+            }
+            
             if (verb is SymbolValue verbSymbol)
             {
                 // Check if this is a monadic verb with each (left is dummy value)
@@ -839,6 +951,19 @@ namespace K3CSharp
                     foreach (var element in dataVec.Elements)
                     {
                         result.Add(ApplyMonadicVerb(verbSymbol.Value, element));
+                    }
+                    int vectorType = DetermineVectorType(result);
+                    return new VectorValue(result, vectorType);
+                }
+                
+                // Handle scalar + vector case (e.g., 1!'x, y _' x)
+                // Atom left is broadcast: apply verb(left, right[i]) for each element of right
+                if (IsScalar(left) && right is VectorValue rightVecScalar)
+                {
+                    var result = new List<K3Value>();
+                    foreach (var rightElement in rightVecScalar.Elements)
+                    {
+                        result.Add(ApplySymbolVerb(verbSymbol.Value, left, rightElement));
                     }
                     int vectorType = DetermineVectorType(result);
                     return new VectorValue(result, vectorType);
@@ -1174,6 +1299,46 @@ namespace K3CSharp
             }
             
             throw new Exception($"Each not implemented for types: {verb.Type}, {data.Type}");
+        }
+
+        /// <summary>
+        /// Apply "each" at a specified depth level.
+        /// depth=1: apply to each element at the top level
+        /// depth=2: apply to each element at level 2 (nested vectors)
+        /// etc.
+        /// </summary>
+        private K3Value ApplyEachAtDepth(K3Value data, int depth)
+        {
+            if (depth <= 0)
+            {
+                return data;
+            }
+            
+            if (depth == 1)
+            {
+                // Apply each at the top level - return the elements as-is
+                if (data is VectorValue vecDepth1)
+                {
+                    // Each at depth 1 preserves the vector structure
+                    return vecDepth1;
+                }
+                return data;
+            }
+            
+            // depth >= 2: descend into nested vectors
+            if (data is VectorValue vecDeep)
+            {
+                var result = new List<K3Value>();
+                foreach (var element in vecDeep.Elements)
+                {
+                    // Recursively apply at depth-1 to each element
+                    result.Add(ApplyEachAtDepth(element, depth - 1));
+                }
+                return new VectorValue(result, DetermineVectorType(result));
+            }
+            
+            // Scalar data - return as-is
+            return data;
         }
 
         
