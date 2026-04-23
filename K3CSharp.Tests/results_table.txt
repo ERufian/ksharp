@@ -1327,7 +1327,7 @@ x#y         │ 10 10 10             │                      ║
 y:2 4
 ~,/&:'+(x;y) │ 1 0 0 1 1 1 0 0...   │                      ║
 ║ idioms_05_252_alternate_takes.k                    │ x:1 2 3 4 5
-~(&x)!2  │ 1 0 0 0 0 0 0 0...   │ 1 0 0 1 1 1 0 0...   ║
+~(&x)!2  │ 1 0 0 1 1 1 0 0...   │                      ║
 ║ idioms_05_480_replace_in_y_by_zero.k               │ x:1 2 3 4 5
 y:2 4
 x*~x _lin y │ 1 0 3 0 5            │                      ║
@@ -1418,13 +1418,13 @@ y:&x="="
 g:4
 h:"x"
 a:g*#y
-(x,a#h)[<(!#x),a#y] │ "abcd=,def=,gh="     │ "abcd=xxxx,def=...   ║
+(x,a#h)[<(!#x),a#y] │ "abcdxxxx=,defx...   │ "abcd=xxxx,def=...   ║
 ║ idioms_07_29_insert_before_y.k                     │ x:"1234,234,34"
 y:0 5 9
 g:5
 h:"*"
 a:g*#y
-((a#h),x)[<(a#y),!#x] │ "***************"    │ "*****1234,****...   ║
+((a#h),x)[<(a#y),!#x] │ "*1****234,***2...   │ "*****1234,****...   ║
 ║ idioms_08_22_index_first_min.k                     │ x:14 12 10 9 6 12 6 11 8 12 6 13 6
 x?&/x │ 4                    │                      ║
 ║ idioms_08_23_index_first_max.k                     │ x:11 10 8 8 8 7 5 9 12 12 10 12 8
@@ -1473,7 +1473,7 @@ x[&~0=(!#x)!y] │ 5 6 8 9 11 12        │                      ║
 y:3
 x[&0=(!#x)!y] │ 4 7 10 13            │                      ║
 ║ idioms_08_469_remove_every_second.k                │ x:"abcdefghijklmn"
-x[&(!#x)!2] │ "bccdddeeeeffff...   │ "bdfhjln"            ║
+x[&(!#x)!2] │ "bdfhjln"            │                      ║
 ║ idioms_08_471_circular_find_after_y.k              │ x:6 6 0 0 8 9 8 1 0 2 9 4 6 3 5
 g:0 6 5
 y:9
@@ -1653,7 +1653,7 @@ y:3
 ║ idioms_11_415_lengths_of_one_infixes.k             │ x:0 0 1 1 1 0 0 1 1 1 1 0 1
 (&<':0,x,0)-&>':0,x,0 │ 1 2 2 2 2 2 2 1...   │ 3 4 1                ║
 ║ idioms_11_417_end_points_equal_infixes.k           │ x:"baackkkegtt"
-(~(1 _ x)=-1 _ x),1 │ Error: Negate o...   │ 1 0 1 1 0 0 1 1...   ║
+(~(1 _ x)=-1 _ x),1 │ 1 0 1 1 0 0 1 1...   │                      ║
 ║ idioms_11_418_start_points_equal_infixes.k         │ x:"baackkkegtt"
 1,~(1 _ x)=-1 _ x │ 1 1 0 1 1 0 0 1...   │                      ║
 ║ idioms_11_423_lengths_from_start_indicator.k       │ x:1 0 1 0 0 1 0 0 0 1 0
@@ -1706,7 +1706,7 @@ det x │ 1                    │                      ║
 ║ idioms_12_375_insert_row.k                         │ y:4 3#1+!12
 x:13 14 15
 g:2
-(y,,x)[<(!#y),g] │ (1 2 3;4 5 6;7 ...   │ (1 2 3;4 5 6;7 ...   ║
+(y,,x)[<(!#y),g] │ (1 2 3;4 5 6;7 ...   │                      ║
 ║ idioms_12_376_append_row.k                         │ x:4 3#1+!12
 y:13 14 15
 x,,y │ (1 2 3;4 5 6;7 ...   │                      ║
@@ -1793,7 +1793,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1087/1138 tests passed (95.5%)                                                                             ║
+║ SUMMARY: 1091/1138 tests passed (95.9%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -1813,12 +1813,6 @@ Test: idioms_05_513_empty_matrix.k
 Input: ^,!0
 Expected: 1 0
 Actual: ,1
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_05_252_alternate_takes.k
-Input: x:1 2 3 4 5
-~(&x)!2
-Expected: 1 0 0 1 1 1 0 0 0 0 1 1 1 1 1
-Actual: 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_06_34_choose_grade_direction.k
 Input: x:30 45 97 77 35 49 87 82 79 8
@@ -1857,7 +1851,7 @@ h:"x"
 a:g*#y
 (x,a#h)[<(!#x),a#y]
 Expected: "abcd=xxxx,def=xxxx,gh=xxxx"
-Actual: "abcd=,def=,gh="
+Actual: "abcdxxxx=,defxxxx=,ghxx=xx"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_07_29_insert_before_y.k
 Input: x:"1234,234,34"
@@ -1867,7 +1861,7 @@ h:"*"
 a:g*#y
 ((a#h),x)[<(a#y),!#x]
 Expected: "*****1234,*****234,*****34"
-Actual: "***************"
+Actual: "*1****234,***2**34,*3****4"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_79_index_last_nonblank.k
 Input: x:"blanks at end "
@@ -1888,12 +1882,6 @@ y:8 5 2 6 1 9
 @[&1+|/x,y;y;:;1][x]
 Expected: 1 0 0 1
 Actual: 0 1 1 0 0 1 1 0 1 1
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_469_remove_every_second.k
-Input: x:"abcdefghijklmn"
-x[&(!#x)!2]
-Expected: "bdfhjln"
-Actual: "bccdddeeeefffffgggggghhhhhhhiiiiiiiijjjjjjjjjkkkkkkkkkklllllllllllmmmmmmmmmmmmnnnnnnnnnnnnn"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_471_circular_find_after_y.k
 Input: x:6 6 0 0 8 9 8 1 0 2 9 4 6 3 5
@@ -1935,7 +1923,7 @@ Input: x:"   abcd e  fg   "
 lt:{x[&(|\a)&||\|a:~x=" "]}
 lt x
 Expected: "abcd e  fg"
-Actual: Error: Function execution error: Undefined variable: a
+Actual: Error: Function execution error: Cannot compare Null and Vector with =
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_207_indices_of_rows.k
 Input: x:+3 8#"abcdefgh"
@@ -1990,12 +1978,6 @@ Input: x:0 0 1 1 1 0 0 1 1 1 1 0 1
 Expected: 3 4 1
 Actual: 1 2 2 2 2 2 2 1 1 2 2 2 1 1 1 1 2 2 2 2 1 1 1 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 2 2 2 2 3 2 2 2 2 3 3 3 3 3 3 3 3 4 3 2 2 1 1 1 1 1 2 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_11_417_end_points_equal_infixes.k
-Input: x:"baackkkegtt"
-(~(1 _ x)=-1 _ x),1
-Expected: 1 0 1 1 0 0 1 1 1 0 1
-Actual: Error: Negate operator cannot be applied to vector of type CharacterValue
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_423_lengths_from_start_indicator.k
 Input: x:1 0 1 0 0 1 0 0 0 1 0
 -':&x,1
@@ -2044,14 +2026,6 @@ Input: lt:{{~x<\:x}[!x]}
 lt 4
 Expected: (1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1)
 Actual: 
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_375_insert_row.k
-Input: y:4 3#1+!12
-x:13 14 15
-g:2
-(y,,x)[<(!#y),g]
-Expected: (1 2 3;4 5 6;7 8 9;13 14 15;10 11 12)
-Actual: (1 2 3;4 5 6;7 8 9;10 11 12)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_555_all_axes.k
 Input: x:2 2 2 2#!16
