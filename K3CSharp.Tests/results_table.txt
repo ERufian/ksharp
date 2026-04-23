@@ -1665,9 +1665,14 @@ y:14 12 18 15 13 16 11 17
 ║ idioms_11_21_rotate_infixes_left.k                 │ y:"abcdefghij"
 x:1 0 1 0 0 1 1 0 0 0
 y[<x++\x] │ "badecfhijg"         │                      ║
+║ idioms_11_39_reverse_infixes_lengths.k             │ il:{(#x)#+\0,x}; x:11+!8; y:3 3 2; x[|>+\(!#x)_lin il y] │ 13 12 11 16 15 ...   │                      ║
 ║ idioms_11_40_reverse_infixes_partition.k           │ x:1 0 1 0 0 1 0 0 0 1
 y:1 2 3 4 5 6 7 8 9 10
 y[|>+\x] │ 2 1 5 4 3 9 8 7...   │                      ║
+║ idioms_11_202_indices_infixes_length.k             │ x:4+!5; y:3; x+\:!y  │ (4 5 6;5 6 7;6 ...   │                      ║
+║ idioms_11_213_maxima_infixes_boolean.k             │ x:-17 7 30 12 5 2 -5 6 -3 -19; y:10#1 1 0; |/x[&y] │ 12                   │                      ║
+║ idioms_11_254_running_parity_infixes.k             │ x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y] │ Error: Function...   │ 1 1 1 0 1 1 1 1...   ║
+║ idioms_11_256_groups_of_ones_pointed.k             │ y:0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1; x:0 0 0 1 0 0 0 0 1 0 0 1 0 0 0 1; y&a=|\x*a:+\>':0,y │ Error: Cannot m...   │ 0 0 0 1 1 1 1 1...   ║
 ║ idioms_11_257_sums_of_infixes.k                    │ x:1+!10
 y:2 3 2 3
 +/'(+\0,-1 _ y)_ x │ 3 12 13 27           │                      ║
@@ -1684,6 +1689,7 @@ y:1 0 0 1 0 1 0 0
 ║ idioms_11_291_sums_infixes.k                       │ y:1 2 3 4 5
 x:1 0 1 0 1
 +/'(&x)_ y │ 3 7 5                │                      ║
+║ idioms_11_292_groups_of_ones_pointed.k             │ y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y] │ Error: Function...   │ 1 1 1 0 0 0 0        ║
 ║ idioms_11_296_starting_positions_from_lengths.k    │ x:2 3 1 5
 +\-1 _ 0,x │ 0 2 5 6              │                      ║
 ║ idioms_11_300_gth_infix.k                          │ x:1 0 0 1 0 1 0 0 0 1 0
@@ -1698,6 +1704,7 @@ y:3
 ║ idioms_11_405_start_points_for_fields.k            │ x:5
 y:3
 @[&x*y;y*!x;:;1] │ 1 0 0 1 0 0 1 0...   │                      ║
+║ idioms_11_414_ending_indices_field_lengths.k       │ x:4 7 13 15 20; (1+*x),-':x │ 5 3 6 2 5            │                      ║
 ║ idioms_11_415_lengths_of_one_infixes.k             │ x:0 0 1 1 1 0 0 1 1 1 1 0 1
 (&<':0,x,0)-&>':0,x,0 │ 1 2 2 2 2 2 2 1...   │ 3 4 1                ║
 ║ idioms_11_417_end_points_equal_infixes.k           │ x:"baackkkegtt"
@@ -1841,7 +1848,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1111/1186 tests passed (93.7%)                                                                             ║
+║ SUMMARY: 1115/1193 tests passed (93.5%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2174,6 +2181,21 @@ y:14 12 18 15 13 16 11 17
 {,/x+'>:'x _ y}[&x;y]
 Expected: 2 0 1 5 3 4 7 6
 Actual: Error: Function execution error: Verb '>:' is registered as monadic but not implemented in ApplyMonadicVerb
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_11_254_running_parity_infixes.k
+Input: x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y]
+Expected: 1 1 1 0 1 1 1 1 0 0 1 0 0 0
+Actual: Error: Function execution error: Vector mod requires all elements to be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_11_256_groups_of_ones_pointed.k
+Input: y:0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1; x:0 0 0 1 0 0 0 0 1 0 0 1 0 0 0 1; y&a=|\x*a:+\>':0,y
+Expected: 0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1
+Actual: Error: Cannot multiply Integer by Function
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_11_292_groups_of_ones_pointed.k
+Input: y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y]
+Expected: 1 1 1 0 0 0 0
+Actual: Error: Function execution error: Undefined variable: a
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_415_lengths_of_one_infixes.k
 Input: x:0 0 1 1 1 0 0 1 1 1 1 0 1
