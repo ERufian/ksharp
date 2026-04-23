@@ -2587,16 +2587,27 @@ namespace K3CSharp.Tests
 
                 // Chapter 10 idioms: Text and block manipulation
 
+                ("idioms_10_205_remove_trailing_blank_rows.k", "(\"aaaaa\";\"bbbbb\";\"ccccc\";\"     \";\"ddddd\";\"eeeee\")"),
                 ("idioms_10_206_remove_duplicate_rows.k", "(\"abc\";\"def\";\"ghi\";\"jkl\")"),
                 ("idioms_10_207_indices_of_rows.k", "0 5 8 2"),
+                ("idioms_10_209_remove_trailing_blank_columns.k", "(\"abc de\";\"abc de\";\"abc de\")"),
+                ("idioms_10_210_remove_leading_blank_columns.k", "(\"ed cba\";\"ed cba\";\"ed cba\")"),
+                ("idioms_10_211_remove_leading_blank_rows.k", "(\"eee\";\"ddd\";\" \";\"ccc\";\"bbb\";\"aaa\")"),
+                ("idioms_10_216_rows_starting_with_y.k", "(\"sit\";\"sin\")"),
+                ("idioms_10_218_single_blank_row.k", "(\"aaa\";\"   \";\"bbb\";\"   \";\"ccc\";\"   \";\"ddd\")"),
+                ("idioms_10_220_remove_duplicate_blank_columns.k", "(\"a b c d\";\"a b c d\";\"a b c d\")"),
                 ("idioms_10_225_remove_blank_rows.k", "(\"aaa\";\"bbb\";\"ccc\")"),
+                ("idioms_10_226_remove_blank_columns.k", "(\"x h \";\"x h \";\"x hi\";\"x hi\")"),
                 ("idioms_10_231_rows_different_from_y.k", "1 1 0 1"),
                 ("idioms_10_359_locate_blank_rows.k", "0 1 0 0 1 0"),
                 ("idioms_10_441_comma_separated.k", "\"Swift,Austen,Dickens\""),
+                ("idioms_10_485_append_empty_row.k", "(\"ab\";\"cd\";\"ef\";\"  \")"),
+                ("idioms_10_487_insert_empty_row.k", "(\"ab\";\"cd\";\"  \";\"ef\")"),
                 ("idioms_10_489_string_to_table.k", "(\"each\";\"word\";\"in\";,\"a\";\"row\")"),
                 ("idioms_10_499_rows_starting_with.k", "(\"abcd\";\"ijkl\")"),
                 ("idioms_10_576_prepend_y_items.k", "10 10 1 10 10 3 10 10 5"),
                 ("idioms_10_577_append_y_items.k", "1 10 10 3 10 10 5 10 10"),
+                ("idioms_10_579_variable_length_lines.k", ",(\"by and by\";\"God caught his eye\")"),
 
                 // Chapter 11 idioms: Subvectors
 

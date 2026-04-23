@@ -1594,13 +1594,21 @@ y:2 4 6 8
 ║ idioms_09_581_insert_after_each.k                  │ x:"abc"
 y:"d"
 ,/x,'y │ "adbdcd"             │                      ║
+║ idioms_10_205_remove_trailing_blank_rows.k         │ x:+5 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; rtr[x] │ Error: Function...   │ ("aaaaa";"bbbbb...   ║
 ║ idioms_10_206_remove_duplicate_rows.k              │ x:("abc";"def";"abc";"ghi";"jkl";"abc";"ghi";"abc")
 ?x │ ("abc";"def";"g...   │                      ║
 ║ idioms_10_207_indices_of_rows.k                    │ x:+3 8#"abcdefgh"
 y:+3 4#"afmc"
 x?/:y │ 3 3 3                │ 0 5 8 2              ║
+║ idioms_10_209_remove_trailing_blank_columns.k      │ x:3 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; +rtr[+x] │ Error: Function...   │ ("abc de";"abc ...   ║
+║ idioms_10_210_remove_leading_blank_columns.k       │ x:3 9#"   ed cba"; rtr:{x[&||\|~x~\:(#+x)#" "]}; +|rtr[|+x] │ Error: Function...   │ ("ed cba";"ed c...   ║
+║ idioms_10_211_remove_leading_blank_rows.k          │ x:|+3 9#"abc de "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x] │ Error: Function...   │ ("eee";"ddd";" ...   ║
+║ idioms_10_216_rows_starting_with_y.k               │ x:("sit";"sat";"sin";"tin"); y:"si"; rb:{x[&&/'y _lin/:x]}; rb[x;y] │ ("sit";"sin")        │                      ║
+║ idioms_10_218_single_blank_row.k                   │ x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x] │ Error: Function...   │ ("aaa";"   ";"b...   ║
+║ idioms_10_220_remove_duplicate_blank_columns.k     │ x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x] │ Error: Function...   │ ("a b c d";"a b...   ║
 ║ idioms_10_225_remove_blank_rows.k                  │ x:("aaa";"bbb";"   ";"ccc";"   ")
 x _dv "   " │ ("aaa";"bbb";"c...   │                      ║
+║ idioms_10_226_remove_blank_columns.k               │ x:+4 4#"xxxx    hhhh  ii"; +(+x)_dv " " │ ("xxxx";"    ";...   │ ("x h ";"x h ";...   ║
 ║ idioms_10_231_rows_different_from_y.k              │ x:("aaa";"bbb";"ooo";"pop")
 y:"o"
 |/'~x=y │ Error: Negate o...   │ 1 1 0 1              ║
@@ -1608,6 +1616,8 @@ y:"o"
 x~\:(#+x)#" " │ 0 0 0 0 0            │ 0 1 0 0 1 0          ║
 ║ idioms_10_441_comma_separated.k                    │ x:("Swift";"Austen";"Dickens")
 1 _ ,/",",'x │ Error: length e...   │ "Swift,Austen,D...   ║
+║ idioms_10_485_append_empty_row.k                   │ x:("ab";"cd";"ef"); x,,(*|^x)#" " │ ("ab";"cd";"ef"...   │                      ║
+║ idioms_10_487_insert_empty_row.k                   │ x:("ab";"cd";"ef"); y:1; (x,,(*|^x)#" ")[<(!#x),y] │ ("ab";"cd";"  "...   │                      ║
 ║ idioms_10_489_string_to_table.k                    │ y:"eachwordinarow"
 x:1 0 0 0 1 0 0 0 1 0 1 1 0 0
 (&x)_ y │ ("each";"word";...   │                      ║
@@ -1622,6 +1632,7 @@ g:10
 y:2
 g:10
 ,/x,\:y#g │ 1 10 10 3 10 10...   │                      ║
+║ idioms_10_579_variable_length_lines.k              │ x:"by and by"; y:"God caught his eye"; ,(x;y) │ ,("by and by";"...   │                      ║
 ║ idioms_11_5b_indices_from_lengths.k                │ il:{(#x)#+\0,x}
 il 4 3 │ 0 4                  │                      ║
 ║ idioms_11_2_max_scan_partition.k                   │ x:1 1 0 0 0 1 0 0 1 1
@@ -1830,7 +1841,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1107/1175 tests passed (94.2%)                                                                             ║
+║ SUMMARY: 1111/1186 tests passed (93.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2082,12 +2093,47 @@ Input: x:"wider"; ,/(+,x),'" "
 Expected: "w i d e r "
 Actual: "wider "
 ──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_205_remove_trailing_blank_rows.k
+Input: x:+5 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; rtr[x]
+Expected: ("aaaaa";"bbbbb";"ccccc";"     ";"ddddd";"eeeee")
+Actual: Error: Function expects 3 arguments, got 5
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_207_indices_of_rows.k
 Input: x:+3 8#"abcdefgh"
 y:+3 4#"afmc"
 x?/:y
 Expected: 0 5 8 2
 Actual: 3 3 3
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_209_remove_trailing_blank_columns.k
+Input: x:3 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; +rtr[+x]
+Expected: ("abc de";"abc de";"abc de")
+Actual: Error: Function execution error: Cannot compare Character and Vector with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_210_remove_leading_blank_columns.k
+Input: x:3 9#"   ed cba"; rtr:{x[&||\|~x~\:(#+x)#" "]}; +|rtr[|+x]
+Expected: ("ed cba";"ed cba";"ed cba")
+Actual: Error: Function execution error: Cannot compare Character and Vector with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_211_remove_leading_blank_rows.k
+Input: x:|+3 9#"abc de "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x]
+Expected: ("eee";"ddd";" ";"ccc";"bbb";"aaa")
+Actual: Error: Function execution error: Cannot compare Character and Vector with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_218_single_blank_row.k
+Input: x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x]
+Expected: ("aaa";"   ";"bbb";"   ";"ccc";"   ";"ddd")
+Actual: Error: Function execution error: Cannot compare Null and Vector with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_220_remove_duplicate_blank_columns.k
+Input: x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x]
+Expected: ("a b c d";"a b c d";"a b c d")
+Actual: Error: Function execution error: Cannot compare Null and Vector with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_10_226_remove_blank_columns.k
+Input: x:+4 4#"xxxx    hhhh  ii"; +(+x)_dv " "
+Expected: ("x h ";"x h ";"x hi";"x hi")
+Actual: ("xxxx";"    ";"hhhh";"  ii")
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_231_rows_different_from_y.k
 Input: x:("aaa";"bbb";"ooo";"pop")
