@@ -1278,10 +1278,10 @@ namespace K3CSharp
                             }
                         }
                         
-                        if (isUniform && uniformLength > 0)
+                        if (isUniform)
                         {
-                            // Check if we have nested vectors (3D tensor)
-                            if (firstElement.Elements[0] is VectorValue)
+                            // Check if we have nested vectors (3D tensor) - only if uniformLength > 0
+                            if (uniformLength > 0 && firstElement.Elements[0] is VectorValue)
                             {
                                 // 3D tensor - check uniformity of third dimension
                                 var thirdDimUniform = true;

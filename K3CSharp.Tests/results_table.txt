@@ -1303,7 +1303,7 @@ y:"cdeac"
 y:2 3 5 7 11
 ~x _lin y │ 0 0 1 0 1 0 1 1...   │                      ║
 ║ idioms_05_563_empty_vector.k                       │ ^!0                  │ ,0                   │                      ║
-║ idioms_05_513_empty_matrix.k                       │ ^,!0                 │ ,1                   │ 1 0                  ║
+║ idioms_05_513_empty_matrix.k                       │ ^,!0                 │ 1 0                  │                      ║
 ║ idioms_05_165_zeros_preceded_by_ones.k             │ x:5
 y:9
 zo:{((y-x)#1),&x}
@@ -1793,7 +1793,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1091/1138 tests passed (95.9%)                                                                             ║
+║ SUMMARY: 1092/1138 tests passed (96.0%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -1808,11 +1808,6 @@ s:h[2;3;z]
 (q;r;s)
 Expected: ((("abcde";"fghij");("abcde";"fghij");("abcde";"fghij"));(("abcde";"abcde";"abcde");("fghij";"fghij"; "fghij"));(("aaa";"bbb";"ccc";"ddd";"eee");("fff";"ggg";"hhh";"iii";"jjj")))
 Actual: Error: Function execution error: Cannot call non-function: Null
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_05_513_empty_matrix.k
-Input: ^,!0
-Expected: 1 0
-Actual: ,1
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_06_34_choose_grade_direction.k
 Input: x:30 45 97 77 35 49 87 82 79 8
