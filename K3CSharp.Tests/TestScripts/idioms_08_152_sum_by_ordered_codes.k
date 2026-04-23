@@ -1,0 +1,1 @@
+y:1+!20; z:"abcde"; x:"dcbbbaceeaeccbecbaea"; sc:{+/'((&#z),y)[=z,x]}; sc[x;y;z]
