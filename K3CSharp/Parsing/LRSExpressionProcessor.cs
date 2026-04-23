@@ -149,22 +149,48 @@ namespace K3CSharp.Parsing
             position++;
             
             // Add operand tokens until we hit a dyadic operator or delimiter
+            int depth = 0;
             while (position < tokens.Count)
             {
                 var currentToken = tokens[position];
+                
+                // Track nesting depth for grouping constructs
+                if (currentToken.Type == TokenType.LEFT_PAREN || 
+                    currentToken.Type == TokenType.LEFT_BRACKET || 
+                    currentToken.Type == TokenType.LEFT_BRACE)
+                {
+                    depth++;
+                }
+                else if (currentToken.Type == TokenType.RIGHT_PAREN || 
+                         currentToken.Type == TokenType.RIGHT_BRACKET || 
+                         currentToken.Type == TokenType.RIGHT_BRACE)
+                {
+                    depth--;
+                }
                 
                 if (VerbRegistry.IsAdverbToken(currentToken.Type))
                 {
                     monadicTokens.Add(currentToken);               
                 }
                 
-                // Stop if we hit a dyadic operator (but not an adverb) or expression delimiter
-                if ((OperatorDetector.IsDyadicOperator(currentToken.Type) && !VerbRegistry.IsAdverbToken(currentToken.Type)) ||
-                    currentToken.Type == TokenType.SEMICOLON ||
-                    currentToken.Type == TokenType.NEWLINE ||
-                    currentToken.Type == TokenType.RIGHT_PAREN ||
-                    currentToken.Type == TokenType.RIGHT_BRACKET ||
-                    currentToken.Type == TokenType.RIGHT_BRACE)
+                // Stop if we hit a dyadic operator (but not an adverb) or expression delimiter at depth 0
+                // Only stop on semicolons/newlines at depth 0 (not inside parentheses)
+                bool shouldBreak = (OperatorDetector.IsDyadicOperator(currentToken.Type) && !VerbRegistry.IsAdverbToken(currentToken.Type)) ||
+                                   (depth == 0 && (currentToken.Type == TokenType.SEMICOLON ||
+                                                   currentToken.Type == TokenType.NEWLINE));
+                
+                // For closing delimiters at depth 0, include them in tokens then break
+                // This ensures complete parenthesized expressions are captured
+                if (depth == 0 && (currentToken.Type == TokenType.RIGHT_PAREN ||
+                                   currentToken.Type == TokenType.RIGHT_BRACKET ||
+                                   currentToken.Type == TokenType.RIGHT_BRACE))
+                {
+                    monadicTokens.Add(currentToken);
+                    position++;
+                    break;
+                }
+                
+                if (shouldBreak)
                 {
                     break;
                 }
@@ -183,7 +209,7 @@ namespace K3CSharp.Parsing
             // Fallback to atomic parsing if only operator
             if (monadicTokens.Count == 1)
             {
-                return LRSAtomicParser.CreateOperatorNode(monadicTokens[0].Type);
+                return LRSAtomicParser.ParseAtomicToken(monadicTokens[0], parentParser);
             }
             
             return null;
