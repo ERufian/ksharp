@@ -2451,17 +2451,17 @@ namespace K3CSharp.Tests
                 ("idioms_05_172_ones_followed_by_zeros.k", "1 1 1 1 1 0 0 0 0"),
                 ("idioms_05_407_vector_x_ones.k", "1 1 1 1 1 0 0 0 0 0 0 0"),
                 ("idioms_05_250_replicate.k", "10 10 10"),
-
-
-
-
-
+                ("idioms_05_608_zeroing_vector.k", "0 0 0 0"),
+                ("idioms_05_608_zeroing_matrix.k", "(0 0 0;0 0 0)"),
+                ("idioms_05_121_draw_range.k", ".((`type;0;);(`shape;3 4;))"),
+                ("idioms_05_122_draw_select.k", ".((`type;0;);(`shape;3 5;);(`min;0;);(`max;6;))"),
+                ("idioms_05_123_draw_deal.k", ".((`type;0;);(`shape;2 3;);(`allitemsunique;1;);(`min;0;);(`max;6;))"),
                 ("idioms_05_247_interlace.k", "1 0 0 1 1 1 0 0 0 0"),
                 ("idioms_05_252_alternate_takes.k", "1 0 0 1 1 1 0 0 0 0 1 1 1 1 1"),
-                
+                ("idioms_05_408_empty_row.k", ",0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"),                
                 ("idioms_05_480_replace_in_y_by_zero.k", "1 0 3 0 5"),
                 ("idioms_05_481_replace_not_in_y_by_zero.k", "0 2 0 4 0"),
-                
+                ("idioms_05_521_matrix_columns.k", "(\"aaaa\";\"bbbb\";\"cccc\")"),                
                 ("idioms_05_593_matrix_y_rows.k", "(\"abcd\";\"abcd\";\"abcd\")"),
                 ("idioms_05_610_cyclic_repetitions.k", "\"abcdabcdabcd\""),
                 ("idioms_05_303_smear_ones.k", "0 1 1 1 1 0 1 1 1 0 1 1 0"),

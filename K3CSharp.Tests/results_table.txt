@@ -553,6 +553,13 @@ square:{[x] x*x}
 ║ rand_draw_vector_select.k                          │ r:2 3 _draw 4; .((`type;4:r);(`shape;^r)) │ .((`type;0;);(`...   │                      ║
 ║ rand_draw_vector_deal.k                            │ r:2 3 _draw -10; .((`type;4:r);(`shape;^r);(`allitemsunique;(#r)=#?r)) │ .((`type;0;);(`...   │                      ║
 ║ rand_draw_vector_probability.k                     │ r:2 3 _draw 0; .((`type;4:r);(`shape;^r)) │ .((`type;0;);(`...   │                      ║
+║ idioms_05_608_zeroing_vector.k                     │ x:1 2 3 4; x[]:0; x  │ 1 2 3 4              │ 0 0 0 0              ║
+║ idioms_05_608_zeroing_matrix.k                     │ x:2 3#!6; x[;]:0; x  │ (0 1 2;3 4 5)        │ (0 0 0;0 0 0)        ║
+║ idioms_05_121_draw_range.k                         │ r:(*4 9)+3 4 _draw --/4 9; .((`type;4:r);(`shape;^r)) │ .((`type;0;);(`...   │                      ║
+║ idioms_05_122_draw_select.k                        │ r:3 5 _draw 7; a:,/r; .((`type;4:r);(`shape;^r);(`min;&/a);(`max;|/a)) │ .((`type;0;);(`...   │                      ║
+║ idioms_05_123_draw_deal.k                          │ r:2 3 _draw -7; a:,/r; .((`type;4:r);(`shape;^r);(`allitemsunique;(#a)=#?a);(`min;&/a);(`max;|/a)) │ .((`type;0;);(`...   │ .((`type;0;);(`...   ║
+║ idioms_05_408_empty_row.k                          │ x:15; ,&x            │ ,0 0 0 0 0 0 0 ...   │                      ║
+║ idioms_05_521_matrix_columns.k                     │ x:4; y:"abc"; x#'y   │ ("aaaa";"bbbb";...   │                      ║
 ║ time_gtime.k                                       │ _gtime 0             │ 20350101 0           │                      ║
 ║ time_lt.k                                          │ _lt 0                │ -18000               │                      ║
 ║ time_jd.k                                          │ _jd 20260206         │ -3251                │                      ║
@@ -1793,11 +1800,26 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1092/1138 tests passed (96.0%)                                                                             ║
+║ SUMMARY: 1096/1145 tests passed (95.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
+Test: idioms_05_608_zeroing_vector.k
+Input: x:1 2 3 4; x[]:0; x
+Expected: 0 0 0 0
+Actual: 1 2 3 4
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_05_608_zeroing_matrix.k
+Input: x:2 3#!6; x[;]:0; x
+Expected: (0 0 0;0 0 0)
+Actual: (0 1 2;3 4 5)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_05_123_draw_deal.k
+Input: r:2 3 _draw -7; a:,/r; .((`type;4:r);(`shape;^r);(`allitemsunique;(#a)=#?a);(`min;&/a);(`max;|/a))
+Expected: .((`type;0;);(`shape;2 3;);(`allitemsunique;1;);(`min;0;);(`max;6;))
+Actual: .((`type;0;);(`shape;2 3;);(`allitemsunique;0;);(`min;0;);(`max;6;))
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_03_10a_depth.k
 Input: d:{[n;f]:[n;_f[n-1;f]';f]}
 h:{d[x;y#,:]z}
