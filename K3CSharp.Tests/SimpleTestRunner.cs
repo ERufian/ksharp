@@ -2305,6 +2305,7 @@ namespace K3CSharp.Tests
                 ("test_eval_monadic_star_atomic.k", "1"),
 
                 // Idioms Chapter 01: Direct Application of Verbs
+
                 ("idioms_01_575_kronecker_delta.k", "1 0 0 1"),
                 ("idioms_01_571_xbutnoty.k", "0 1 0 0"),
                 ("idioms_01_570_implies.k", "1 0 1 1"),
@@ -2652,62 +2653,74 @@ namespace K3CSharp.Tests
                 ("idioms_11_540_markers_at_y_indices.k", "0 1 0 1 0 0 0 1 0 0"),
 
                 // Chapter 12 idioms: Matrices and Tensors
+
                 ("idioms_12_547_is_vector.k", "1"),
                 ("idioms_12_601_num_rows.k", "17"),
-
+                ("idioms_12_600_number_of_columns.k", "19"),
                 ("idioms_12_410_num_cols.k", "7"),
-
-
+                ("idioms_12_599_number_of_columns_array.k", "678"),
+                ("idioms_12_203_one_column_matrix.k", "(,34;,31;,51;,29;,35;,17;,89)"),
                 ("idioms_12_588_two_row_matrix.k", "(\"abcd\";\"efgh\")"),
                 ("idioms_12_50_connectivity_list.k", "(0 0 1 1;0 2 0 2)"),
-
-
-
-
-
-
-
-
-
-
+                ("idioms_12_71_connectivity_matrix_from_list.k", "(0 1 1;1 0 1;0 0 1)"),
+                ("idioms_12_148_node_matrix_from_connection.k", "(0 0 2 1 1;2 1 3 2 3)"),
+                ("idioms_12_157_connection_matrix_from_node.k", "(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1)"),
+                ("idioms_12_51_indices.k", "(0 0 0 1 1 1;0 1 2 0 1 2)"),
+                ("idioms_12_81_raveled_index.k", "19"),
+                ("idioms_12_58_pair_each_element.k", "(\"ae\";\"af\";\"ag\";\"ah\");(\"be\";\"bf\";\"bg\";\"bh\");(\"ce\";\"cf\";\"cg\";\"ch\");(\"de\";\"df\";\"dg\";\"dh\")"),
+                ("idioms_12_55_indices_containing.k", "1 0 1 0 1 0"),
+                ("idioms_12_100_indexing_arbitrary_rank.k", "(\"efgh\";\"qrst\")"),
+                ("idioms_12_161_is_upper_triangular.k", "1"),
+                ("idioms_12_162_is_lower_triangular.k", "1"),
                 ("idioms_12_525_main_diagonal.k", "1 6 11"),
                 ("idioms_12_429_matrix_with_diagonal.k", "(5 0 0 0 0;0 9 0 0 0;0 0 6 0 0;0 0 0 7 0;0 0 0 0 2)"),
                 ("idioms_12_197_identity_matrix.k", "(1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1)"),
-
+                ("idioms_12_163_polynomial_product.k", "26"),
                 ("idioms_12_195_upper_triangular.k", "(1 1 1 1;0 1 1 1;0 0 1 1;0 0 0 1)"),
                 ("idioms_12_196_lower_triangular.k", "(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1)"),
-
-
-
-
-
-
+                ("idioms_12_187_direct_matrix_product.k", "(1 10 10 3 10 10 10 5;4 10 10 6 10 10 10 9)"),
+                ("idioms_12_188_shur_product.k", "(10 40 90;160 250 360)"),
+                ("idioms_12_191_shur_sum.k", "(11 22 33;44 55 66)"),
+                ("idioms_12_198_hilbert_matrix.k", "(1.0 0.5 0.333 0.25 0.2;0.5 0.333 0.25 0.2 0.167;0.333 0.25 0.2 0.167 0.143;0.25 0.2 0.167 0.143 0.125;0.2 0.167 0.143 0.125 0.111)"),
+                ("idioms_12_200_replicate_dimension.k", "(0 0 0 1 1 1 2 2 2;3 3 3 4 4 4 5 5 5)"),
+                ("idioms_12_230_extend_transitive_relation.k", "(0 1 1 0 1 1 0;0 0 1 0 1 0 0;0 0 0 1 0 0 0;0 0 0 0 0 0 0;0 0 0 0 0 0 1;0 0 0 0 0 0 0;0 0 0 0 0 0 0)"),
                 ("idioms_12_240_matrix_product.k", "(22 28;49 64)"),
-
+                ("idioms_12_244_product_over_subsets.k", "15"),                
                 ("idioms_12_313_two_by_two_determinant.k", "1"),
                 ("idioms_12_375_insert_row.k", "(1 2 3;4 5 6;7 8 9;13 14 15;10 11 12)"),
                 ("idioms_12_376_append_row.k", "(1 2 3;4 5 6;7 8 9;10 11 12;13 14 15)"),
-
-
-
-
+                ("idioms_12_390_conform_table_rows.k", "(11 12 13;14 15 16)"),
+                ("idioms_12_391_conform_table_columns.k", "(9 9 0 0 0;9 9 0 0 0;9 9 0 0 0;9 9 0 0 0)"),
+                ("idioms_12_392_matrix_from_scalar.k", "(,7)"),
+                ("idioms_12_527_cross_product.k", "-3 6 -3"),
+                ("idioms_12_527_transpose_planes_3d.k", "((0 2;1 3);(4 6;5 7))"),
                 ("idioms_12_528_cross_product.k", "4 28 46 -27 -41 39 45 3 -19 -58"),
                 ("idioms_12_555_all_axes.k", "0 1 2 3"),
                 ("idioms_12_583_array_and_negative.k", "(1 -1;-3 3;5 -5)"),
-
+                ("idioms_12_590_matrix_and_vector.k", "(1 2 3 7 8;4 5 6 7 8)"),
                 ("idioms_12_612_rank_of_array.k", "2"),
                 
                 // Chapter 13 idioms: Charting and drawing
-                ("idioms_13_572_division_by_zero.k", "5 0 0.0"),
-                ("idioms_13_174_move_first_quadrant.k", "(0 5 3;0 1 4;1 2 0)"),
+
                 ("idioms_13_464_framing_matrix.k", "(\"------\";\"|abcd|\";\"|efgh|\";\"|ijkl|\";\"|mnop|\";\"------\")"),
+                ("idioms_13_572_division_by_zero.k", "5 0 0.0"),
                 ("idioms_13_605_plotting_chars.k", "(\"*** \";\"****** \";\"***** \";\"*******\";\"** \")"),
+                ("idioms_13_166_bar_chart_down.k", "(\"    X  \";\"    X  \";\"  X X  \";\"  X X X\";\" XX X X\";\" XXXX X\";\" XXXXXX\";\"XXXXXXX\";\"XXXXXXX\")"),
+                ("idioms_13_170_bar_chart_horizontal_normalized.k", "(\"X    \";\"XXXX \";\"XX   \";\"XXX  \";\"X    \";\"     \";\"XXX  \";\"XXX  \";\"XXXXX\";\"XX   \")"),
+                ("idioms_13_171_bar_chart_horizontal.k", "(\"XX        \";\"XXXXXXXX  \";\"XXXXX     \";\"XXXXXX    \";\"XXX       \";\"X         \";\"XXXXXXX   \";\"XXXXXXX   \";\"XXXXXXXXXX\";\"XXXX      \")"),
+                ("idioms_13_174_move_first_quadrant.k", "(0 5 3;0 1 4;1 2 0)"),
+                ("idioms_13_144_histogram.k", "(\"            \";\"         *  \";\"   *     *  \";\"   *  *  *  \";\"   ** **** *\")"),
 
                 // Chapter 14 idioms: Conversions between numbers and character vectors
                 ("idioms_14_111_count_format.k", "6"),
+                ("idioms_14_93_numbers_from_alphanumeric.k", "(1;12;0;0.5)"),
+                ("idioms_14_94_number_with_default_empty.k", "\"-1\""),
+                ("idioms_14_94_number_with_default_value.k", "234.5"),
                 ("idioms_14_95_numeric_from_alphanumeric.k", "123 438"),
                 ("idioms_14_99_numeric_vector_rows.k", "(3 5;4 7)"),
                 ("idioms_14_101_sum_numbers_matrix.k", "10"),
+                ("idioms_14_106_leading_zeros.k", "(\"037\";\"036\";\"017\";\"038\";\"029\";\"004\";\"031\";\"012\";\"035\";\"025\")"),
+                ("idioms_14_452_number_of_positions.k", "4"),
                 ("idioms_14_456_number_digits.k", "1 2 3 5"),
 
                 // Chapter 15 idioms: Numeric base conversions
@@ -2715,19 +2728,23 @@ namespace K3CSharp.Tests
                 ("idioms_15_49_hex_from_decimal.k", "\"ff\""),
                 ("idioms_15_52_truth_table.k", "(0 0 0 0 1 1 1 1;0 0 1 1 0 0 1 1;0 1 0 1 0 1 0 1)"),
                 ("idioms_15_53_decimal_digits.k", "1 2 3 4"),
+                ("idioms_15_63_represent_mixed_radix.k", "0 1 984"),
                 ("idioms_15_54_represent_in_base.k", "1 4 4"),
                 ("idioms_15_56_hex_from_decimal_chars.k", "\"ff\""),
-                ("idioms_15_63_represent_mixed_radix.k", "0 1 984"),
-                ("idioms_15_66_selection_encoded_list.k", "(\"blue\";\"green\")"),
                 ("idioms_15_75_decimal_from_hex.k", "255"),
+                ("idioms_15_66_selection_encoded_list.k", "(\"blue\";\"green\")"),
                 ("idioms_15_342_arabic_from_roman.k", "1909"),
 
                 // Chapter 16 idioms: Date and time manipulation
                 ("idioms_16_57_vector_from_date.k", "98 12 31"),
                 ("idioms_16_64_time_as_string.k", "\"13:37:21\""),
                 ("idioms_16_65_date_as_string.k", "\"98/12/31\""),
+                ("idioms_16_72_encode_date.k", "1411046639"),
                 ("idioms_16_463_is_leap_year.k", "1"),
                 ("idioms_16_74_days_in_month.k", "29"),
+                ("idioms_16_104_date_ascending_format.k", "103"),
+                ("idioms_16_107_american_date.k", "\"12\""),
+                ("idioms_16_105_12hour_clock.k", "\"13\""),
 
                 // Chapter 17 idioms: Mathematical computations
                 ("idioms_17_457_is_integral.k", "1"),
