@@ -1934,10 +1934,43 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_281_taylor_series_value.k                │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
 ║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ Error: Function...   │ (1 1 4 4;1 4 1 4)    ║
 ║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ Error: Function...   │ ,14                  ║
+║ idioms_20_159_is_range_of_x_1.k                    │ x:1 1 1 1 1;1=#?x    │ 1                    │                      ║
+║ idioms_20_180_is_x_in_range.k                      │ hc:{1 0~/:~x<\:y};x:19 20 21 39 40 41;y:20 40;hc[x;y] │ 0 0 0 0 0 0          │ 0 1 1 1 0 0          ║
+║ idioms_20_233_is_x_within_range.k                  │ x:9;y:(1 9;9 16;5 7;8 20;6 10);x(</<)/:y │                      │ 0 1 0 1 1            ║
+║ idioms_20_234_is_x_within_range_exclusive.k        │ x:9;y:(1 9;9 16;5 7;8 20;6 10);</'~x>y │ Error: Negate o...   │ 1 0 0 1 1            ║
+║ idioms_20_221_is_x_integer_in_interval.k           │ g:6;h:12;x:7;(x=_ x)&(~x<g)&(x<h) │ 1                    │                      ║
+║ idioms_20_312_maximum_separation.k                 │ x:17 14 14 17 14 17 18;(|/x)-(&/x) │ 4                    │                      ║
+║ idioms_20_329_mask_from_positive_integers.k        │ x:2 3 3 -2 4 4 -1;(!1+|/x) _lin x │ 0 0 1 1 1            │                      ║
+║ idioms_20_345_do_ranges_match.k                    │ x:1 2 3;y:3 2 1 1;om:{x[<x]~y[<y]};om[?x;?y] │ 1                    │                      ║
+║ idioms_20_350_is_x_boolean.k                       │ x:0 1 0 1;&/x _lin\:0 1 │ 1                    │                      ║
+║ idioms_20_353_are_items_unique.k                   │ x:"abcdefg";(#x)=#?x │ 1                    │                      ║
+║ idioms_20_366_count_of_scalars.k                   │ cs:{#,//x};cs[(1 2;(3 4;5))] │ 2                    │ 5                    ║
+║ idioms_20_548_test_if_empty.k                      │ ie:{0 _in ^x};ie[(1 0#5)] │ 1                    │                      ║
+║ idioms_20_564_is_x_within_range_exclusive.k        │ ci:{(y[0]<x)&(x<y[1])};y:3 8;x:5;ci[x;y] │ 1                    │                      ║
+║ idioms_20_565_is_x_within_range_inclusive.k        │ oi:{(~y[0]>x)&(~x>y[1])};y:3 8;x:5;oi[x;y] │ 1                    │                      ║
+║ idioms_21_325_average_mean.k                       │ av:{(+/x)%#x};av[1 10 100] │ 1.0                  │ 37.0                 ║
+║ idioms_21_237_weighted_average.k                   │ y:78 80 90 88 72;x:20 15 20 22 19;(+/x*y)%#x │ 1572.8               │                      ║
+║ idioms_21_24_median.k                              │ x:61 20 51 12 34 31 51 29 35 17 89;x[(<x)[_.5*#x]] │ 61 20 51 12 34 ...   │ 34                   ║
+║ idioms_21_319_standard_deviation.k                 │ x:44 77 48 24 28 36 17 49 90 91;std:{((+/(x-(+/x)%#x)^2)%#x)^0.5};std[x] │ Error: Function...   │ 25.48411             ║
+║ idioms_21_320_variance.k                           │ x:44 77 48 24 28 36 17 49 90 91.0;var:{(+/(x-(+/x)%#x)^2)%#x};var[x] │ Error: Function...   │ 649.44               ║
+║ idioms_21_321_y_th_moment.k                        │ x:44 77 48 24 28 36 17 49;ym:{(+/(x-(+/x)%#x)^y)%#x};ym[x;2] │ 309.2344             │                      ║
+║ idioms_21_128_linear_fit_coefficients.k            │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z │ Error: _lsq req...   │ 4.587803 0.7927486   ║
+║ idioms_21_125_linear_fit_predicted.k               │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a) │ Error: _mul req...   │ 55.32371 60.080...   ║
+║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: CreateNo...   │ 35.2829 0.00817742   ║
+║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: CreateNo...   │ 56 60 66 70 78.0     ║
+║ idioms_21_173_assign_to_classes.k                  │ f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h] │ Error: Function...   │ 0 2 4 2              ║
+║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ Error: Vector i...   │ (26 40 39;40 39...   ║
+║ idioms_21_546_is_count_of_atoms_1.k                │ cs:{#,//x};co:{1=cs[x]};co[1 1 1#35] │ 1                    │                      ║
+║ idioms_22_77_present_value.k                       │ pv:{[c;t;d]+/c*d^t};c:0.1 0.1 1.1;t:1 2 3;d:0.9;pv[c;t;d] │ 0.9729               │                      ║
+║ idioms_22_82_future_value.k                        │ x:10 15 20 25;y:5;fv:{+/x*(1+y%100)^|!#x};fv[x;y] │ 74.11375             │                      ║
+║ idioms_22_146_compound_interest.k                  │ x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0] │ ((1.005 1.01002...   │ 1.005                ║
+║ idioms_22_186_annuity_coefficient.k                │ x:10 15 20 25;y:8 9 10 15;ac:{(y%100)%/:+1-(1+y%100)^\:-x};ac[x;y] │ (8.5899346e-013...   │ (0.1490295 0.15...   ║
+║ idioms_22_286_fifo_stock.k                         │ x:5;y:1 2 3 4 5;ff:{-':0,0|(+\y)-x};ff[x;y] │ Error: Function...   │ 0 0 1 4 5            ║
+║ idioms_23_389_playing_order.k                      │ log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6] │ Error: CreateNo...   │ 1 5 3 0 2 6 4 0      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1144/1282 tests passed (89.2%)                                                                             ║
+║ SUMMARY: 1159/1315 tests passed (88.1%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2726,6 +2759,96 @@ Test: idioms_19_262_saddle_point_value.k
 Input: x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]]
 Expected: ,14
 Actual: Error: Function expects 3 arguments, got 5
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_20_180_is_x_in_range.k
+Input: hc:{1 0~/:~x<\:y};x:19 20 21 39 40 41;y:20 40;hc[x;y]
+Expected: 0 1 1 1 0 0
+Actual: 0 0 0 0 0 0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_20_233_is_x_within_range.k
+Input: x:9;y:(1 9;9 16;5 7;8 20;6 10);x(</<)/:y
+Expected: 0 1 0 1 1
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_20_234_is_x_within_range_exclusive.k
+Input: x:9;y:(1 9;9 16;5 7;8 20;6 10);</'~x>y
+Expected: 1 0 0 1 1
+Actual: Error: Negate operator cannot be applied to vector of type VectorValue
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_20_366_count_of_scalars.k
+Input: cs:{#,//x};cs[(1 2;(3 4;5))]
+Expected: 5
+Actual: 2
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_325_average_mean.k
+Input: av:{(+/x)%#x};av[1 10 100]
+Expected: 37.0
+Actual: 1.0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_24_median.k
+Input: x:61 20 51 12 34 31 51 29 35 17 89;x[(<x)[_.5*#x]]
+Expected: 34
+Actual: 61 20 51 12 34 31 51 29 35 17 89
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_319_standard_deviation.k
+Input: x:44 77 48 24 28 36 17 49 90 91;std:{((+/(x-(+/x)%#x)^2)%#x)^0.5};std[x]
+Expected: 25.48411
+Actual: Error: Function expects 3 arguments, got 10
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_320_variance.k
+Input: x:44 77 48 24 28 36 17 49 90 91.0;var:{(+/(x-(+/x)%#x)^2)%#x};var[x]
+Expected: 649.44
+Actual: Error: Function expects 3 arguments, got 10
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_128_linear_fit_coefficients.k
+Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z
+Expected: 4.587803 0.7927486
+Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_125_linear_fit_predicted.k
+Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a)
+Expected: 55.32371 60.08021 65.62945 69.59319 77.52068 89.41191 103.6814 117.9509 135.3913 154.4173
+Actual: Error: _mul requires matrices represented as nested vectors
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_127_exponential_fit_coefficients.k
+Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a
+Expected: 35.2829 0.00817742
+Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_124_exponential_fit_predicted.k
+Input: x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]]
+Expected: 56 60 66 70 78.0
+Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_173_assign_to_classes.k
+Input: f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h]
+Expected: 0 2 4 2
+Actual: Error: Function execution error: Verb '#:' found in registry but not implemented in EvaluateDyadicOperatorWithRegistry
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_21_201_moving_index.k
+Input: x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y]
+Expected: (26 40 39;40 39 28;39 28 27;28 27 48)
+Actual: Error: Vector indices must be integers, got Vector
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_22_146_compound_interest.k
+Input: x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0]
+Expected: 1.005
+Actual: ((1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1);(1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1);(1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1))
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_22_186_annuity_coefficient.k
+Input: x:10 15 20 25;y:8 9 10 15;ac:{(y%100)%/:+1-(1+y%100)^\:-x};ac[x;y]
+Expected: (0.1490295 0.1558201 0.1627454 0.1992521;0.1168295 0.1240589 0.1314738 0.1710171;0.1018522 0.1095465 0.1174596 0.1597615;0.09367878 0.1018063 0.1101681 0.1546994)
+Actual: (8.5899346e-013 -3.1665935e-018 1.1529215e-023 -5.6668398e-029;2.7894275e-012 -1.8530202e-017 1.2157665e-022 -1.076847e-027;8e-012 -9e-017 1e-021 -1.5e-026;4.613203E-1 -3.941045e-014 3.3252567e-018 -3.7876752e-022)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_22_286_fifo_stock.k
+Input: x:5;y:1 2 3 4 5;ff:{-':0,0|(+\y)-x};ff[x;y]
+Expected: 0 0 1 4 5
+Actual: Error: Function execution error: Cannot apply monadic minus to Null
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_23_389_playing_order.k
+Input: log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6]
+Expected: 1 5 3 0 2 6 4 0
+Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
 ──────────────────────────────────────────────────────────────────────────
 Test: test_f_rec.k
 Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]

@@ -2805,6 +2805,47 @@ namespace K3CSharp.Tests
                 ("idioms_19_48_saddle_point_indices.k", "(1 1 4 4;1 4 1 4)"),
                 ("idioms_19_262_saddle_point_value.k", ",14"),
 
+                // Chapter 20 idioms: Ranges
+                ("idioms_20_159_is_range_of_x_1.k", "1"),
+                ("idioms_20_180_is_x_in_range.k", "0 1 1 1 0 0"),
+                ("idioms_20_233_is_x_within_range.k", "0 1 0 1 1"),
+                ("idioms_20_234_is_x_within_range_exclusive.k", "1 0 0 1 1"),
+                ("idioms_20_221_is_x_integer_in_interval.k", "1"),
+                ("idioms_20_312_maximum_separation.k", "4"),
+                ("idioms_20_329_mask_from_positive_integers.k", "0 0 1 1 1"),
+                ("idioms_20_345_do_ranges_match.k", "1"),
+                ("idioms_20_350_is_x_boolean.k", "1"),
+                ("idioms_20_353_are_items_unique.k", "1"),
+                ("idioms_20_366_count_of_scalars.k", "5"),
+                ("idioms_20_548_test_if_empty.k", "1"),
+                ("idioms_20_564_is_x_within_range_exclusive.k", "1"),
+                ("idioms_20_565_is_x_within_range_inclusive.k", "1"),
+
+                // Chapter 21 idioms: Statistics
+                ("idioms_21_325_average_mean.k", "37.0"),
+                ("idioms_21_237_weighted_average.k", "1572.8"),
+                ("idioms_21_24_median.k", "34"),
+                ("idioms_21_319_standard_deviation.k", "25.48411"),
+                ("idioms_21_320_variance.k", "649.44"),
+                ("idioms_21_321_y_th_moment.k", "309.2344"),
+                ("idioms_21_128_linear_fit_coefficients.k", "4.587803 0.7927486"),
+                ("idioms_21_125_linear_fit_predicted.k", "55.32371 60.08021 65.62945 69.59319 77.52068 89.41191 103.6814 117.9509 135.3913 154.4173"),
+                ("idioms_21_127_exponential_fit_coefficients.k", "35.2829 0.00817742"),
+                ("idioms_21_124_exponential_fit_predicted.k", "56 60 66 70 78.0"),
+                ("idioms_21_173_assign_to_classes.k", "0 2 4 2"),
+                ("idioms_21_201_moving_index.k", "(26 40 39;40 39 28;39 28 27;28 27 48)"),
+                ("idioms_21_546_is_count_of_atoms_1.k", "1"),
+
+                // Chapter 22 idioms: Application of financial formulas
+                ("idioms_22_77_present_value.k", "0.9729"),
+                ("idioms_22_82_future_value.k", "74.11375"),
+                ("idioms_22_146_compound_interest.k", "1.005"),
+                ("idioms_22_186_annuity_coefficient.k", "(0.1490295 0.1558201 0.1627454 0.1992521;0.1168295 0.1240589 0.1314738 0.1710171;0.1018522 0.1095465 0.1174596 0.1597615;0.09367878 0.1018063 0.1101681 0.1546994)"),
+                ("idioms_22_286_fifo_stock.k", "0 0 1 4 5"),
+
+                // Chapter 23 idioms: Full problems
+                ("idioms_23_389_playing_order.k", "1 5 3 0 2 6 4 0"),
+
                 // Self-referent lambda _f tests
                 ("test_f_rec.k", "120"),
                 ("test_f_var.k", "6"),
