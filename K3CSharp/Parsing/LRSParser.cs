@@ -1526,7 +1526,64 @@ namespace K3CSharp.Parsing
                     }
                 }
             }
-            
+
+            // Check for implicit vector followed by bracket indexing: e.g., 1 -1[y]
+            // This handles vector literals with bracket indexing like "1 -1[y]" which creates
+            // the vector [1, -1] and then indexes at position y
+            if (expressionTokens.Count >= 3 &&
+                expressionTokens[expressionTokens.Count - 1].Type == TokenType.RIGHT_BRACKET)
+            {
+                // Find the matching left bracket by scanning backwards from the end
+                int bracketEnd = expressionTokens.Count - 1;
+                int bracketStart = -1;
+                int depth = 1;
+                for (int i = bracketEnd - 1; i >= 0; i--)
+                {
+                    if (expressionTokens[i].Type == TokenType.RIGHT_BRACKET)
+                        depth++;
+                    else if (expressionTokens[i].Type == TokenType.LEFT_BRACKET)
+                    {
+                        depth--;
+                        if (depth == 0)
+                        {
+                            bracketStart = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (bracketStart > 0)
+                {
+                    // Get the tokens before the bracket
+                    var vectorTokens = expressionTokens.GetRange(0, bracketStart);
+                    var bracketContent = expressionTokens.GetRange(bracketStart + 1, bracketEnd - bracketStart - 1);
+
+                    // Check if all tokens before the bracket are atomic (implicit vector)
+                    if (vectorTokens.Count > 0 && vectorTokens.All(t => LRSAtomicParser.CanBeImplicitVectorElement(t.Type)))
+                    {
+                        // Create the implicit vector node
+                        var vectorElements = new List<ASTNode>();
+                        foreach (var token in vectorTokens)
+                        {
+                            vectorElements.Add(LRSAtomicParser.ParseAtomicToken(token, this));
+                        }
+                        var vectorNode = ASTNode.MakeVector(vectorElements);
+
+                        // Parse the index
+                        ASTNode? indexNode = null;
+                        if (bracketContent.Count > 0)
+                        {
+                            indexNode = EvaluateFromRight(bracketContent);
+                        }
+
+                        // Create indexing operation using @ (apply) operator
+                        // This represents: vector @ index
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, vectorNode,
+                            indexNode ?? ASTNode.MakeLiteral(new NullValue()));
+                    }
+                }
+            }
+
             // Detect the exact arity using VerbRegistry rules
             int determinedArity = DetectOperationArity(expressionTokens, 0);
             

@@ -1327,7 +1327,7 @@ x#y         │ 10 10 10             │                      ║
 ║ idioms_05_608_zeroing_matrix.k                     │ x:2 3#!6; x[;]:0; x  │ (0 0 0;0 0 0)        │                      ║
 ║ idioms_05_121_draw_range.k                         │ r:(*4 9)+3 4 _draw --/4 9; .((`type;4:r);(`shape;^r)) │ .((`type;0;);(`...   │                      ║
 ║ idioms_05_122_draw_select.k                        │ r:3 5 _draw 7; a:,/r; .((`type;4:r);(`shape;^r);(`min;&/a);(`max;|/a)) │ .((`type;0;);(`...   │                      ║
-║ idioms_05_123_draw_deal.k                          │ r:2 3 _draw -7; a:,/r; .((`type;4:r);(`shape;^r);(`allitemsunique;(#a)=#?a);(`min;&/a);(`max;|/a)) │ .((`type;0;);(`...   │ .((`type;0;);(`...   ║
+║ idioms_05_123_draw_deal.k                          │ r:2 3 _draw -7; a:,/r; .((`type;4:r);(`shape;^r);(`allitemsunique;(#a)=#?a);(`min;&/a);(`max;|/a)) │ .((`type;0;);(`...   │                      ║
 ║ idioms_05_247_interlace.k                          │ x:1 3
 y:2 4
 ~,/&:'+(x;y) │ 1 0 0 1 1 1 0 0...   │                      ║
@@ -1369,7 +1369,7 @@ y:7 8 17 11 16 6
 y[<x] │ 11 8 17 6 7 16       │                      ║
 ║ idioms_06_34_choose_grade_direction.k              │ x:30 45 97 77 35 49 87 82 79 8
 y:1
-<x*1 -1[y] │ Error: Cannot m...   │ 2 6 7 8 3 5 1 4...   ║
+<x*1 -1[y] │ 2 6 7 8 3 5 1 4...   │                      ║
 ║ idioms_06_33_sort_matrix_on_col.k                  │ x:(37 41 41 72 60 0;91 59 5 19 17 26;24 90 28 63 42 56;75 67 45 14 38 49;85 11 23 61 64 44)
 y:2
 x[<x[;y];] │ Error: CreateNo...   │ (91 59 5 19 17 ...   ║
@@ -1876,7 +1876,7 @@ t:$100 100 100 _vs x
 y:2000
 lp:((0=y!4)&~(0=y!100))|(0=y!400)
 (0 31 28 31 30 31 30 31 31 30 31 30 31+0,(0,lp,10#0))[x] │ 29                   │                      ║
-║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ Error: Cannot m...   │ 1 -2 3 -4 -5 6       ║
+║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ 1 -2 3 -4 -5 6       │                      ║
 ║ idioms_17_457_is_integral.k                        │ ii:{x=_ x}
 ii[3.0]   │ Error: Function...   │ 1                    ║
 ║ idioms_17_62_fractional_part.k                     │ x:3.7
@@ -1970,23 +1970,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1165/1315 tests passed (88.6%)                                                                             ║
+║ SUMMARY: 1168/1315 tests passed (88.8%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_05_123_draw_deal.k
-Input: r:2 3 _draw -7; a:,/r; .((`type;4:r);(`shape;^r);(`allitemsunique;(#a)=#?a);(`min;&/a);(`max;|/a))
-Expected: .((`type;0;);(`shape;2 3;);(`allitemsunique;1;);(`min;0;);(`max;6;))
-Actual: .((`type;0;);(`shape;2 3;);(`allitemsunique;0;);(`min;0;);(`max;6;))
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_06_34_choose_grade_direction.k
-Input: x:30 45 97 77 35 49 87 82 79 8
-y:1
-<x*1 -1[y]
-Expected: 2 6 7 8 3 5 1 4 0 9
-Actual: Error: Cannot multiply Integer by Null
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_06_33_sort_matrix_on_col.k
 Input: x:(37 41 41 72 60 0;91 59 5 19 17 26;24 90 28 63 42 56;75 67 45 14 38 49;85 11 23 61 64 44)
 y:2
@@ -2547,11 +2535,6 @@ Test: idioms_16_105_12hour_clock.k
 Input: t:13 37 21;$t[0]
 Expected: "13"
 Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_603_conditional_change_of_sign.k
-Input: y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x]
-Expected: 1 -2 3 -4 -5 6
-Actual: Error: Cannot multiply Integer by Null
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_457_is_integral.k
 Input: ii:{x=_ x}
