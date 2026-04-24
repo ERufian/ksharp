@@ -1800,6 +1800,10 @@ y:6 9 1 1 6 7 1 4 1 5
 x,'-x       │ (1 -1;-3 3;5 -5)     │                      ║
 ║ idioms_12_590_matrix_and_vector.k                  │ x:(1 2 3;4 5 6); y:7 8; x,\:y │ (1 2 3 7 8;4 5 ...   │                      ║
 ║ idioms_12_612_rank_of_array.k                      │ #^(1 2 3;4 5 6)      │ 2                    │                      ║
+║ idioms_13_166_bar_chart_down.k                     │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ Error: Function...   │ ("    X  ";"   ...   ║
+║ idioms_13_170_bar_chart_horizontal_normalized.k    │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Index mu...   │ ("X    ";"XXXX ...   ║
+║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ Error: Index mu...   │ ("XX        ";"...   ║
+║ idioms_13_144_histogram.k                          │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ Error: Function...   │ ("            "...   ║
 ║ idioms_13_464_framing_matrix.k                     │ x:4 4#"abcdefghijklmnop"
 +"-",'(+"|",'x,'"|"),'"-" │ ("-|abcd|-";"-|...   │ ("------";"|abc...   ║
 ║ idioms_13_572_division_by_zero.k                   │ dz:{(~0=x)*y%x+x=0}
@@ -1808,20 +1812,16 @@ x:2 0 0
 dz[x;y] │ 5 0 0                │ 5 0 0.0              ║
 ║ idioms_13_605_plotting_chars.k                     │ x:~3 6 5 7 2<\:1+!7
 " *"[x] │ Error: Negate o...   │ ("*** ";"******...   ║
-║ idioms_13_166_bar_chart_down.k                     │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ Error: Function...   │ ("    X  ";"   ...   ║
-║ idioms_13_170_bar_chart_horizontal_normalized.k    │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Index mu...   │ ("X    ";"XXXX ...   ║
-║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ Error: Index mu...   │ ("XX        ";"...   ║
 ║ idioms_13_174_move_first_quadrant.k                │ sm:{x-&/x}
 x:(1 6 4;3 4 7;7 8 6)
 sm'[x] │ 0 0 0                │ (0 5 3;0 1 4;1 ...   ║
-║ idioms_13_144_histogram.k                          │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ Error: Function...   │ ("            "...   ║
+║ idioms_14_93_numbers_from_alphanumeric.k           │ x:(" 1";" 12";" ";"0.5");@[.:'x;&&/'x=" ";:;0] │ (1;12;0;0.5)         │                      ║
+║ idioms_14_94_number_with_default_empty.k           │ x:"";y:"-1";.((x~"")#y),x │ -                    │ "-1"                 ║
+║ idioms_14_94_number_with_default_value.k           │ x:"234.5";y:"-1";.((x~"")#y),x │ 234.5                │                      ║
 ║ idioms_14_111_count_format.k                       │ cf:{#$x}
 cf 12.345
 cf -1
 cf 1e-12 │ 6                    │                      ║
-║ idioms_14_93_numbers_from_alphanumeric.k           │ x:(" 1";" 12";" ";"0.5");@[.:'x;&&/'x=" ";:;0] │ (1;12;0;0.5)         │                      ║
-║ idioms_14_94_number_with_default_empty.k           │ x:"";y:"-1";.((x~"")#y),x │ -                    │ "-1"                 ║
-║ idioms_14_94_number_with_default_value.k           │ x:"234.5";y:"-1";.((x~"")#y),x │ 234.5                │                      ║
 ║ idioms_14_95_numeric_from_alphanumeric.k           │ x:"123 438"
 d:"0123456789 "
 1 _ . "0 ",((#x)*&/x _lin d)#x │ 123 438              │                      ║
@@ -1863,32 +1863,54 @@ ar["MCMIX"] │ Error: Function...   │ 1909                 ║
 100 100 100 _vs x │ 98 12 31             │                      ║
 ║ idioms_16_64_time_as_string.k                      │ x:133721
 1_,/":",'$100 100 100 _vs x │ Error: length e...   │ "13:37:21"           ║
+║ idioms_16_72_encode_date.k                         │ d:98 12 31;100 _sv 1 0 0,d │ 1411046639           │                      ║
 ║ idioms_16_65_date_as_string.k                      │ x:19981231
 t:$100 100 100 _vs x
 1_,/"/",'t │ Error: length e...   │ "98/12/31"           ║
-║ idioms_16_72_encode_date.k                         │ d:98 12 31;100 _sv 1 0 0,d │ 1411046639           │                      ║
+║ idioms_16_104_date_ascending_format.k              │ d:98 12 31;+/d[2],2#60,d[1],2#60,d[0] │ 103                  │                      ║
+║ idioms_16_107_american_date.k                      │ d:1998 12 31;$d[1]   │ Error: CreateNo...   │ "12"                 ║
+║ idioms_16_105_12hour_clock.k                       │ t:13 37 21;$t[0]     │ Error: CreateNo...   │ "13"                 ║
 ║ idioms_16_463_is_leap_year.k                       │ x:2000
 ((0=x!4)&~(0=x!100))|(0=x!400) │ 1                    │                      ║
 ║ idioms_16_74_days_in_month.k                       │ x:2
 y:2000
 lp:((0=y!4)&~(0=y!100))|(0=y!400)
 (0 31 28 31 30 31 30 31 31 30 31 30 31+0,(0,lp,10#0))[x] │ 29                   │                      ║
-║ idioms_16_104_date_ascending_format.k              │ d:98 12 31;+/d[2],2#60,d[1],2#60,d[0] │ 103                  │                      ║
-║ idioms_16_107_american_date.k                      │ d:1998 12 31;$d[1]   │ Error: CreateNo...   │ "12"                 ║
-║ idioms_16_105_12hour_clock.k                       │ t:13 37 21;$t[0]     │ Error: CreateNo...   │ "13"                 ║
 ║ idioms_17_457_is_integral.k                        │ ii:{x=_ x}
 ii[3.0]   │ Error: Function...   │ 1                    ║
 ║ idioms_17_62_fractional_part.k                     │ x:3.7
 x-_ x          │ 0.7                  │                      ║
+║ idioms_17_87_number_of_decimals.k                  │ nd:{:[1=#x;0;-2+#x]};ff:{$x-_ x};nd ff 1.234 │ 3                    │                      ║
+║ idioms_17_149_number_of_decimals_max.k             │ nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y] │ Error: Function...   │ 3 2 0                ║
+║ idioms_17_175_primes_to_n.k                        │ pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30 │ Error: Function...   │ 2 3 5 7 11 13 1...   ║
+║ idioms_17_260_figurate_numbers.k                   │ a:10#1;2(+\)/a       │                      │ 1 3 6 10 15 21 ...   ║
+║ idioms_17_302_triangular_numbers.k                 │ x:6;+\!x             │ 0 1 3 6 10 15        │                      ║
+║ idioms_17_450_arithmetic_precision.k               │ 3*%3                 │ 1.0                  │                      ║
+║ idioms_17_459_leading_digit.k                      │ ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x │ Error: Function...   │ 1 8 6 6 0 9          ║
 ║ idioms_17_462_round_nearest_int.k                  │ x:3.7
 _ x+0.5        │ 4                    │                      ║
+║ idioms_17_453_round_nearest_even.k                 │ x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ Error: Function...   │ 0 2 2 4 0 -2         ║
+║ idioms_17_454_rounding_nearest_even_half.k         │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ Error: Function...   │ 24 40 3 -14 4 4      ║
+║ idioms_17_460_round_to_decimals.k                  │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
+║ idioms_17_461_round_nearest_hundredth.k            │ rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x │ Error: Function...   │ 3.14 2.72 -12.67     ║
+║ idioms_17_465_magnitude_fractional_part.k          │ x:6.13 -6.13;_abs[x]!1 │ 6.13 6.13            │ 0.13 0.13            ║
 ║ idioms_17_470_divisible_by_y.k                     │ x:1 2 3 4 5 6 7 8 9 10
 y:3
 x[&0=x!y] │ 3 6 9                │                      ║
+║ idioms_17_473_is_even.k                            │ x:1 2 3 4 5;~x!2     │ 0 1 0 1 0            │                      ║
+║ idioms_17_474_round_to_zero_magnitude.k            │ y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x │ 0.0001 0.0 0.0 0.0   │ 0.0001 -0 -0 0       ║
+║ idioms_17_475_increase_absolute_value.k            │ x:0 -1 2 -3 4 -5;y:10;sg:{(x>0)-(x<0)};(sg x)*y+_abs x │ 0 -11 12 -13 14...   │                      ║
+║ idioms_17_476_fractional_part_with_sign.k          │ x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ Error: Vector m...   │ 0.2 0.3 -0.2 -0...   ║
+║ idioms_17_477_square_retain_sign.k                 │ x:0 -1 2 -3 4;x*_abs x │ 0 -1 4 -9 16         │                      ║
+║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Vector m...   │ 0 0 0 0.4 0.4 0.9    ║
+║ idioms_17_479_last_part_of_abbb.k                  │ x:1234 5678 9012 345 6789;x!1000 │ 234 678 12 345 789   │                      ║
+║ idioms_17_142_number_of_combinations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4] │ 1.0                  │ 210.0                ║
+║ idioms_17_135_number_of_permutations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3] │ 1.0                  │ 60.0                 ║
+║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ Error: Cannot m...   │ 1 -2 3 -4 -5 6       ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1126/1233 tests passed (91.3%)                                                                             ║
+║ SUMMARY: 1133/1255 tests passed (90.3%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2403,6 +2425,26 @@ Input: x:2 2 2 2#!16
 Expected: 0 1 2 3
 Actual: 0 1 2
 ──────────────────────────────────────────────────────────────────────────
+Test: idioms_13_166_bar_chart_down.k
+Input: x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x]
+Expected: ("    X  ";"    X  ";"  X X  ";"  X X X";" XX X X";" XXXX X";" XXXXXX";"XXXXXXX";"XXXXXXX")
+Actual: Error: Function expects 3 arguments, got 7
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_13_170_bar_chart_horizontal_normalized.k
+Input: x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]]
+Expected: ("X    ";"XXXX ";"XX   ";"XXX  ";"X    ";"     ";"XXX  ";"XXX  ";"XXXXX";"XX   ")
+Actual: Error: Index must be integer or vector of integers, got Function
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_13_171_bar_chart_horizontal.k
+Input: x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]]
+Expected: ("XX        ";"XXXXXXXX  ";"XXXXX     ";"XXXXXX    ";"XXX       ";"X         ";"XXXXXXX   ";"XXXXXXX   ";"XXXXXXXXXX";"XXXX      ")
+Actual: Error: Index must be integer or vector of integers, got Function
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_13_144_histogram.k
+Input: x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d]
+Expected: ("            ";"         *  ";"   *     *  ";"   *  *  *  ";"   ** **** *")
+Actual: Error: Function expects 3 arguments, got 13
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_464_framing_matrix.k
 Input: x:4 4#"abcdefghijklmnop"
 +"-",'(+"|",'x,'"|"),'"-"
@@ -2423,32 +2465,12 @@ Input: x:~3 6 5 7 2<\:1+!7
 Expected: ("*** ";"****** ";"***** ";"*******";"** ")
 Actual: Error: Negate operator cannot be applied to vector of type VectorValue
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_166_bar_chart_down.k
-Input: x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x]
-Expected: ("    X  ";"    X  ";"  X X  ";"  X X X";" XX X X";" XXXX X";" XXXXXX";"XXXXXXX";"XXXXXXX")
-Actual: Error: Function expects 3 arguments, got 7
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_170_bar_chart_horizontal_normalized.k
-Input: x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]]
-Expected: ("X    ";"XXXX ";"XX   ";"XXX  ";"X    ";"     ";"XXX  ";"XXX  ";"XXXXX";"XX   ")
-Actual: Error: Index must be integer or vector of integers, got Function
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_171_bar_chart_horizontal.k
-Input: x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]]
-Expected: ("XX        ";"XXXXXXXX  ";"XXXXX     ";"XXXXXX    ";"XXX       ";"X         ";"XXXXXXX   ";"XXXXXXX   ";"XXXXXXXXXX";"XXXX      ")
-Actual: Error: Index must be integer or vector of integers, got Function
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_174_move_first_quadrant.k
 Input: sm:{x-&/x}
 x:(1 6 4;3 4 7;7 8 6)
 sm'[x]
 Expected: (0 5 3;0 1 4;1 2 0)
 Actual: 0 0 0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_144_histogram.k
-Input: x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d]
-Expected: ("            ";"         *  ";"   *     *  ";"   *  *  *  ";"   ** **** *")
-Actual: Error: Function expects 3 arguments, got 13
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_14_94_number_with_default_empty.k
 Input: x:"";y:"-1";.((x~"")#y),x
@@ -2522,6 +2544,81 @@ Input: ii:{x=_ x}
 ii[3.0]
 Expected: 1
 Actual: Error: Function execution error: Cannot compare Float and Integer with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_149_number_of_decimals_max.k
+Input: nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y]
+Expected: 3 2 0
+Actual: Error: Function execution error: Cannot floor Vector
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_175_primes_to_n.k
+Input: pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30
+Expected: 2 3 5 7 11 13 17 19 23 29
+Actual: Error: Function execution error: Cannot add Integer to Null
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_260_figurate_numbers.k
+Input: a:10#1;2(+\)/a
+Expected: 1 3 6 10 15 21 28 36 45 55
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_459_leading_digit.k
+Input: ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x
+Expected: 1 8 6 6 0 9
+Actual: Error: Function execution error: Cannot floor Vector
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_453_round_nearest_even.k
+Input: x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x
+Expected: 0 2 2 4 0 -2
+Actual: Error: Function execution error: Vector mod requires all elements to be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_454_rounding_nearest_even_half.k
+Input: x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x
+Expected: 24 40 3 -14 4 4
+Actual: Error: Function execution error: Vector mod requires all elements to be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_460_round_to_decimals.k
+Input: y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y]
+Expected: 3.326
+Actual: 0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_461_round_nearest_hundredth.k
+Input: rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x
+Expected: 3.14 2.72 -12.67
+Actual: Error: Function execution error: Cannot floor Vector
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_465_magnitude_fractional_part.k
+Input: x:6.13 -6.13;_abs[x]!1
+Expected: 0.13 0.13
+Actual: 6.13 6.13
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_474_round_to_zero_magnitude.k
+Input: y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x
+Expected: 0.0001 -0 -0 0
+Actual: 0.0001 0.0 0.0 0.0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_476_fractional_part_with_sign.k
+Input: x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
+Expected: 0.2 0.3 -0.2 -0.8 0 0 -0
+Actual: Error: Vector mod requires all elements to be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_478_fractional_part.k
+Input: x:0 1 -2 3.4 -5.6 -6.1;x!1
+Expected: 0 0 0 0.4 0.4 0.9
+Actual: Error: Vector mod requires all elements to be integers
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_142_number_of_combinations.k
+Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4]
+Expected: 210.0
+Actual: 1.0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_135_number_of_permutations.k
+Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3]
+Expected: 60.0
+Actual: 1.0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_603_conditional_change_of_sign.k
+Input: y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x]
+Expected: 1 -2 3 -4 -5 6
+Actual: Error: Cannot multiply Integer by Null
 ──────────────────────────────────────────────────────────────────────────
 Test: test_f_rec.k
 Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]
