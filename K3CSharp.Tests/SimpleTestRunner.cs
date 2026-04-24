@@ -2429,7 +2429,7 @@ namespace K3CSharp.Tests
                 ("idioms_03_537_rotate_rows_right.k", "(4 1 2 3;8 5 6 7;12 9 10 11)"),
                 ("idioms_03_444_drop_first_cols.k", "(,2;,5;,8;,11)"),
                 ("idioms_03_204_array_and_negative.k", "((3 -3;4 -4;5 -5;6 -6);(7 -7;8 -8;9 -9;10 -10);(11 -11;12 -12;13 -13;14 -14))"),
-                ("idioms_03_10a_depth.k", "(((\"abcde\";\"fghij\");(\"abcde\";\"fghij\");(\"abcde\";\"fghij\"));((\"abcde\";\"abcde\";\"abcde\");(\"fghij\";\"fghij\"; \"fghij\"));((\"aaa\";\"bbb\";\"ccc\";\"ddd\";\"eee\");(\"fff\";\"ggg\";\"hhh\";\"iii\";\"jjj\")))"),
+                ("idioms_03_10a_depth.k", "(((\"abcde\";\"fghij\");(\"abcde\";\"fghij\");(\"abcde\";\"fghij\"));((\"abcde\";\"abcde\";\"abcde\");(\"fghij\";\"fghij\";\"fghij\"));((\"aaa\";\"bbb\";\"ccc\";\"ddd\";\"eee\");(\"fff\";\"ggg\";\"hhh\";\"iii\";\"jjj\")))"),
                 ("idioms_03_10a_depth_v2.k", "(((\"abcde\";\"fghij\");(\"abcde\";\"fghij\");(\"abcde\";\"fghij\"));((\"abcde\";\"abcde\";\"abcde\");(\"fghij\";\"fghij\";\"fghij\"));((\"aaa\";\"bbb\";\"ccc\";\"ddd\";\"eee\");(\"fff\";\"ggg\";\"hhh\";\"iii\";\"jjj\")))"),
                 ("idioms_03_396_remove_cols.k", "((2 4;6 8;10 12);(14 16;18 20;22 24))"),
 

@@ -823,23 +823,62 @@ namespace K3CSharp.Parsing
                 int closingBracket = FindMatchingBracket(tokens, 1);
                 if (closingBracket > 0 && closingBracket < tokens.Count - 1)
                 {
+                    // Check if token right after the closing bracket is an adverb
+                    // Pattern: identifier[args]' - apply adverb to function call result
+                    if (VerbRegistry.IsAdverbToken(tokens[closingBracket + 1].Type))
+                    {
+                        var adverbToken = tokens[closingBracket + 1];
+                        
+                        // Parse the bracket call as the function
+                        var bracketContent = tokens.GetRange(2, closingBracket - 2);
+                        var argGroups = SplitBracketArguments(bracketContent, int.MaxValue);
+                        var argNodes = new List<ASTNode>();
+                        foreach (var ag in argGroups)
+                        {
+                            if (ag.Count == 0)
+                                argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                            else
+                            {
+                                var an = BuildParseTree ? BuildParseTreeFromRight(ag) : EvaluateFromRight(ag);
+                                argNodes.Add(an ?? ASTNode.MakeLiteral(new NullValue()));
+                            }
+                        }
+                        var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                        funcCallNode.Children.Add(ASTNode.MakeVariable(firstTok.Lexeme));
+                        funcCallNode.Children.AddRange(argNodes);
+                        
+                        // Parse the remaining tokens after the adverb as the argument
+                        if (closingBracket + 2 < tokens.Count)
+                        {
+                            var remainingTokens = tokens.Skip(closingBracket + 2).ToList();
+                            var argNode = BuildParseTree ? BuildParseTreeFromRight(remainingTokens) : EvaluateFromRight(remainingTokens);
+                            if (argNode != null)
+                            {
+                                // Create adverb node: ADVERB(adverb, function, argument)
+                                return CreateAdverbNode(adverbToken, funcCallNode, argNode);
+                            }
+                        }
+                        // Noun form: no argument after adverb
+                        return CreateAdverbNode(adverbToken, funcCallNode, null);
+                    }
+                    
                     // Parse the bracket call: identifier[bracketContent]
-                    var bracketContent = tokens.GetRange(2, closingBracket - 2);
-                    var argGroups = SplitBracketArguments(bracketContent, 2);
-                    var argNodes = new List<ASTNode>();
-                    foreach (var ag in argGroups)
+                    var bracketContent2 = tokens.GetRange(2, closingBracket - 2);
+                    var argGroups2 = SplitBracketArguments(bracketContent2, 2);
+                    var argNodes2 = new List<ASTNode>();
+                    foreach (var ag in argGroups2)
                     {
                         if (ag.Count == 0)
-                            argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                            argNodes2.Add(ASTNode.MakeLiteral(new NullValue()));
                         else
                         {
                             var an = BuildParseTree ? BuildParseTreeFromRight(ag) : EvaluateFromRight(ag);
-                            if (an != null) argNodes.Add(an);
+                            if (an != null) argNodes2.Add(an);
                         }
                     }
-                    var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
-                    funcCallNode.Children.Add(ASTNode.MakeVariable(firstTok.Lexeme));
-                    funcCallNode.Children.AddRange(argNodes);
+                    var funcCallNode2 = new ASTNode(ASTNodeType.FunctionCall);
+                    funcCallNode2.Children.Add(ASTNode.MakeVariable(firstTok.Lexeme));
+                    funcCallNode2.Children.AddRange(argNodes2);
 
                     // Parse the remaining tokens as the argument to the result
                     var afterBracket = tokens.GetRange(closingBracket + 1, tokens.Count - closingBracket - 1);
@@ -850,11 +889,11 @@ namespace K3CSharp.Parsing
                     {
                         // Apply the bracket-call result to the remaining argument
                         var applyNode = new ASTNode(ASTNodeType.FunctionCall);
-                        applyNode.Children.Add(funcCallNode);
+                        applyNode.Children.Add(funcCallNode2);
                         applyNode.Children.Add(afterNode);
                         return applyNode;
                     }
-                    return funcCallNode;
+                    return funcCallNode2;
                 }
                 else if (closingBracket > 0 && closingBracket == tokens.Count - 1)
                 {

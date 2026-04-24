@@ -415,16 +415,33 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
-        /// Parse arguments inside brackets (separated by semicolons)
+        /// Parse arguments inside brackets (separated by semicolons at top level only)
+        /// Respects nested brackets, braces, and parentheses
         /// </summary>
         private List<ASTNode> ParseBracketArguments(List<Token> contentTokens)
         {
             var arguments = new List<ASTNode>();
             var currentArgTokens = new List<Token>();
+            int depth = 0; // Track nesting depth of brackets/braces/parens
             
             foreach (var token in contentTokens)
             {
-                if (token.Type == TokenType.SEMICOLON)
+                // Track nesting depth
+                if (token.Type == TokenType.LEFT_BRACKET || 
+                    token.Type == TokenType.LEFT_BRACE || 
+                    token.Type == TokenType.LEFT_PAREN)
+                {
+                    depth++;
+                }
+                else if (token.Type == TokenType.RIGHT_BRACKET || 
+                         token.Type == TokenType.RIGHT_BRACE || 
+                         token.Type == TokenType.RIGHT_PAREN)
+                {
+                    depth--;
+                }
+                
+                // Only split on semicolons at depth 0 (top level)
+                if (token.Type == TokenType.SEMICOLON && depth == 0)
                 {
                     // End of current argument
                     if (currentArgTokens.Count > 0)

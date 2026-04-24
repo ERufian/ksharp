@@ -46,6 +46,7 @@ namespace K3CSharp
             // Inherit currentFunctionValue from parent for _f recursion support
             currentFunctionValue = parent?.currentFunctionValue;
             adverbAwareEvaluator = new AdverbAwareEvaluator(this);
+            
         }
 
                 
@@ -99,9 +100,6 @@ namespace K3CSharp
         /// </summary>
         private K3Value EvaluateSystemVariable(string name)
         {
-            var debugPath = @"T:\_src\github.com\ERufian\ksharp\K3CSharp.Tests\kdebug_f.txt";
-            try { File.AppendAllText(debugPath, $"EvaluateSystemVariable called for {name}{Environment.NewLine}"); } catch { }
-            
             return name switch
             {
                 "_d" => DirectoryFunction(new NullValue()),

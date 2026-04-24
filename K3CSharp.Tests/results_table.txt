@@ -1274,7 +1274,7 @@ z:2 5#"abcdefghij"
 q:h[0;3;z]
 r:h[1;3;z]
 s:h[2;3;z]
-(q;r;s) │ Error: Function...   │ ((("abcde";"fgh...   ║
+(q;r;s) │ ((("abcde";"fgh...   │                      ║
 ║ idioms_03_10a_depth_v2.k                           │ d:{x'}/
 h:{d[x;y#,:]z}
 z:2 5#"abcdefghij"
@@ -1970,22 +1970,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1162/1315 tests passed (88.4%)                                                                             ║
+║ SUMMARY: 1163/1315 tests passed (88.4%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_03_10a_depth.k
-Input: d:{[n;f]:[n;_f[n-1;f]';f]}
-h:{d[x;y#,:]z}
-z:2 5#"abcdefghij"
-q:h[0;3;z]
-r:h[1;3;z]
-s:h[2;3;z]
-(q;r;s)
-Expected: ((("abcde";"fghij");("abcde";"fghij");("abcde";"fghij"));(("abcde";"abcde";"abcde");("fghij";"fghij"; "fghij"));(("aaa";"bbb";"ccc";"ddd";"eee");("fff";"ggg";"hhh";"iii";"jjj")))
-Actual: Error: Function execution error: Cannot call non-function: Null
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_05_608_zeroing_vector.k
 Input: x:1 2 3 4; x[]:0; x
 Expected: 0 0 0 0
