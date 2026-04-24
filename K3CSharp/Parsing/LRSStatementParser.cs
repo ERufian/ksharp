@@ -229,6 +229,95 @@ namespace K3CSharp.Parsing
                 }
             }
             
+            // Case 4: simple indexed assignment: IDENTIFIER [indices...] COLON expression
+            // e.g., x[]:0 — amend all elements of x with 0
+            // e.g., x[1]:0 — amend element at index 1 with 0
+            // e.g., x[1;2]:0 — amend nested element at path [1;2] with 0
+            if (assignmentToken.Type == TokenType.COLON &&
+                leftTokens.Count >= 3 &&
+                leftTokens[0].Type == TokenType.IDENTIFIER &&
+                leftTokens[1].Type == TokenType.LEFT_BRACKET)
+            {
+                // Find the matching right bracket
+                int depth = 0;
+                int rightBracket = -1;
+                for (int i = 1; i < leftTokens.Count; i++)
+                {
+                    if (leftTokens[i].Type == TokenType.LEFT_BRACKET) depth++;
+                    else if (leftTokens[i].Type == TokenType.RIGHT_BRACKET)
+                    {
+                        depth--;
+                        if (depth == 0) { rightBracket = i; break; }
+                    }
+                }
+                // The right bracket should be the last token in leftTokens
+                if (rightBracket != -1 && rightBracket == leftTokens.Count - 1)
+                {
+                    var varName = leftTokens[0].Lexeme;
+                    var indexTokens = leftTokens.GetRange(2, rightBracket - 2);
+                    
+                    // Parse the index (empty tokens = null index = all elements)
+                    ASTNode? indexNode = null;
+                    if (indexTokens.Count > 0)
+                    {
+                        // Split index tokens by semicolons to support multi-level paths
+                        var indexParts = SplitByTopLevelSemicolons(indexTokens);
+                        
+                        // Check if any part is non-empty (has actual index values)
+                        bool hasNonEmptyPart = indexParts.Any(p => p.Count > 0);
+                        
+                        if (indexParts.Count == 1 && hasNonEmptyPart)
+                        {
+                            // Single index value
+                            var parsed = ParseRightSideExpression(indexParts[0]);
+                            if (parsed == null) return null;
+                            indexNode = parsed;
+                        }
+                        else if (indexParts.Count > 1 || hasNonEmptyPart)
+                        {
+                            // Multi-level path (e.g., [1;2] or [;0] or [0;])
+                            // Empty parts represent "all elements" at that dimension (null index)
+                            var indexLevels = new List<ASTNode>();
+                            foreach (var part in indexParts)
+                            {
+                                if (part.Count > 0)
+                                {
+                                    var parsed = ParseRightSideExpression(part);
+                                    if (parsed != null) indexLevels.Add(parsed);
+                                }
+                                else
+                                {
+                                    // Empty part means "all elements" at this dimension - add NullValue marker
+                                    indexLevels.Add(ASTNode.MakeLiteral(new NullValue()));
+                                }
+                            }
+                            // Create Block with all index levels (including NullValue markers for empty parts)
+                            indexNode = new ASTNode(ASTNodeType.Block, null, indexLevels);
+                        }
+                        // else: single empty part (e.g., []), indexNode stays null meaning "all elements"
+                    }
+                    else
+                    {
+                        // Empty brackets [] means "all elements" - create a NullValue index node
+                        indexNode = ASTNode.MakeLiteral(new NullValue());
+                    }
+                    // else: indexNode stays null, meaning "all elements"
+                    
+                    var assignRightNode = ParseRightSideExpression(rightTokens);
+                    if (assignRightNode == null)
+                        return null;
+                    
+                    // Create indexed assignment as ApplyAndAssign with colon (direct assignment marker)
+                    var indexedAssignNode = new ASTNode(ASTNodeType.ApplyAndAssign);
+                    indexedAssignNode.Value = new SymbolValue(varName);
+                    indexedAssignNode.Children.Add(ASTNode.MakeLiteral(new SymbolValue(":"))); // direct assignment marker
+                    indexedAssignNode.Children.Add(assignRightNode);
+                    if (indexNode != null)
+                        indexedAssignNode.Children.Add(indexNode); // index as 3rd child
+                    return indexedAssignNode;
+                }
+            }
+            
             // Parse left side (variable name)
             var variableNode = ParseVariableName(leftTokens);
             if (variableNode == null)

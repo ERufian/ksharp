@@ -566,6 +566,13 @@ namespace K3CSharp
         
         private K3Value ApplyAmendFunction(K3Value currentValue, K3Value function, K3Value? value)
         {
+            // Check if function is colon - this means direct assignment (not a function to call)
+            if (function is SymbolValue symbol && symbol.Value == ":")
+            {
+                // Direct assignment: just return the value (ignoring currentValue)
+                return value ?? currentValue;
+            }
+            
             // Apply function to current value
             if (value != null)
             {

@@ -174,7 +174,7 @@ namespace K3CSharp
                         {
                             var opName = operatorSymbol.Value;
                             
-                            // Indexed apply-and-assign: a[i]+:y — amend at index path
+                            // Indexed apply-and-assign: a[i]+:y or a[]:y — amend at index path or all elements
                             if (node.Children.Count >= 3)
                             {
                                 var currentData = GetVariable(variableName);
@@ -189,9 +189,19 @@ namespace K3CSharp
                                 {
                                     path = new List<K3Value> { Evaluate(indexNode) };
                                 }
-                                // Build function (dyadic verb to apply)
+                                // Build function (dyadic verb to apply, or colon for direct assignment)
                                 var opFunc = new SymbolValue(opName);
                                 var amended = AmendAtPath(currentData, path, 0, opFunc, rightArgument);
+                                SetVariable(variableName, amended);
+                                return amended;
+                            }
+                            else if (opName == ":")
+                            {
+                                // Direct assignment to all elements: x[]:y
+                                // No index specified means amend entire value
+                                var currentData = GetVariable(variableName);
+                                // Use empty path for top-level replacement
+                                var amended = AmendAtPath(currentData, new List<K3Value>(), 0, new SymbolValue(":"), rightArgument);
                                 SetVariable(variableName, amended);
                                 return amended;
                             }
