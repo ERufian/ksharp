@@ -943,16 +943,16 @@ while[i < 3; i: i + 1] │                      │                      ║
 ║ ffi_type_marshalling_float.k                       │ f:3.14159;f _sethint: `float;_gethint f │ `float               │                      ║
 ║ ffi_type_marshalling_string.k                      │ s:"hello";s _sethint: `string;_gethint s │ `string              │                      ║
 ║ ffi_type_marshalling_list.k                        │ l:1 2 3 4 5;l _sethint: `list;_gethint l │ `list                │                      ║
-║ ffi_constructor.k                                  │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
+║ ffi_constructor.k                                  │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.26\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
 complex_new:complex[`constructor]
 c1:complex_new[2;3]
-.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`instance;6<#!c1);(`type;10<#!complex)) │ Error: Failed t...   │ .((`real;2.0;);...   ║
-║ ffi_dispose.k                                      │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
+.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`instance;6<#!c1);(`type;10<#!complex)) │ .((`real;2.0;);...   │                      ║
+║ ffi_dispose.k                                      │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.26\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
 complex_new:complex[`constructor]
 c1:complex_new[2;3]
 _dispose c1
-c1 @ `_this │ Error: Failed t...   │ `Disposed            ║
-║ ffi_complete_workflow.k                            │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
+c1 @ `_this │ `Disposed            │                      ║
+║ ffi_complete_workflow.k                            │ complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.26\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
 complex_new:complex[`constructor]
 c1:complex_new[2;3]
 magnitude: c1[`Abs][]
@@ -960,7 +960,7 @@ real: c1[`Real][]
 imag: c1[`Imaginary]
 conj_func: ._dotnet.System.Numerics.Complex.Conjugate
 conj_result: conj_func[c1]
-.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`magnitude;magnitude);(`conj_real;conj_result[`Real]);(`conj_imag;conj_result[`Imaginary]);(`instance_more_than_5_methods;5<#!c1);(`type_more_than_20_methods;20<#!complex)) │ Error: Failed t...   │ .((`real;2.0;);...   ║
+.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`magnitude;magnitude);(`conj_real;conj_result[`Real]);(`conj_imag;conj_result[`Imaginary]);(`instance_more_than_5_methods;5<#!c1);(`type_more_than_20_methods;20<#!complex)) │ .((`real;2.0;);...   │                      ║
 ║ ktree_enumerate_relative_name.k                    │ d:.((`keyA;1 2 3;);(`keyB;1 3 5))
 !d │ `keyA`keyB           │                      ║
 ║ ktree_enumerate_relative_path.k                    │ d:.((`keyA;1 2 3;);(`keyB;1 3 5))
@@ -1970,41 +1970,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1159/1315 tests passed (88.1%)                                                                             ║
+║ SUMMARY: 1162/1315 tests passed (88.4%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: ffi_constructor.k
-Input: complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
-complex_new:complex[`constructor]
-c1:complex_new[2;3]
-.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`instance;6<#!c1);(`type;10<#!complex))
-Expected: .((`real;2.0;);(`imag;3.0;);(`instance;1;);(`type;1;))
-Actual: Error: Failed to load .NET assembly 'C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll' type 'System.Numerics.Complex': Assembly file not found: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.25\System.Runtime.Numerics.dll
-──────────────────────────────────────────────────────────────────────────
-Test: ffi_dispose.k
-Input: complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
-complex_new:complex[`constructor]
-c1:complex_new[2;3]
-_dispose c1
-c1 @ `_this
-Expected: `Disposed
-Actual: Error: Failed to load .NET assembly 'C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll' type 'System.Numerics.Complex': Assembly file not found: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.25\System.Runtime.Numerics.dll
-──────────────────────────────────────────────────────────────────────────
-Test: ffi_complete_workflow.k
-Input: complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
-complex_new:complex[`constructor]
-c1:complex_new[2;3]
-magnitude: c1[`Abs][]
-real: c1[`Real][]
-imag: c1[`Imaginary]
-conj_func: ._dotnet.System.Numerics.Complex.Conjugate
-conj_result: conj_func[c1]
-.((`real;c1[`Real]);(`imag;c1[`Imaginary]);(`magnitude;magnitude);(`conj_real;conj_result[`Real]);(`conj_imag;conj_result[`Imaginary]);(`instance_more_than_5_methods;5<#!c1);(`type_more_than_20_methods;20<#!complex))
-Expected: .((`real;2.0;);(`imag;3.0;);(`magnitude;3.605551;);(`conj_real;2.0;);(`conj_imag;-3.0;);(`instance_more_than_5_methods;1;);(`type_more_than_20_methods;1;))
-Actual: Error: Failed to load .NET assembly 'C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll' type 'System.Numerics.Complex': Assembly file not found: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.25\System.Runtime.Numerics.dll
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_03_10a_depth.k
 Input: d:{[n;f]:[n;_f[n-1;f]';f]}
 h:{d[x;y#,:]z}

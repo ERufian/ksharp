@@ -2,7 +2,7 @@
 // This test covers the full FFI functionality from assembly loading to method invocation
 
 // Step 1: Load .NET assembly with Complex type
-complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.25\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
+complex:"C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.26\\System.Runtime.Numerics.dll" 2: `System.Numerics.Complex
 
 // Step 2: Create constructor function
 complex_new:complex[`constructor]
