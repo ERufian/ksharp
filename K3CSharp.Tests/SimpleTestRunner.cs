@@ -2775,6 +2775,36 @@ namespace K3CSharp.Tests
                 ("idioms_17_135_number_of_permutations.k", "60.0"),
                 ("idioms_17_136_pascals_triangle.k", "(1;(1 1);(1 2 1);(1 3 3 1);(1 4 6 4 1))"),
 
+                // Chapter 18 idioms: Geometry and trigonometry
+                ("idioms_18_133_degrees_from_radians.k", "28.64789"),
+                ("idioms_18_134_radians_from_degrees.k", "0.5"),
+                ("idioms_18_179_contour_levels.k", "10"),
+                ("idioms_18_224_extend_distance_table.k", "(0 50 70 20 30;50 0 20 40 30;70 20 0 40 30;20 40 40 0 10;30 30 30 10 0)"),
+                ("idioms_18_318_herons_rule.k", "6.0"),
+                ("idioms_18_131_complementary_angle.k", "1.320796"),
+                ("idioms_18_132_rotation_matrix.k", "(0.9689124 -0.247404;0.247404 0.9689124)"),
+
+                // Chapter 19 idioms: Calculus and series
+                ("idioms_19_199_multiplication_table.k", "(1 2 3 4 5;2 4 6 8 10;3 6 9 12 15;4 8 12 16 20;5 10 15 20 25)"),
+                ("idioms_19_155_greatest_common_divisor.k", "3"),
+                ("idioms_19_451_arithmetic_progression.k", "3 8 13 18"),
+                ("idioms_19_557_arithmetic_progression_y_numbers.k", "5 105 205 305 405 505 605 705"),
+                ("idioms_19_301_alternating_sum_series.k", "1 -1 2 -2 3 -3 4 -4 5 -5"),
+                ("idioms_19_369_alternating_sum.k", "-5"),
+                ("idioms_19_367_alternating_product.k", "1.875"),
+                ("idioms_19_558_consecutive_integers.k", "5 6 7 8 9 10"),
+                ("idioms_19_164_divisors.k", "1 3 11 33 121 363"),
+                ("idioms_19_47_polynomial_with_roots.k", "1 -6 11 -6"),
+                ("idioms_19_67_extrapolated_value.k", "25.0"),
+                ("idioms_19_69_polynomial_value_at_points.k", "-8 1 43"),
+                ("idioms_19_126_polynomial_fit.k", "5 -1 3.999997 182.0001"),
+                ("idioms_19_363_solve_quadratic.k", "5 3.0"),
+                ("idioms_19_430_polynomial_derivative.k", "4 6 6 4"),
+                ("idioms_19_137_taylor_series.k", "8.5"),
+                ("idioms_19_281_taylor_series_value.k", "2227.0"),
+                ("idioms_19_48_saddle_point_indices.k", "(1 1 4 4;1 4 1 4)"),
+                ("idioms_19_262_saddle_point_value.k", ",14"),
+
                 // Self-referent lambda _f tests
                 ("test_f_rec.k", "120"),
                 ("test_f_var.k", "6"),

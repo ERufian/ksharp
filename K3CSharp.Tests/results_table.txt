@@ -1876,41 +1876,68 @@ t:$100 100 100 _vs x
 y:2000
 lp:((0=y!4)&~(0=y!100))|(0=y!400)
 (0 31 28 31 30 31 30 31 31 30 31 30 31+0,(0,lp,10#0))[x] │ 29                   │                      ║
+║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ Error: Cannot m...   │ 1 -2 3 -4 -5 6       ║
 ║ idioms_17_457_is_integral.k                        │ ii:{x=_ x}
 ii[3.0]   │ Error: Function...   │ 1                    ║
 ║ idioms_17_62_fractional_part.k                     │ x:3.7
 x-_ x          │ 0.7                  │                      ║
+║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Vector m...   │ 0 0 0 0.4 0.4 0.9    ║
+║ idioms_17_465_magnitude_fractional_part.k          │ x:6.13 -6.13;_abs[x]!1 │ 6.13 6.13            │ 0.13 0.13            ║
+║ idioms_17_476_fractional_part_with_sign.k          │ x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ Error: Vector m...   │ 0.2 0.3 -0.2 -0...   ║
+║ idioms_17_453_round_nearest_even.k                 │ x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ Error: Function...   │ 0 2 2 4 0 -2         ║
+║ idioms_17_454_rounding_nearest_even_half.k         │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ Error: Function...   │ 24 40 3 -14 4 4      ║
+║ idioms_17_460_round_to_decimals.k                  │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
+║ idioms_17_461_round_nearest_hundredth.k            │ rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x │ Error: Function...   │ 3.14 2.72 -12.67     ║
+║ idioms_17_462_round_nearest_int.k                  │ x:3.7
+_ x+0.5        │ 4                    │                      ║
+║ idioms_17_474_round_to_zero_magnitude.k            │ y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x │ 0.0001 0.0 0.0 0.0   │ 0.0001 -0 -0 0       ║
 ║ idioms_17_87_number_of_decimals.k                  │ nd:{:[1=#x;0;-2+#x]};ff:{$x-_ x};nd ff 1.234 │ 3                    │                      ║
 ║ idioms_17_149_number_of_decimals_max.k             │ nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y] │ Error: Function...   │ 3 2 0                ║
+║ idioms_17_470_divisible_by_y.k                     │ x:1 2 3 4 5 6 7 8 9 10
+y:3
+x[&0=x!y] │ 3 6 9                │                      ║
+║ idioms_17_473_is_even.k                            │ x:1 2 3 4 5;~x!2     │ 0 1 0 1 0            │                      ║
 ║ idioms_17_175_primes_to_n.k                        │ pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30 │ Error: Function...   │ 2 3 5 7 11 13 1...   ║
 ║ idioms_17_260_figurate_numbers.k                   │ a:10#1;2(+\)/a       │                      │ 1 3 6 10 15 21 ...   ║
 ║ idioms_17_302_triangular_numbers.k                 │ x:6;+\!x             │ 0 1 3 6 10 15        │                      ║
 ║ idioms_17_450_arithmetic_precision.k               │ 3*%3                 │ 1.0                  │                      ║
 ║ idioms_17_459_leading_digit.k                      │ ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x │ Error: Function...   │ 1 8 6 6 0 9          ║
-║ idioms_17_462_round_nearest_int.k                  │ x:3.7
-_ x+0.5        │ 4                    │                      ║
-║ idioms_17_453_round_nearest_even.k                 │ x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ Error: Function...   │ 0 2 2 4 0 -2         ║
-║ idioms_17_454_rounding_nearest_even_half.k         │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ Error: Function...   │ 24 40 3 -14 4 4      ║
-║ idioms_17_460_round_to_decimals.k                  │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
-║ idioms_17_461_round_nearest_hundredth.k            │ rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x │ Error: Function...   │ 3.14 2.72 -12.67     ║
-║ idioms_17_465_magnitude_fractional_part.k          │ x:6.13 -6.13;_abs[x]!1 │ 6.13 6.13            │ 0.13 0.13            ║
-║ idioms_17_470_divisible_by_y.k                     │ x:1 2 3 4 5 6 7 8 9 10
-y:3
-x[&0=x!y] │ 3 6 9                │                      ║
-║ idioms_17_473_is_even.k                            │ x:1 2 3 4 5;~x!2     │ 0 1 0 1 0            │                      ║
-║ idioms_17_474_round_to_zero_magnitude.k            │ y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x │ 0.0001 0.0 0.0 0.0   │ 0.0001 -0 -0 0       ║
-║ idioms_17_475_increase_absolute_value.k            │ x:0 -1 2 -3 4 -5;y:10;sg:{(x>0)-(x<0)};(sg x)*y+_abs x │ 0 -11 12 -13 14...   │                      ║
-║ idioms_17_476_fractional_part_with_sign.k          │ x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ Error: Vector m...   │ 0.2 0.3 -0.2 -0...   ║
-║ idioms_17_477_square_retain_sign.k                 │ x:0 -1 2 -3 4;x*_abs x │ 0 -1 4 -9 16         │                      ║
-║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Vector m...   │ 0 0 0 0.4 0.4 0.9    ║
 ║ idioms_17_479_last_part_of_abbb.k                  │ x:1234 5678 9012 345 6789;x!1000 │ 234 678 12 345 789   │                      ║
+║ idioms_17_475_increase_absolute_value.k            │ x:0 -1 2 -3 4 -5;y:10;sg:{(x>0)-(x<0)};(sg x)*y+_abs x │ 0 -11 12 -13 14...   │                      ║
+║ idioms_17_477_square_retain_sign.k                 │ x:0 -1 2 -3 4;x*_abs x │ 0 -1 4 -9 16         │                      ║
 ║ idioms_17_142_number_of_combinations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4] │ 1.0                  │ 210.0                ║
 ║ idioms_17_135_number_of_permutations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3] │ 1.0                  │ 60.0                 ║
-║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ Error: Cannot m...   │ 1 -2 3 -4 -5 6       ║
+║ idioms_17_136_pascals_triangle.k                   │ pt:{+':0,x,0};4 pt\1 │                      │ (1;(1 1);(1 2 1...   ║
+║ idioms_18_133_degrees_from_radians.k               │ x:0.5;57.295779513082323*x │ 28.64789             │                      ║
+║ idioms_18_134_radians_from_degrees.k               │ z:28.64789;0.017453292519943295*z │ 0.5                  │                      ║
+║ idioms_18_179_contour_levels.k                     │ cl:{y[-1++/~y>x]};y:-100 0 10 100 1000 10000;cl[99;y] │ 10                   │                      ║
+║ idioms_18_224_extend_distance_table.k              │ x:(0 50 80 20 999;50 0 20 40 30;80 20 0 999 30;20 40 999 0 10;999 30 30 10 0);x(&/+)\:x │                      │ (0 50 70 20 30;...   ║
+║ idioms_18_318_herons_rule.k                        │ x:3 4 5;hr:{(*/(+/x%2)-0,x)^0.5};hr[x] │ 0n                   │ 6.0                  ║
+║ idioms_18_131_complementary_angle.k                │ x:0.25;_acos[_sin x] │ 1.320796             │                      ║
+║ idioms_18_132_rotation_matrix.k                    │ x:0.25;((_cos[x];-_sin[x]);(_sin[x];_cos[x])) │ Error: CreateNo...   │ (0.9689124 -0.2...   ║
+║ idioms_19_199_multiplication_table.k               │ mt:{{x*\:x}[1+!x]};mt 5 │                      │ (1 2 3 4 5;2 4 ...   ║
+║ idioms_19_155_greatest_common_divisor.k            │ gcd:{*|1+&&/'0=x!/:1+!&/x};x:6 9 12;gcd x │ ()                   │ 3                    ║
+║ idioms_19_451_arithmetic_progression.k             │ ap:{[x;y;g]x+g*!1+_(y-x)%g};ap[3;20;5] │ 3 8 13 18            │                      ║
+║ idioms_19_557_arithmetic_progression_y_numbers.k   │ x:5;y:8;g:100;x+g*!y │ 5 105 205 305 4...   │                      ║
+║ idioms_19_301_alternating_sum_series.k             │ x:1+!10;as:{+\x*(#x)#1 -1};as[x] │ Error: Function...   │ 1 -1 2 -2 3 -3 ...   ║
+║ idioms_19_369_alternating_sum.k                    │ x:1+!10;+/x*(#x)#1 -1 │ -5                   │                      ║
+║ idioms_19_367_alternating_product.k                │ x:1 2 3 4 5;a:(#x)#1 -1;*/x^a │ 0                    │ 1.875                ║
+║ idioms_19_558_consecutive_integers.k               │ ci:{x+!1+y-x};ci[5;10] │ 5 6 7 8 9 10         │                      ║
+║ idioms_19_164_divisors.k                           │ dv:{&0=x!/:!1+x};x:363;dv[x] │ Error: Function...   │ 1 3 11 33 121 363    ║
+║ idioms_19_47_polynomial_with_roots.k               │ x:1 2 3;{(x,0)-y*0,x}/1,x │ 1 -6 11 -6           │                      ║
+║ idioms_19_67_extrapolated_value.k                  │ x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x │ Error: y must b...   │ 25.0                 ║
+║ idioms_19_69_polynomial_value_at_points.k          │ x:-1 0 2;y:4 0 5 1;x _sv\:y │ Error: _sv: dig...   │ -8 1 43              ║
+║ idioms_19_126_polynomial_fit.k                     │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: _lsq req...   │ 5 -1 3.999997 1...   ║
+║ idioms_19_363_solve_quadratic.k                    │ qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15] │ 5.0 3.0              │ 5 3.0                ║
+║ idioms_19_430_polynomial_derivative.k              │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
+║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 13                   │ 8.5                  ║
+║ idioms_19_281_taylor_series_value.k                │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
+║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ Error: Function...   │ (1 1 4 4;1 4 1 4)    ║
+║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ Error: Function...   │ ,14                  ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1133/1255 tests passed (90.3%)                                                                             ║
+║ SUMMARY: 1144/1282 tests passed (89.2%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2539,31 +2566,31 @@ Input: t:13 37 21;$t[0]
 Expected: "13"
 Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
 ──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_603_conditional_change_of_sign.k
+Input: y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x]
+Expected: 1 -2 3 -4 -5 6
+Actual: Error: Cannot multiply Integer by Null
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_457_is_integral.k
 Input: ii:{x=_ x}
 ii[3.0]
 Expected: 1
 Actual: Error: Function execution error: Cannot compare Float and Integer with =
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_149_number_of_decimals_max.k
-Input: nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y]
-Expected: 3 2 0
-Actual: Error: Function execution error: Cannot floor Vector
+Test: idioms_17_478_fractional_part.k
+Input: x:0 1 -2 3.4 -5.6 -6.1;x!1
+Expected: 0 0 0 0.4 0.4 0.9
+Actual: Error: Vector mod requires all elements to be integers
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_175_primes_to_n.k
-Input: pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30
-Expected: 2 3 5 7 11 13 17 19 23 29
-Actual: Error: Function execution error: Cannot add Integer to Null
+Test: idioms_17_465_magnitude_fractional_part.k
+Input: x:6.13 -6.13;_abs[x]!1
+Expected: 0.13 0.13
+Actual: 6.13 6.13
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_260_figurate_numbers.k
-Input: a:10#1;2(+\)/a
-Expected: 1 3 6 10 15 21 28 36 45 55
-Actual: 
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_459_leading_digit.k
-Input: ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x
-Expected: 1 8 6 6 0 9
-Actual: Error: Function execution error: Cannot floor Vector
+Test: idioms_17_476_fractional_part_with_sign.k
+Input: x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
+Expected: 0.2 0.3 -0.2 -0.8 0 0 -0
+Actual: Error: Vector mod requires all elements to be integers
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_453_round_nearest_even.k
 Input: x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x
@@ -2585,25 +2612,30 @@ Input: rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x
 Expected: 3.14 2.72 -12.67
 Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_465_magnitude_fractional_part.k
-Input: x:6.13 -6.13;_abs[x]!1
-Expected: 0.13 0.13
-Actual: 6.13 6.13
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_474_round_to_zero_magnitude.k
 Input: y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x
 Expected: 0.0001 -0 -0 0
 Actual: 0.0001 0.0 0.0 0.0
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_476_fractional_part_with_sign.k
-Input: x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
-Expected: 0.2 0.3 -0.2 -0.8 0 0 -0
-Actual: Error: Vector mod requires all elements to be integers
+Test: idioms_17_149_number_of_decimals_max.k
+Input: nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y]
+Expected: 3 2 0
+Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_478_fractional_part.k
-Input: x:0 1 -2 3.4 -5.6 -6.1;x!1
-Expected: 0 0 0 0.4 0.4 0.9
-Actual: Error: Vector mod requires all elements to be integers
+Test: idioms_17_175_primes_to_n.k
+Input: pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30
+Expected: 2 3 5 7 11 13 17 19 23 29
+Actual: Error: Function execution error: Cannot add Integer to Null
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_260_figurate_numbers.k
+Input: a:10#1;2(+\)/a
+Expected: 1 3 6 10 15 21 28 36 45 55
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_17_459_leading_digit.k
+Input: ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x
+Expected: 1 8 6 6 0 9
+Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_142_number_of_combinations.k
 Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4]
@@ -2615,10 +2647,85 @@ Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k
 Expected: 60.0
 Actual: 1.0
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_603_conditional_change_of_sign.k
-Input: y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x]
-Expected: 1 -2 3 -4 -5 6
-Actual: Error: Cannot multiply Integer by Null
+Test: idioms_17_136_pascals_triangle.k
+Input: pt:{+':0,x,0};4 pt\1
+Expected: (1;(1 1);(1 2 1);(1 3 3 1);(1 4 6 4 1))
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_18_224_extend_distance_table.k
+Input: x:(0 50 80 20 999;50 0 20 40 30;80 20 0 999 30;20 40 999 0 10;999 30 30 10 0);x(&/+)\:x
+Expected: (0 50 70 20 30;50 0 20 40 30;70 20 0 40 30;20 40 40 0 10;30 30 30 10 0)
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_18_318_herons_rule.k
+Input: x:3 4 5;hr:{(*/(+/x%2)-0,x)^0.5};hr[x]
+Expected: 6.0
+Actual: 0n
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_18_132_rotation_matrix.k
+Input: x:0.25;((_cos[x];-_sin[x]);(_sin[x];_cos[x]))
+Expected: (0.9689124 -0.247404;0.247404 0.9689124)
+Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_199_multiplication_table.k
+Input: mt:{{x*\:x}[1+!x]};mt 5
+Expected: (1 2 3 4 5;2 4 6 8 10;3 6 9 12 15;4 8 12 16 20;5 10 15 20 25)
+Actual: 
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_155_greatest_common_divisor.k
+Input: gcd:{*|1+&&/'0=x!/:1+!&/x};x:6 9 12;gcd x
+Expected: 3
+Actual: ()
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_301_alternating_sum_series.k
+Input: x:1+!10;as:{+\x*(#x)#1 -1};as[x]
+Expected: 1 -1 2 -2 3 -3 4 -4 5 -5
+Actual: Error: Function expects 3 arguments, got 10
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_367_alternating_product.k
+Input: x:1 2 3 4 5;a:(#x)#1 -1;*/x^a
+Expected: 1.875
+Actual: 0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_164_divisors.k
+Input: dv:{&0=x!/:!1+x};x:363;dv[x]
+Expected: 1 3 11 33 121 363
+Actual: Error: Function execution error: Attempted to divide by zero.
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_67_extrapolated_value.k
+Input: x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x
+Expected: 25.0
+Actual: Error: y must be a list of vectors representing matrix rows
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_69_polynomial_value_at_points.k
+Input: x:-1 0 2;y:4 0 5 1;x _sv\:y
+Expected: -8 1 43
+Actual: Error: _sv: digit 1 is out of range for base -1
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_126_polynomial_fit.k
+Input: x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1]
+Expected: 5 -1 3.999997 182.0001
+Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_363_solve_quadratic.k
+Input: qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15]
+Expected: 5 3.0
+Actual: 5.0 3.0
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_137_taylor_series.k
+Input: x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a]
+Expected: 8.5
+Actual: 13
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_48_saddle_point_indices.k
+Input: x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x
+Expected: (1 1 4 4;1 4 1 4)
+Actual: Error: Function execution error: Function execution error: Function execution error: Function execution error: Cannot compare Vector and Integer with =
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_19_262_saddle_point_value.k
+Input: x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]]
+Expected: ,14
+Actual: Error: Function expects 3 arguments, got 5
 ──────────────────────────────────────────────────────────────────────────
 Test: test_f_rec.k
 Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]
