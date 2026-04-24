@@ -39,40 +39,42 @@ namespace K3CSharp
             {
                 if (leftVec.Elements.All(e => e is IntegerValue))
                 {
-                    if (rightVal.Value < 0 && leftVec.Elements.Count >= 2)
+                    var dims = leftVec.Elements.Select(e => ((IntegerValue)e).Value).ToList();
+                    
+                    if (rightVal.Value < 0)
                     {
-                        // Deal case with vector left: creates a matrix
+                        // Deal case with vector left: creates a matrix with ALL unique values
                         // e.g., 2 3 _draw -10 creates 2 rows of 3 unique values from 0-9
-                        var dims = leftVec.Elements.Select(e => ((IntegerValue)e).Value).ToList();
-                        var rows = dims[0];
-                        var cols = dims[dims.Count - 1];
-
-                        var results = new List<K3Value>();
-                        for (int r = 0; r < rows; r++)
+                        // ALL 6 values must be unique across the entire matrix
+                        var totalElements = dims.Aggregate(1, (acc, val) => acc * val);
+                        var range = -rightVal.Value;
+                        
+                        if (totalElements > range)
                         {
-                            results.Add(DrawDeal(cols, -rightVal.Value));
+                            throw new Exception($"_draw Deal case: product of dimensions ({totalElements}) must be <= range ({range}) for unique values");
                         }
-                        return new VectorValue(results);
+                        
+                        // Generate all unique values at once
+                        var allUniqueValues = DrawDeal(totalElements, range);
+                        
+                        // Reshape into matrix/tensor
+                        return ReshapeDrawResult(allUniqueValues, dims);
                     }
                     else
                     {
-                        // Select/Probability with vector left: create matrix using same logic as deal case
+                        // Select/Probability with vector left: create matrix
                         // e.g., 2 3 _draw 4 creates 2 rows of 3 random selections from 0-3
-                        var dims = leftVec.Elements.Select(e => ((IntegerValue)e).Value).ToList();
-                        var rows = dims[0];
-                        var cols = dims[dims.Count - 1];
-
-                        var results = new List<K3Value>();
-                        for (int r = 0; r < rows; r++)
-                        {
-                            K3Value rowResult;
-                            if (rightVal.Value > 0)
-                                rowResult = DrawSelect(cols, rightVal.Value);
-                            else
-                                rowResult = DrawProbability(new IntegerValue(cols), rightVal);
-                            results.Add(rowResult);
-                        }
-                        return new VectorValue(results);
+                        // e.g., 2 3 _draw 0 creates 2 rows of 3 random floats between 0-1
+                        var totalElements = dims.Aggregate(1, (acc, val) => acc * val);
+                        
+                        K3Value allValues;
+                        if (rightVal.Value > 0)
+                            allValues = DrawSelect(totalElements, rightVal.Value);
+                        else
+                            allValues = DrawProbability(new IntegerValue(totalElements), rightVal);
+                        
+                        // Reshape into matrix/tensor
+                        return ReshapeDrawResult(allValues, dims);
                     }
                 }
                 throw new Exception("_draw requires integer or vector of integers");
@@ -157,6 +159,48 @@ namespace K3CSharp
             }
             
             return new VectorValue(results);
+        }
+        
+        private K3Value ReshapeDrawResult(K3Value flatValues, List<int> dims)
+        {
+            // Reshape flat vector into matrix/tensor with given dimensions
+            if (flatValues is not VectorValue flatVec)
+            {
+                throw new Exception("_draw reshape requires vector input");
+            }
+            
+            if (dims.Count == 1)
+            {
+                // Single dimension - just return the vector
+                return flatValues;
+            }
+            
+            // Build nested structure from dimensions
+            // e.g., dims = [2, 3] means 2 rows of 3 elements each
+            return BuildNestedStructure(flatVec.Elements, dims, 0);
+        }
+        
+        private K3Value BuildNestedStructure(List<K3Value> elements, List<int> dims, int dimIndex)
+        {
+            if (dimIndex == dims.Count - 1)
+            {
+                // Last dimension - return a vector of elements
+                return new VectorValue(elements);
+            }
+            
+            // Build structure for current dimension
+            var currentDim = dims[dimIndex];
+            var result = new List<K3Value>();
+            var elementsPerSubStructure = dims.Skip(dimIndex + 1).Aggregate(1, (acc, val) => acc * val);
+            
+            for (int i = 0; i < currentDim; i++)
+            {
+                var startIndex = i * elementsPerSubStructure;
+                var subElements = elements.Skip(startIndex).Take(elementsPerSubStructure).ToList();
+                result.Add(BuildNestedStructure(subElements, dims, dimIndex + 1));
+            }
+            
+            return new VectorValue(result);
         }
         
         private K3Value DrawProbability(K3Value left, K3Value right)
