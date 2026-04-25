@@ -1437,7 +1437,7 @@ a:g*#y
 x?&/x │ 4                    │                      ║
 ║ idioms_08_23_index_first_max.k                     │ x:11 10 8 8 8 7 5 9 12 12 10 12 8
 x?|/x │ 8                    │                      ║
-║ idioms_08_80_scattered_indexing.k                  │ x:2 3 4# _ci 97+!24; x ./:(0 0 0;1 1 3;1 2 2) │ Error: Cannot a...   │ "atw"                ║
+║ idioms_08_80_scattered_indexing.k                  │ x:2 3 4# _ci 97+!24; x ./:(0 0 0;1 1 3;1 2 2) │ "atw"                │                      ║
 ║ idioms_08_145_count_between_endpoints.k            │ x:(66 8 6 4 86; 82 91 52 53 89; 43 0 62 3 17; 0 26 81 2 12; 37 41 41 72 60); l:10; h:80; +/'(x>l)&(x<h) │ Error: Cannot f...   │ 1 2 3 2 5            ║
 ║ idioms_08_150_sum_items_given_by_y.k               │ x:_log[1+!5]; y:1 4 1 4 1; +/'x[=y] │ Error: Undefine...   │ 2.70805 2.079442     ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(?x)?/:x │ 7 7 7 7 7 7 7        │ 10 20 30 20 30 ...   ║
@@ -1509,7 +1509,7 @@ y:8 2 3 4 9 5 7 1 10 6 8 2
 y:3 1 4 1 5 9
 (~x=y)?1 │ 4                    │                      ║
 ║ idioms_08_554_select_from_g.k                      │ g:("William Shakespeare"; "John Milton"; "Jonathan Swift"; "Jane Austen"; "John Keats"; "Charles Dickens"); y:1564 1608 1667 1775 1795 1812; x:1775; g[y?x] │ "Jane Austen"        │                      ║
-║ idioms_08_567_select_based_on_g.k                  │ x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g │ ((`hot`cold;`wh...   │ `cold `white `s...   ║
+║ idioms_08_567_select_based_on_g.k                  │ x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g │ `cold`white`sho...   │ `cold `white `s...   ║
 ║ idioms_08_574_y_where_x_is_zero.k                  │ x:0 7 8 0 2
 y:10 4 6 7 3
 x+y*x=0 │ 10 7 8 7 2           │                      ║
@@ -1749,14 +1749,14 @@ y:"efgh"
 ║ idioms_12_148_node_matrix_from_connection.k        │ x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x] │ Error: Function...   │ (0 0 2 1 1;2 1 ...   ║
 ║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ Error: Cannot c...   │ (1 1 0 0 0;0 -1...   ║
 ║ idioms_12_51_indices.k                             │ ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x] │ ,0 1 2               │ (0 0 0 1 1 1;0 ...   ║
-║ idioms_12_81_raveled_index.k                       │ x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3 │ Error: Cannot a...   │ 19                   ║
+║ idioms_12_81_raveled_index.k                       │ x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3 │ 19                   │                      ║
 ║ idioms_12_58_pair_each_element.k                   │ x:"abcd"; y:"efgh"; x,/:\:y │ (("ae";"af";"ag...   │ ("ae";"af";"ag"...   ║
 ║ idioms_12_55_indices_containing.k                  │ x:"abcdef"; y:"ace"; &/y _lin/:x │ 0 0 0                │ 1 0 1 0 1 0          ║
-║ idioms_12_100_indexing_arbitrary_rank.k            │ x:2 3 4#_ci 97+!24; x[;1;] │ Error: Cannot a...   │ ("efgh";"qrst")      ║
+║ idioms_12_100_indexing_arbitrary_rank.k            │ x:2 3 4#_ci 97+!24; x[;1;] │ (,"efgh";,"qrst")    │ ("efgh";"qrst")      ║
 ║ idioms_12_161_is_upper_triangular.k                │ y:(2 3 1 1;0 1 2 3;0 0 4 1;0 0 0 5); &/(^y)=!^y │ Error: Cannot e...   │ 1                    ║
 ║ idioms_12_162_is_lower_triangular.k                │ x:(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1); &/0=^x _vs/:!^x │ Error: Cannot e...   │ 1                    ║
 ║ idioms_12_525_main_diagonal.k                      │ x:(1 2 3 4;5 6 7 8;9 10 11 12)
-x ./: 2#'!#x │ ((1 2 3 4;1 2 3...   │ 1 6 11               ║
+x ./: 2#'!#x │ 1 6 11               │                      ║
 ║ idioms_12_429_matrix_with_diagonal.k               │ x:5 9 6 7 2
 (2##x)#,/x,'(2##x)#0 │ (5 9 6 7 2 0 0 ...   │ (5 0 0 0 0;0 9 ...   ║
 ║ idioms_12_197_identity_matrix.k                    │ id:{(!x)=\:!x}
@@ -1850,7 +1850,7 @@ y:8
 y _vs x    │ 1 4 4                │                      ║
 ║ idioms_15_56_hex_from_decimal_chars.k              │ x:"255"
 h:"0123456789abcdef"
-h[16 _vs 10 _sv _ic[x]-_ic"0"] │ "ff"                 │                      ║
+h[16 _vs 10 _sv _ic[x]-_ic"0"] │ Error: Cannot s...   │ "ff"                 ║
 ║ idioms_15_75_decimal_from_hex.k                    │ h:"0123456789abcdef"
 x:"ff"
 16 _sv h?/:x │ Error: _sv: all...   │ 255                  ║
@@ -1970,16 +1970,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1178/1315 tests passed (89.6%)                                                                             ║
+║ SUMMARY: 1180/1315 tests passed (89.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_08_80_scattered_indexing.k
-Input: x:2 3 4# _ci 97+!24; x ./:(0 0 0;1 1 3;1 2 2)
-Expected: "atw"
-Actual: Error: Cannot add Integer to Character
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_145_count_between_endpoints.k
 Input: x:(66 8 6 4 86; 82 91 52 53 89; 43 0 62 3 17; 0 26 81 2 12; 37 41 41 72 60); l:10; h:80; +/'(x>l)&(x<h)
 Expected: 1 2 3 2 5
@@ -2053,7 +2048,7 @@ Actual: Error: Cannot subtract Integer and Character
 Test: idioms_08_567_select_based_on_g.k
 Input: x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g
 Expected: `cold `white `short `young
-Actual: ((`hot`cold;`white`black);(`white`black;`hot`cold);(`short`tall;`hot`cold);(`old`young;`white`black))
+Actual: `cold`white`short`young
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_181_classify.k
 Input: x:87 9 931 7 27 92 654 1416 7 911
@@ -2264,11 +2259,6 @@ Input: ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x]
 Expected: (0 0 0 1 1 1;0 1 2 0 1 2)
 Actual: ,0 1 2
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_81_raveled_index.k
-Input: x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3
-Expected: 19
-Actual: Error: Cannot add Integer to Character
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_58_pair_each_element.k
 Input: x:"abcd"; y:"efgh"; x,/:\:y
 Expected: ("ae";"af";"ag";"ah");("be";"bf";"bg";"bh");("ce";"cf";"cg";"ch");("de";"df";"dg";"dh")
@@ -2282,7 +2272,7 @@ Actual: 0 0 0
 Test: idioms_12_100_indexing_arbitrary_rank.k
 Input: x:2 3 4#_ci 97+!24; x[;1;]
 Expected: ("efgh";"qrst")
-Actual: Error: Cannot add Integer to Character
+Actual: (,"efgh";,"qrst")
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_161_is_upper_triangular.k
 Input: y:(2 3 1 1;0 1 2 3;0 0 4 1;0 0 0 5); &/(^y)=!^y
@@ -2293,12 +2283,6 @@ Test: idioms_12_162_is_lower_triangular.k
 Input: x:(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1); &/0=^x _vs/:!^x
 Expected: 1
 Actual: Error: Cannot enumerate Vector
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_525_main_diagonal.k
-Input: x:(1 2 3 4;5 6 7 8;9 10 11 12)
-x ./: 2#'!#x
-Expected: 1 6 11
-Actual: ((1 2 3 4;1 2 3 4);(5 6 7 8;5 6 7 8);(9 10 11 12;9 10 11 12))
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_429_matrix_with_diagonal.k
 Input: x:5 9 6 7 2
@@ -2438,6 +2422,13 @@ x:0 13 523 16008
 np x
 Expected: 1 2 3 5
 Actual: Error: Function execution error: Undefined variable: log10
+──────────────────────────────────────────────────────────────────────────
+Test: idioms_15_56_hex_from_decimal_chars.k
+Input: x:"255"
+h:"0123456789abcdef"
+h[16 _vs 10 _sv _ic[x]-_ic"0"]
+Expected: "ff"
+Actual: Error: Cannot subtract Character values
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_75_decimal_from_hex.k
 Input: h:"0123456789abcdef"

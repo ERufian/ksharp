@@ -32,7 +32,7 @@ namespace K3CSharp.Parsing
             // The leftmost operator splits: left side is atomic, right side is recursively parsed
             
             int depth = 0;
-            
+
             for (int i = 0; i < tokens.Count; i++)
             {
                 var currentToken = tokens[i];
@@ -246,12 +246,12 @@ namespace K3CSharp.Parsing
             
             var rightmostOpIndex = FindRightmostOperator(tokens);
             if (rightmostOpIndex == -1) return null;
-            
+
             // Split at rightmost operator
             var leftTokens = tokens.GetRange(0, rightmostOpIndex);
             var rightTokens = tokens.GetRange(rightmostOpIndex + 1, tokens.Count - rightmostOpIndex - 1);
             var opToken = tokens[rightmostOpIndex];
-            
+
             // Choose strategy based on parent parser mode
             if (parentParser?.BuildParseTree == true)
             {
@@ -357,6 +357,29 @@ namespace K3CSharp.Parsing
                 projectedNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(tokens[0].Type));
                 projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
                 return projectedNode;
+            }
+
+            // Check for monadic system function application (e.g., _ci 97+!24)
+            // The system function should consume the entire remaining expression as its argument
+            if (tokens.Count >= 2 && OperatorDetector.IsFunction(tokens[0].Type) && 
+                !IsDyadicOperatorDirect(tokens[0].Type))
+            {
+                var funcName = VerbRegistry.TokenTypeToVerbName(tokens[0].Type);
+                var verb = VerbRegistry.GetVerb(funcName);
+                
+                // If it's a system function that supports monadic arity, treat rest as its argument
+                if (verb?.Type == VerbType.SystemFunction && verb.SupportedArities.Contains(1))
+                {
+                    var argTokens = tokens.GetRange(1, tokens.Count - 1);
+                    var argNode = BuildParseTreeFromTokens(argTokens);
+                    if (argNode != null)
+                    {
+                        var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                        funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                        funcCallNode.Children.Add(argNode);
+                        return funcCallNode;
+                    }
+                }
             }
             
             // Try dyadic operation first (monadic parsing is handled at main LRS level)
@@ -597,6 +620,29 @@ namespace K3CSharp.Parsing
                 var implicitVector = TryCreateImplicitVector(tokens);
                 if (implicitVector != null)
                     return implicitVector;
+            }
+
+            // Check for monadic system function application (e.g., _ci 97+!24)
+            // The system function should consume the entire remaining expression as its argument
+            if (tokens.Count >= 2 && OperatorDetector.IsFunction(tokens[0].Type) && 
+                !IsDyadicOperatorDirect(tokens[0].Type))
+            {
+                var funcName = VerbRegistry.TokenTypeToVerbName(tokens[0].Type);
+                var verb = VerbRegistry.GetVerb(funcName);
+                
+                // If it's a system function that supports monadic arity, treat rest as its argument
+                if (verb?.Type == VerbType.SystemFunction && verb.SupportedArities.Contains(1))
+                {
+                    var argTokens = tokens.GetRange(1, tokens.Count - 1);
+                    var argNode = ParseSubExpression(argTokens);
+                    if (argNode != null)
+                    {
+                        var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                        funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                        funcCallNode.Children.Add(argNode);
+                        return funcCallNode;
+                    }
+                }
             }
             
             // Delegate to EvaluateFromRight when there are adverb patterns

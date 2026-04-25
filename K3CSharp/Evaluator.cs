@@ -3112,6 +3112,57 @@ namespace K3CSharp
             }
         }
 
+        /// <summary>
+        /// Vector deep indexing for . operator (index at depth)
+        /// e.g., x . 1 2 3 navigates nested structure: x[1][2][3]
+        /// </summary>
+        private K3Value VectorDotIndex(VectorValue vector, VectorValue indices)
+        {
+            if (indices.Elements.Count == 0)
+            {
+                return vector;
+            }
+            
+            // Get the first index
+            var firstIdx = indices.Elements[0];
+            if (firstIdx is not IntegerValue intIdx)
+            {
+                throw new Exception($"Deep index must be integer, got {firstIdx.Type}");
+            }
+            
+            int idx = intIdx.Value;
+            if (idx < 0 || idx >= vector.Elements.Count)
+            {
+                throw new Exception($"Index {idx} out of bounds for vector of length {vector.Elements.Count}");
+            }
+            
+            // Get the element at the first index
+            var element = vector.Elements[idx];
+            
+            // If there are more indices, recurse
+            if (indices.Elements.Count > 1)
+            {
+                var remainingIndices = new VectorValue(indices.Elements.GetRange(1, indices.Elements.Count - 1));
+                
+                if (element is VectorValue elementVec)
+                {
+                    return VectorDotIndex(elementVec, remainingIndices);
+                }
+                else if (element is VectorValue charVec && charVec.VectorType == -3)
+                {
+                    // Character vector (string) - index into it
+                    return VectorDotIndex(charVec, remainingIndices);
+                }
+                else
+                {
+                    throw new Exception($"Cannot index into type {element.Type} with remaining indices");
+                }
+            }
+            
+            // Return the final element
+            return element;
+        }
+
         private K3Value AtIndex(K3Value left, K3Value right)
         {
             // Check if this is Amend Item operation: @[d; i; f; y] or @[d; i; f]
@@ -3932,7 +3983,14 @@ namespace K3CSharp
                 }
                 else if (left is VectorValue vector)
                 {
-                    // Vector indexing: vector . indices
+                    // Vector deep indexing: vector . indices
+                    // If right is a vector of integers, do deep indexing at depth
+                    // e.g., x . 1 2 3 is equivalent to x[1][2][3]
+                    if (right is VectorValue indexVec && indexVec.Elements.All(e => e is IntegerValue))
+                    {
+                        return VectorDotIndex(vector, indexVec);
+                    }
+                    // Otherwise, use regular vector indexing
                     return VectorIndex(vector, right ?? throw new ArgumentNullException(nameof(right)));
                 }
                 else if (left is FunctionValue function)
