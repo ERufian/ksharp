@@ -172,7 +172,7 @@ namespace K3CSharp
         static VerbRegistry()
         {
             InitializeBasicOperators();
-            PopulateImplementationDelegates(); // This is a hack for _eval. We need to fix _eval and remove it
+            // Note: All verb implementations are handled by the Evaluator
         }
 
         public static void RegisterVerb(string name, VerbType type, int[] arities, Func<K3Value[], K3Value>?[]? implementations, bool isSystemVariable = false, string? description = null)
@@ -817,122 +817,10 @@ namespace K3CSharp
             RegisterVerb("SETHINT", VerbType.SystemFunction, new[] { 2 }, null);
         }
 
-        // This is a hack for _eval, we should fix _eval and remove it
-        private static void PopulateImplementationDelegates()
-        {
-            // Only implement basic arithmetic operators that have K3Value methods
-            // All other operators will be handled by the evaluator
-            UpdateVerbImplementations("+", new Func<K3Value[], K3Value>?[] { 
-                null, // No monadic implementation for +
-                args => args[0].Add(args[1])
-            });
-            
-            UpdateVerbImplementations("-", new Func<K3Value[], K3Value>?[] { 
-                null, // Monadic - will be handled by evaluator
-                args => args[0].Subtract(args[1])
-            });
-            
-            UpdateVerbImplementations("*", new Func<K3Value[], K3Value>?[] { 
-                null, // No monadic implementation for *
-                args => args[0].Multiply(args[1])
-            });
-            
-            UpdateVerbImplementations("%", new Func<K3Value[], K3Value>?[] { 
-                null, // Monadic % will be handled by evaluator
-                args => args[0].Divide(args[1])
-            });
-            
-            UpdateVerbImplementations(",", new Func<K3Value[], K3Value>?[] { 
-                null, // No monadic implementation for ,
-                args => {
-                    // Implement join logic manually since it's commonly used
-                    var elements = new List<K3Value>();
-                    
-                    if (args[0] is VectorValue vecA)
-                    {
-                        elements.AddRange(vecA.Elements);
-                    }
-                    else
-                    {
-                        elements.Add(args[0]);
-                    }
-                    
-                    if (args[1] is VectorValue vecB)
-                    {
-                        elements.AddRange(vecB.Elements);
-                    }
-                    else
-                    {
-                        elements.Add(args[1]);
-                    }
-                    
-                    return new VectorValue(elements);
-                }
-            });
-            
-            // Common modified verbs (operators with colons)
-            UpdateVerbImplementations("*:", new Func<K3Value[], K3Value>?[] { 
-                args => {
-                    // Monadic *: is "first" - return first element
-                    if (args[0] is VectorValue vec && vec.Elements.Count > 0)
-                    {
-                        return vec.Elements[0];
-                    }
-                    else
-                    {
-                        return args[0]; // First on scalar returns scalar
-                    }
-                },
-                args => {
-                    // Dyadic *: is "each" - apply to each element
-                    if (args[0] is VectorValue vec)
-                    {
-                        var elements = new List<K3Value>();
-                        foreach (var elem in vec.Elements)
-                        {
-                            elements.Add(elem.Multiply(args[1]));
-                        }
-                        return new VectorValue(elements);
-                    }
-                    else
-                    {
-                        return args[0].Multiply(args[1]);
-                    }
-                }
-            });
-                        
-            // System operators - need to access Evaluator methods
-            // These will be handled by the evaluator's method dispatch
-            UpdateVerbImplementations("GTIME", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_gtime", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("LTIME", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_ltime", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("GETENV", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_getenv", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("SETENV", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_setenv", new Func<K3Value[], K3Value>?[] { null, null });
-            
-            // Mathematical functions - delegate to Evaluator_Math.cs implementations via Evaluator switch
-            UpdateVerbImplementations("CEIL", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_ceil", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("FLOOR", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_floor", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("SIN", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_sin", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("COS", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_cos", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("TAN", new Func<K3Value[], K3Value>?[] { null, null });
-            UpdateVerbImplementations("_tan", new Func<K3Value[], K3Value>?[] { null, null });
-        }
-
-        // This is a hack for _eval, we should fix _eval and remove it
-        private static void UpdateVerbImplementations(string name, Func<K3Value[], K3Value>?[]? implementations)
-        {
-            if (verbs.TryGetValue(name, out var verb))
-            {
-                verb.Implementations = implementations;
-            }
-        }
+        // Note: All verb implementations are handled by the Evaluator to maintain
+        // proper separation of concerns. The Evaluator uses VerbRegistry for
+        // dispatch information (arities, types) and handles all operation logic,
+        // type promotion, and vector operations internally.
 
         /// <summary>
         /// Get the preferred arity for an operator based on context and position

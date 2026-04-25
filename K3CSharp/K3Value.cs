@@ -25,93 +25,10 @@ namespace K3CSharp
         public ValueType Type { get; protected set; }
         public SymbolValue? Hint { get; set; }
 
-        public abstract K3Value Add(K3Value other);
-        public abstract K3Value Subtract(K3Value other);
-        public abstract K3Value Multiply(K3Value other);
-        public abstract K3Value Divide(K3Value other);
+        // Note: Arithmetic operations are handled by the Evaluator to maintain
+        // proper separation of concerns. The Evaluator uses VerbRegistry for
+        // dispatch and handles type promotion, vector operations, etc.
         public abstract override string ToString();
-        
-        /// <summary>
-        /// Determines the result of 0%0 division in a vector context.
-        /// Returns infinity (0i/-0i) if adjacent elements would produce infinity,
-        /// otherwise returns 0/0.0 based on the operand types.
-        /// </summary>
-        protected static K3Value ResolveZeroDividedByZero(K3Value dividend, K3Value divisor, 
-            K3Value? prevDividend = null, K3Value? nextDividend = null)
-        {
-            // Check if this is truly a 0%0 case
-            bool isZeroDividend = dividend is IntegerValue iv && iv.Value == 0 ||
-                                   dividend is LongValue lv && lv.Value == 0 ||
-                                   dividend is FloatValue fv && fv.Value == 0.0;
-            bool isZeroDivisor = divisor is IntegerValue id && id.Value == 0 ||
-                                 divisor is LongValue ld && ld.Value == 0 ||
-                                 divisor is FloatValue fd && fd.Value == 0.0;
-            
-            if (!isZeroDividend || !isZeroDivisor)
-                return dividend.Divide(divisor); // Not a 0%0 case, use normal division
-            
-            // Check if adjacent elements would produce infinity
-            // "Very large" numbers are those close to the limits of numeric representation
-            // where division by a small number would result in infinity
-            const double VeryLargeThreshold = 1e300; // Threshold for considering a number "very large"
-            
-            bool WouldProduceInfinity(K3Value? adjDividend)
-            {
-                if (adjDividend == null) return false;
-                
-                double value = 0;
-                if (adjDividend is IntegerValue i) value = Math.Abs(i.Value);
-                else if (adjDividend is LongValue l) value = Math.Abs(l.Value);
-                else if (adjDividend is FloatValue f) 
-                {
-                    if (double.IsNaN(f.Value) || f.Value == 0.0) return false;
-                    value = Math.Abs(f.Value);
-                }
-                else return false;
-                
-                // A number is "very large" if it exceeds the threshold
-                return value >= VeryLargeThreshold;
-            }
-            
-            // Check if adjacent element would produce positive or negative infinity
-            double GetInfinitySign(K3Value? adjDividend)
-            {
-                if (adjDividend is IntegerValue i) return Math.Sign(i.Value);
-                if (adjDividend is LongValue l) return Math.Sign(l.Value);
-                if (adjDividend is FloatValue f) return Math.Sign(f.Value);
-                return 1.0;
-            }
-            
-            bool prevProducesInfinity = WouldProduceInfinity(prevDividend);
-            bool nextProducesInfinity = WouldProduceInfinity(nextDividend);
-            
-            if (prevProducesInfinity || nextProducesInfinity)
-            {
-                // Determine the sign of infinity
-                double sign = 1.0;
-                if (prevProducesInfinity)
-                    sign = GetInfinitySign(prevDividend);
-                else if (nextProducesInfinity)
-                    sign = GetInfinitySign(nextDividend);
-                
-                // Return appropriate infinity based on operand types
-                if (dividend is LongValue || divisor is LongValue)
-                    return new LongValue(sign > 0 ? long.MaxValue : -long.MaxValue);
-                else if (dividend is FloatValue || divisor is FloatValue || 
-                         (prevDividend is FloatValue) || (nextDividend is FloatValue))
-                    return new FloatValue(sign > 0 ? double.PositiveInfinity : double.NegativeInfinity);
-                else
-                    return new IntegerValue(sign > 0 ? int.MaxValue : int.MinValue + 1);
-            }
-            
-            // No adjacent infinity-producing elements, return 0/0.0 based on types
-            if (dividend is LongValue || divisor is LongValue)
-                return new LongValue(0);
-            else if (dividend is FloatValue || divisor is FloatValue)
-                return new FloatValue(0.0);
-            else
-                return new IntegerValue(0);
-        }
     }
 
     public class IntegerValue : K3Value
@@ -165,76 +82,6 @@ namespace K3CSharp
             }
         }
 
-        public override K3Value Add(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-            {
-                // Use unchecked arithmetic for all integers to allow natural overflow/underflow
-                unchecked
-                {
-                    return new IntegerValue(Value + intVal.Value);
-                }
-            }
-            if (other is LongValue longVal)
-                return new LongValue(Value + longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value + floatVal.Value);
-            if (other is VectorValue vec)
-            {
-                // Scalar + vector: add scalar to each element
-                var result = new List<K3Value>();
-                foreach (var element in vec.Elements)
-                {
-                    result.Add(element.Add(this));
-                }
-                return new VectorValue(result);
-            }
-            
-            throw new InvalidOperationException($"Cannot add Integer to {other.Type}");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-            {
-                // Use unchecked arithmetic for all integers to allow natural overflow/underflow
-                unchecked
-                {
-                    return new IntegerValue(Value - intVal.Value);
-                }
-            }
-            if (other is LongValue longVal)
-                return new LongValue(Value - longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value - floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot subtract Integer from {other.Type}");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new IntegerValue(Value * intVal.Value);
-            if (other is LongValue longVal)
-                return new LongValue(Value * longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value * floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot multiply Integer by {other.Type}");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new IntegerValue(Value / intVal.Value);
-            if (other is LongValue longVal)
-                return new LongValue(Value / longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value / floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot divide Integer by {other.Type}");
-        }
-
         public override string ToString()
         {
             if (IsSpecial)
@@ -252,100 +99,6 @@ namespace K3CSharp
             Value = value;
             Type = ValueType.Long;
             Hint = hint;
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value + intVal.Value);
-                }
-            }
-            if (other is LongValue longVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value + longVal.Value);
-                }
-            }
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value + floatVal.Value);
-            if (other is VectorValue vec)
-            {
-                // Scalar + vector: add scalar to each element
-                var result = new List<K3Value>();
-                foreach (var element in vec.Elements)
-                {
-                    result.Add(element.Add(this));
-                }
-                return new VectorValue(result);
-            }
-            
-            throw new InvalidOperationException($"Cannot add Long to {other.Type}");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value - intVal.Value);
-                }
-            }
-            if (other is LongValue longVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value - longVal.Value);
-                }
-            }
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value - floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot subtract from Long");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value * intVal.Value);
-                }
-            }
-            if (other is LongValue longVal)
-            {
-                // Use unchecked arithmetic to allow natural overflow/underflow
-                unchecked
-                {
-                    return new LongValue(Value * longVal.Value);
-                }
-            }
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value * floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot multiply Long by {other.Type}");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new LongValue(Value / intVal.Value);
-            if (other is LongValue longVal)
-                return new LongValue(Value / longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value / floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot divide Long by {other.Type}");
         }
 
         public override string ToString()
@@ -410,64 +163,6 @@ namespace K3CSharp
                 case "-0i": Value = double.NegativeInfinity; break;
                 default: throw new ArgumentException($"Unknown special float: {specialName}");
             }
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new FloatValue(Value + intVal.Value);
-            if (other is LongValue longVal)
-                return new FloatValue(Value + longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value + floatVal.Value);
-            if (other is VectorValue vec)
-            {
-                // Scalar + vector: add scalar to each element
-                var result = new List<K3Value>();
-                foreach (var element in vec.Elements)
-                {
-                    result.Add(element.Add(this));
-                }
-                return new VectorValue(result);
-            }
-            
-            throw new InvalidOperationException($"Cannot add Float to {other.Type}");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new FloatValue(Value - intVal.Value);
-            if (other is LongValue longVal)
-                return new FloatValue(Value - longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value - floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot subtract Float from {other.Type}");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new FloatValue(Value * intVal.Value);
-            if (other is LongValue longVal)
-                return new FloatValue(Value * longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value * floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot multiply Float by {other.Type}");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            if (other is IntegerValue intVal)
-                return new FloatValue(Value / intVal.Value);
-            if (other is LongValue longVal)
-                return new FloatValue(Value / longVal.Value);
-            if (other is FloatValue floatVal)
-                return new FloatValue(Value / floatVal.Value);
-            
-            throw new InvalidOperationException($"Cannot divide Float by {other.Type}");
         }
 
         public override string ToString()
@@ -736,26 +431,6 @@ namespace K3CSharp
             return result.ToString();
         }
 
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add Character values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract Character values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply Character values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide Character values");
-        }
-
         public override string ToString()
         {
             var result = new StringBuilder();
@@ -813,26 +488,6 @@ namespace K3CSharp
             Value = value;
             Type = ValueType.Symbol;
             Hint = hint;
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add Symbol values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract Symbol values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply Symbol values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide Symbol values");
         }
 
         public override string ToString()
@@ -990,314 +645,6 @@ namespace K3CSharp
                 return -3; // Character vector
             else
                 return 0; // Default to mixed list (for mixed types)
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            if (other is VectorValue otherVec)
-            {
-                if (Elements.Count != otherVec.Elements.Count)
-                    throw new InvalidOperationException("Vector size mismatch for addition");
-                
-                var result = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    result.Add(Elements[i].Add(otherVec.Elements[i]));
-                }
-                return new VectorValue(result);
-            }
-            
-            // Scalar addition
-            var scalarResult = new List<K3Value>();
-            foreach (var element in Elements)
-            {
-                scalarResult.Add(element.Add(other));
-            }
-            return new VectorValue(scalarResult);
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            if (other is VectorValue otherVec)
-            {
-                if (Elements.Count != otherVec.Elements.Count)
-                    throw new InvalidOperationException("Vector size mismatch for subtraction");
-                
-                var result = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    result.Add(Elements[i].Subtract(otherVec.Elements[i]));
-                }
-                return new VectorValue(result);
-            }
-            
-            // Scalar subtraction
-            var scalarResult = new List<K3Value>();
-            foreach (var element in Elements)
-            {
-                scalarResult.Add(element.Subtract(other));
-            }
-            return new VectorValue(scalarResult);
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            if (other is VectorValue otherVec)
-            {
-                if (Elements.Count != otherVec.Elements.Count)
-                    throw new InvalidOperationException("Vector size mismatch for multiplication");
-                
-                var result = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    result.Add(Elements[i].Multiply(otherVec.Elements[i]));
-                }
-                return new VectorValue(result);
-            }
-            
-            // Scalar multiplication
-            var scalarResult = new List<K3Value>();
-            foreach (var element in Elements)
-            {
-                scalarResult.Add(element.Multiply(other));
-            }
-            return new VectorValue(scalarResult);
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            if (other is VectorValue otherVec)
-            {
-                if (Elements.Count != otherVec.Elements.Count)
-                    throw new InvalidOperationException("Vector size mismatch for division");
-                
-                // Check if all elements are integers and all divisions are exact
-                bool allIntegerDivision = true;
-                bool allExactDivision = true;
-                
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    if (Elements[i] is IntegerValue intElem && otherVec.Elements[i] is IntegerValue intDiv)
-                    {
-                        // Check for 0%0 special case
-                        if (intDiv.Value == 0 && intElem.Value == 0)
-                        {
-                            // 0%0 will be handled later with adjacent element checking
-                            allExactDivision = false; // Force non-exact path to use FloatValue
-                        }
-                        else if (intDiv.Value == 0)
-                            throw new InvalidOperationException("Division by zero");
-                        else if (intElem.Value % intDiv.Value != 0)
-                            allExactDivision = false;
-                    }
-                    else if (Elements[i] is LongValue longElem && otherVec.Elements[i] is LongValue longDiv)
-                    {
-                        // Check for 0j%0j special case
-                        if (longDiv.Value == 0 && longElem.Value == 0)
-                        {
-                            // 0j%0j will be handled later
-                            allExactDivision = false;
-                        }
-                        else if (longDiv.Value == 0)
-                            throw new InvalidOperationException("Division by zero");
-                        else if (longElem.Value % longDiv.Value != 0)
-                            allExactDivision = false;
-                    }
-                    else
-                    {
-                        allIntegerDivision = false;
-                        break;
-                    }
-                }
-                
-                var result = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    // Check for 0%0 special case first
-                    bool isZeroDividend = (Elements[i] is IntegerValue iv && iv.Value == 0) ||
-                                          (Elements[i] is LongValue lv && lv.Value == 0);
-                    bool isZeroDivisor = (otherVec.Elements[i] is IntegerValue id && id.Value == 0) ||
-                                        (otherVec.Elements[i] is LongValue ld && ld.Value == 0);
-                    
-                    if (isZeroDividend && isZeroDivisor)
-                    {
-                        // Use special 0%0 resolution with adjacent elements
-                        K3Value? prevDiv = i > 0 ? Elements[i - 1] : null;
-                        K3Value? nextDiv = i < Elements.Count - 1 ? Elements[i + 1] : null;
-                        result.Add(ResolveZeroDividedByZero(Elements[i], otherVec.Elements[i], prevDiv, nextDiv));
-                    }
-                    else if (allIntegerDivision && allExactDivision)
-                    {
-                        // All exact integer division - return integer vector
-                        if (Elements[i] is IntegerValue intElem && otherVec.Elements[i] is IntegerValue intDiv)
-                            result.Add(new IntegerValue(intElem.Value / intDiv.Value));
-                        else if (Elements[i] is LongValue longElem && otherVec.Elements[i] is LongValue longDiv)
-                            result.Add(new LongValue(longElem.Value / longDiv.Value));
-                    }
-                    else if (allIntegerDivision && !allExactDivision)
-                    {
-                        // Integer division but not all exact - return float vector
-                        if (Elements[i] is IntegerValue intElem && otherVec.Elements[i] is IntegerValue intDiv)
-                            result.Add(new FloatValue((double)intElem.Value / intDiv.Value));
-                        else if (Elements[i] is LongValue longElem && otherVec.Elements[i] is LongValue longDiv)
-                            result.Add(new FloatValue((double)longElem.Value / longDiv.Value));
-                    }
-                    else
-                    {
-                        // Mixed types - use element-wise division
-                        result.Add(Elements[i].Divide(otherVec.Elements[i]));
-                    }
-                }
-                return new VectorValue(result);
-            }
-            
-            // Scalar division with smart division rules
-            if (other is IntegerValue intScalar)
-            {
-                int scalarValue = intScalar.Value;
-                
-                // Check if all elements are integers
-                bool allIntegerElements = true;
-                bool allExactDivision = true;
-                
-                foreach (var element in Elements)
-                {
-                    if (element is IntegerValue intElem)
-                    {
-                        if (scalarValue != 0 && intElem.Value % scalarValue != 0)
-                            allExactDivision = false;
-                    }
-                    else if (element is LongValue longElem)
-                    {
-                        if (scalarValue != 0 && longElem.Value % scalarValue != 0)
-                            allExactDivision = false;
-                    }
-                    else
-                    {
-                        allIntegerElements = false;
-                        break;
-                    }
-                }
-                
-                var scalarResult = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    var element = Elements[i];
-                    
-                    // Check for 0%0 special case
-                    bool isZeroDividend = (element is IntegerValue iv && iv.Value == 0) ||
-                                          (element is LongValue lv && lv.Value == 0);
-                    
-                    if (scalarValue == 0 && isZeroDividend)
-                    {
-                        // Use special 0%0 resolution with adjacent elements
-                        K3Value? prevDiv = i > 0 ? Elements[i - 1] : null;
-                        K3Value? nextDiv = i < Elements.Count - 1 ? Elements[i + 1] : null;
-                        scalarResult.Add(ResolveZeroDividedByZero(element, intScalar, prevDiv, nextDiv));
-                    }
-                    else if (scalarValue == 0)
-                    {
-                        throw new InvalidOperationException("Division by zero");
-                    }
-                    else if (allIntegerElements && allExactDivision)
-                    {
-                        // All exact integer division
-                        if (element is IntegerValue intElem)
-                            scalarResult.Add(new IntegerValue(intElem.Value / scalarValue));
-                        else if (element is LongValue longElem)
-                            scalarResult.Add(new LongValue(longElem.Value / scalarValue));
-                    }
-                    else if (allIntegerElements && !allExactDivision)
-                    {
-                        // Integer division but not all exact - convert to float
-                        if (element is IntegerValue intElem)
-                            scalarResult.Add(new FloatValue((double)intElem.Value / scalarValue));
-                        else if (element is LongValue longElem)
-                            scalarResult.Add(new FloatValue((double)longElem.Value / scalarValue));
-                    }
-                    else
-                    {
-                        // Mixed types - use element-wise division
-                        scalarResult.Add(element.Divide(other));
-                    }
-                }
-                return new VectorValue(scalarResult);
-            }
-            
-            // Handle LongValue scalar division
-            if (other is LongValue longScalar)
-            {
-                long scalarValue = longScalar.Value;
-                
-                var longResult = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    var element = Elements[i];
-                    
-                    // Check for 0%0 special case
-                    bool isZeroDividend = (element is IntegerValue iv && iv.Value == 0) ||
-                                          (element is LongValue lv && lv.Value == 0);
-                    
-                    if (scalarValue == 0 && isZeroDividend)
-                    {
-                        // Use special 0%0 resolution with adjacent elements
-                        K3Value? prevDiv = i > 0 ? Elements[i - 1] : null;
-                        K3Value? nextDiv = i < Elements.Count - 1 ? Elements[i + 1] : null;
-                        longResult.Add(ResolveZeroDividedByZero(element, longScalar, prevDiv, nextDiv));
-                    }
-                    else if (scalarValue == 0)
-                    {
-                        throw new InvalidOperationException("Division by zero");
-                    }
-                    else
-                    {
-                        longResult.Add(element.Divide(other));
-                    }
-                }
-                return new VectorValue(longResult);
-            }
-            
-            // Handle FloatValue scalar division
-            if (other is FloatValue floatScalar)
-            {
-                double scalarValue = floatScalar.Value;
-                
-                var floatResult = new List<K3Value>();
-                for (int i = 0; i < Elements.Count; i++)
-                {
-                    var element = Elements[i];
-                    
-                    // Check for 0%0 special case
-                    bool isZeroDividend = (element is IntegerValue iv && iv.Value == 0) ||
-                                          (element is LongValue lv && lv.Value == 0) ||
-                                          (element is FloatValue fv && fv.Value == 0.0);
-                    
-                    if (scalarValue == 0.0 && isZeroDividend)
-                    {
-                        // Use special 0%0 resolution with adjacent elements
-                        K3Value? prevDiv = i > 0 ? Elements[i - 1] : null;
-                        K3Value? nextDiv = i < Elements.Count - 1 ? Elements[i + 1] : null;
-                        floatResult.Add(ResolveZeroDividedByZero(element, floatScalar, prevDiv, nextDiv));
-                    }
-                    else if (scalarValue == 0.0)
-                    {
-                        throw new InvalidOperationException("Division by zero");
-                    }
-                    else
-                    {
-                        floatResult.Add(element.Divide(other));
-                    }
-                }
-                return new VectorValue(floatResult);
-            }
-            
-            // Default scalar division for other types
-            var defaultScalarResult = new List<K3Value>();
-            foreach (var element in Elements)
-            {
-                defaultScalarResult.Add(element.Divide(other));
-            }
-            return new VectorValue(defaultScalarResult);
         }
 
         public K3Value Minimum(VectorValue other)
@@ -1571,26 +918,6 @@ namespace K3CSharp
             }
         }
 
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add Function values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract Function values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply Function values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide Function values");
-        }
-
         public override string ToString()
         {
             // Use the original source text if available for exact representation
@@ -1608,26 +935,6 @@ namespace K3CSharp
         public NullValue()
         {
             Type = ValueType.Null;
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add Null values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract Null values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply Null values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide Null values");
         }
 
         public override string ToString()
@@ -1650,26 +957,6 @@ namespace K3CSharp
         {
             Type = ValueType.Dictionary;
             Entries = entries;
-        }
-
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add Dictionary values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract Dictionary values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply Dictionary values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide Dictionary values");
         }
 
         public override string ToString()
@@ -1732,26 +1019,6 @@ namespace K3CSharp
             return RequiredArguments == 1 ? OperatorName + ":" : OperatorName;
         }
 
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add ProjectedFunction values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract ProjectedFunction values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply ProjectedFunction values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide ProjectedFunction values");
-        }
-
         public override bool Equals(object? obj)
         {
             if (obj is ProjectedFunctionValue otherProjected)
@@ -1784,26 +1051,6 @@ namespace K3CSharp
             return $"{AdverbName}({Verb})";
         }
 
-        public override K3Value Add(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot add AdverbProjectedFunction values");
-        }
-
-        public override K3Value Subtract(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot subtract AdverbProjectedFunction values");
-        }
-
-        public override K3Value Multiply(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot multiply AdverbProjectedFunction values");
-        }
-
-        public override K3Value Divide(K3Value other)
-        {
-            throw new InvalidOperationException("Cannot divide AdverbProjectedFunction values");
-        }
-
         public override bool Equals(object? obj)
         {
             if (obj is AdverbProjectedFunctionValue other)
@@ -1834,11 +1081,6 @@ namespace K3CSharp
             Evaluator = evaluator;
             Type = ValueType.Function;
         }
-
-        public override K3Value Add(K3Value other) => throw new InvalidOperationException("Cannot add DeferredTakeProjection");
-        public override K3Value Subtract(K3Value other) => throw new InvalidOperationException("Cannot subtract DeferredTakeProjection");
-        public override K3Value Multiply(K3Value other) => throw new InvalidOperationException("Cannot multiply DeferredTakeProjection");
-        public override K3Value Divide(K3Value other) => throw new InvalidOperationException("Cannot divide DeferredTakeProjection");
 
         public override string ToString() => $"{Count}#{Func}";
     }

@@ -852,7 +852,7 @@ namespace K3CSharp.Tests
 
                 ("dyadic_divide_vector_vector.k", "3 2 2"),
 
-                ("dyadic_divide_atom_vector.k", "6.0 4.0 3.0"),
+                ("dyadic_divide_atom_vector.k", "6 4 3"),
 
                 ("dyadic_divide_vector_atom.k", "2 3 4"),
 
@@ -1795,9 +1795,9 @@ namespace K3CSharp.Tests
                 ("division_mixed_float_int_zero_by_zero.k", "0.0"),
                 ("division_mixed_long_float_zero_by_zero.k", "0.0"),
                 ("division_mixed_float_long_zero_by_zero.k", "0.0"),
-                ("division_vector_zero_by_zero_normal.k", "(10.0;0;10.0)"),
-                ("division_vector_zero_by_zero_large_positive.k", "(1e+308;0i;10)"),
-                ("division_vector_zero_by_zero_large_negative.k", "(-1e+308;-0i;10)"),
+                ("division_vector_zero_by_zero_normal.k", "10 0 10"),
+                ("division_vector_zero_by_zero_large_positive.k", "1e+308 0i 10.0"),
+                ("division_vector_zero_by_zero_large_negative.k", "-1e+308 -0i 10.0"),
 
 
                 // K Tree tests - Following One Test Per File principle

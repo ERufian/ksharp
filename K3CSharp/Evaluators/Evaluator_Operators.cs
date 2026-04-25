@@ -32,26 +32,43 @@ namespace K3CSharp
             if (a is FloatValue && b is LongValue)
                 return new FloatValue(((FloatValue)a).Value + ((LongValue)b).Value);
             
-            // Handle same type operations - use K3Value Add method for proper overflow handling
-            if (a is IntegerValue && b is IntegerValue)
-                return ((IntegerValue)a).Add((IntegerValue)b);
-            if (a is LongValue && b is LongValue)
-                return ((LongValue)a).Add((LongValue)b);
-            if (a is FloatValue && b is FloatValue)
-                return ((FloatValue)a).Add((FloatValue)b);
+            // Handle same type operations
+            if (a is IntegerValue intA && b is IntegerValue intB)
+                return new IntegerValue(intA.Value + intB.Value);
+            if (a is LongValue longA && b is LongValue longB)
+                return new LongValue(longA.Value + longB.Value);
+            if (a is FloatValue floatA && b is FloatValue floatB)
+                return new FloatValue(floatA.Value + floatB.Value);
             
-            // Handle vector operations
+            // Handle vector operations - element-wise
             if (a is VectorValue vecA)
             {
                 if (b is VectorValue vecB)
-                    return vecA.Add(vecB);
+                {
+                    if (vecA.Elements.Count != vecB.Elements.Count)
+                        throw new InvalidOperationException("Vector size mismatch for addition");
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < vecA.Elements.Count; i++)
+                        result.Add(Plus(vecA.Elements[i], vecB.Elements[i]));
+                    return new VectorValue(result);
+                }
                 else
-                    return vecA.Add(b);
+                {
+                    var result = new List<K3Value>();
+                    foreach (var elem in vecA.Elements)
+                        result.Add(Plus(elem, b));
+                    return new VectorValue(result);
+                }
             }
             
             // Handle scalar + vector operations
             if (b is VectorValue vectorB)
-                return vectorB.Add(a);
+            {
+                var result = new List<K3Value>();
+                foreach (var elem in vectorB.Elements)
+                    result.Add(Plus(a, elem));
+                return new VectorValue(result);
+            }
             
             throw new Exception($"Cannot add {a.Type} and {b.Type}");
         }
@@ -82,32 +99,41 @@ namespace K3CSharp
             if (a is FloatValue && b is LongValue)
                 return new FloatValue(((FloatValue)a).Value - ((LongValue)b).Value);
             
-            // Handle same type operations - use the K3Value Subtract method for proper overflow handling
-            if (a is IntegerValue && b is IntegerValue)
-                return ((IntegerValue)a).Subtract((IntegerValue)b);
-            if (a is LongValue && b is LongValue)
-                return ((LongValue)a).Subtract((LongValue)b);
-            if (a is FloatValue && b is FloatValue)
-                return ((FloatValue)a).Subtract((FloatValue)b);
+            // Handle same type operations
+            if (a is IntegerValue intA2 && b is IntegerValue intB2)
+                return new IntegerValue(intA2.Value - intB2.Value);
+            if (a is LongValue longA2 && b is LongValue longB2)
+                return new LongValue(longA2.Value - longB2.Value);
+            if (a is FloatValue floatA2 && b is FloatValue floatB2)
+                return new FloatValue(floatA2.Value - floatB2.Value);
             
-            // Handle vector operations
-            if (a is VectorValue vecA)
+            // Handle vector operations - element-wise
+            if (a is VectorValue vecA2)
             {
-                if (b is VectorValue vecB)
-                    return vecA.Subtract(vecB);
+                if (b is VectorValue vecB2)
+                {
+                    if (vecA2.Elements.Count != vecB2.Elements.Count)
+                        throw new InvalidOperationException("Vector size mismatch for subtraction");
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < vecA2.Elements.Count; i++)
+                        result.Add(Minus(vecA2.Elements[i], vecB2.Elements[i]));
+                    return new VectorValue(result);
+                }
                 else
-                    return vecA.Subtract(b);
+                {
+                    var result = new List<K3Value>();
+                    foreach (var elem in vecA2.Elements)
+                        result.Add(Minus(elem, b));
+                    return new VectorValue(result);
+                }
             }
             
             // Handle scalar - vector operations
-            if (b is VectorValue vectorB)
+            if (b is VectorValue vectorB2)
             {
-                // For scalar - vector, we need to subtract each element from the scalar
                 var result = new List<K3Value>();
-                foreach (var element in vectorB.Elements)
-                {
-                    result.Add(Minus(a, element));
-                }
+                foreach (var elem in vectorB2.Elements)
+                    result.Add(Minus(a, elem));
                 return new VectorValue(result);
             }
             
@@ -140,27 +166,42 @@ namespace K3CSharp
             if (a is FloatValue && b is LongValue)
                 return new FloatValue(((FloatValue)a).Value * ((LongValue)b).Value);
             
-            // Handle same type operations - use the K3Value Multiply method for proper overflow handling
-            if (a is IntegerValue && b is IntegerValue)
-                return ((IntegerValue)a).Multiply((IntegerValue)b);
-            if (a is LongValue && b is LongValue)
-                return ((LongValue)a).Multiply((LongValue)b);
-            if (a is FloatValue && b is FloatValue)
-                return ((FloatValue)a).Multiply((FloatValue)b);
+            // Handle same type operations
+            if (a is IntegerValue intA3 && b is IntegerValue intB3)
+                return new IntegerValue(intA3.Value * intB3.Value);
+            if (a is LongValue longA3 && b is LongValue longB3)
+                return new LongValue(longA3.Value * longB3.Value);
+            if (a is FloatValue floatA3 && b is FloatValue floatB3)
+                return new FloatValue(floatA3.Value * floatB3.Value);
             
-            // Handle vector operations
-            if (a is VectorValue vecA)
+            // Handle vector operations - element-wise
+            if (a is VectorValue vecA3)
             {
-                if (b is VectorValue vecB)
-                    return vecA.Multiply(vecB);
+                if (b is VectorValue vecB3)
+                {
+                    if (vecA3.Elements.Count != vecB3.Elements.Count)
+                        throw new InvalidOperationException("Vector size mismatch for multiplication");
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < vecA3.Elements.Count; i++)
+                        result.Add(Times(vecA3.Elements[i], vecB3.Elements[i]));
+                    return new VectorValue(result);
+                }
                 else
-                    return vecA.Multiply(b);
+                {
+                    var result = new List<K3Value>();
+                    foreach (var elem in vecA3.Elements)
+                        result.Add(Times(elem, b));
+                    return new VectorValue(result);
+                }
             }
             
             // Handle scalar * vector operations
-            if (b is VectorValue vectorB)
+            if (b is VectorValue vectorB3)
             {
-                return vectorB.Multiply(a);
+                var result = new List<K3Value>();
+                foreach (var elem in vectorB3.Elements)
+                    result.Add(Times(a, elem));
+                return new VectorValue(result);
             }
             
             throw new Exception($"Cannot multiply {a.Type} and {b.Type}");
@@ -168,7 +209,7 @@ namespace K3CSharp
 
         private K3Value Divide(K3Value a, K3Value b)
         {
-            // Handle integer division - always promote to float in K
+            // Handle integer division - scalar division always promotes to float
             if (a is IntegerValue && b is IntegerValue)
             {
                 int divisor = ((IntegerValue)b).Value;
@@ -181,11 +222,11 @@ namespace K3CSharp
                 if (divisor == 0)
                     throw new Exception("Division by zero");
                 
-                // In K, division always promotes to float
+                // Scalar division always promotes to float in K
                 return new FloatValue((double)dividend / divisor);
             }
             
-            // Handle long division - always promote to float in K
+            // Handle long division - scalar division always promotes to float
             if (a is LongValue && b is LongValue)
             {
                 long divisor = ((LongValue)b).Value;
@@ -198,38 +239,10 @@ namespace K3CSharp
                 if (divisor == 0)
                     throw new Exception("Division by zero");
                 
-                // In K, division always promotes to float
+                // Scalar division always promotes to float
                 return new FloatValue((double)dividend / divisor);
             }
             
-            // Handle mixed type promotion
-            if (a is IntegerValue && b is LongValue)
-            {
-                long divisor = ((LongValue)b).Value;
-                if (divisor == 0)
-                    throw new Exception("Division by zero");
-                return new FloatValue((double)((IntegerValue)a).Value / divisor);
-            }
-            if (a is LongValue && b is IntegerValue)
-            {
-                int divisor = ((IntegerValue)b).Value;
-                if (divisor == 0)
-                    throw new Exception("Division by zero");
-                return new FloatValue((double)((LongValue)a).Value / divisor);
-            }
-            if (a is IntegerValue && b is FloatValue)
-            {
-                double divisor = ((FloatValue)b).Value;
-                int dividend = ((IntegerValue)a).Value;
-                
-                // Special case: 0%0.0 returns 0.0 (per K specification - type promotion case)
-                if (divisor == 0.0 && dividend == 0)
-                    return new FloatValue(0.0);
-                
-                if (divisor == 0)
-                    throw new Exception("Division by zero");
-                return new FloatValue(dividend / divisor);
-            }
             if (a is FloatValue && b is IntegerValue)
             {
                 int divisor = ((IntegerValue)b).Value;
@@ -240,6 +253,19 @@ namespace K3CSharp
                     return new FloatValue(0.0);
                 
                 if (divisor == 0)
+                    throw new Exception("Division by zero");
+                return new FloatValue(dividend / divisor);
+            }
+            if (a is IntegerValue && b is FloatValue)
+            {
+                double divisor = ((FloatValue)b).Value;
+                int dividend = ((IntegerValue)a).Value;
+                
+                // Special case: 0%0.0 returns 0.0 (per K specification - type promotion case)
+                if (divisor == 0.0 && dividend == 0)
+                    return new FloatValue(0.0);
+                
+                if (divisor == 0.0)
                     throw new Exception("Division by zero");
                 return new FloatValue(dividend / divisor);
             }
@@ -285,28 +311,327 @@ namespace K3CSharp
                 return new FloatValue(dividend / divisor);
             }
             
-            // Handle vector operations
-            if (a is VectorValue vecA)
+            // Handle vector operations - element-wise
+            if (a is VectorValue vecA4)
             {
-                if (b is VectorValue vecB)
-                    return vecA.Divide(vecB);
+                if (b is VectorValue vecB4)
+                {
+                    if (vecA4.Elements.Count != vecB4.Elements.Count)
+                        throw new InvalidOperationException("Vector size mismatch for division");
+                    
+                    // Check if all elements are integers and if any division has remainder
+                    bool allIntegers = vecA4.Elements.All(e => e is IntegerValue or LongValue) && 
+                                       vecB4.Elements.All(e => e is IntegerValue or LongValue);
+                    
+                    bool anyHasRemainder = false;
+                    if (allIntegers)
+                    {
+                        for (int i = 0; i < vecA4.Elements.Count; i++)
+                        {
+                            var left = vecA4.Elements[i];
+                            var right = vecB4.Elements[i];
+                            long dividend = left is IntegerValue iv ? iv.Value : ((LongValue)left).Value;
+                            long divisor = right is IntegerValue iv2 ? iv2.Value : ((LongValue)right).Value;
+                            
+                            // Skip 0%0 and division by zero checks for remainder detection
+                            if (divisor != 0 && dividend % divisor != 0)
+                            {
+                                anyHasRemainder = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < vecA4.Elements.Count; i++)
+                    {
+                        var left = vecA4.Elements[i];
+                        var right = vecB4.Elements[i];
+                        K3Value divResult;
+                        
+                        if (allIntegers && anyHasRemainder)
+                        {
+                            // Cast to float and do float division
+                            double dividend = left is IntegerValue iv ? iv.Value : ((LongValue)left).Value;
+                            double divisor = right is IntegerValue iv2 ? iv2.Value : ((LongValue)right).Value;
+                            
+                            if (divisor == 0.0 && dividend == 0.0)
+                                divResult = new FloatValue(0.0);
+                            else if (divisor == 0)
+                                throw new Exception("Division by zero");
+                            else
+                                divResult = new FloatValue(dividend / divisor);
+                        }
+                        else if (allIntegers)
+                        {
+                            // All integers and no remainder - do integer division directly
+                            long dividend = left is IntegerValue iv ? iv.Value : ((LongValue)left).Value;
+                            long divisor = right is IntegerValue iv2 ? iv2.Value : ((LongValue)right).Value;
+                            
+                            if (divisor == 0 && dividend == 0)
+                                divResult = new IntegerValue(0);
+                            else if (divisor == 0)
+                                throw new Exception("Division by zero");
+                            else
+                                divResult = divisor > int.MaxValue || divisor < int.MinValue || 
+                                           dividend > int.MaxValue || dividend < int.MinValue
+                                    ? new LongValue(dividend / divisor)
+                                    : new IntegerValue((int)(dividend / divisor));
+                        }
+                        else
+                        {
+                            divResult = Divide(left, right);
+                        }
+                        
+                        // Check if this is 0%0 with adjacent very large numbers
+                        divResult = CheckZeroDivisionSpecialCase(left, right, divResult, i, vecA4.Elements, vecB4.Elements);
+                        
+                        result.Add(divResult);
+                    }
+                    return new VectorValue(result);
+                }
                 else
-                    return vecA.Divide(b);
+                {
+                    // Check if all elements are integers and scalar is integer, and if any division has remainder
+                    bool allIntegers = vecA4.Elements.All(e => e is IntegerValue or LongValue) && 
+                                       (b is IntegerValue or LongValue);
+                    
+                    long scalarDivisor = 0;
+                    if (b is IntegerValue biv) scalarDivisor = biv.Value;
+                    else if (b is LongValue blv) scalarDivisor = blv.Value;
+                    
+                    bool anyHasRemainder = false;
+                    if (allIntegers && scalarDivisor != 0)
+                    {
+                        anyHasRemainder = vecA4.Elements.Any(e => {
+                            long dividend = e is IntegerValue iv ? iv.Value : ((LongValue)e).Value;
+                            return dividend % scalarDivisor != 0;
+                        });
+                    }
+                    
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < vecA4.Elements.Count; i++)
+                    {
+                        var elem = vecA4.Elements[i];
+                        K3Value divResult;
+                        
+                        if (allIntegers && anyHasRemainder)
+                        {
+                            // Cast to float and do float division
+                            double dividend = elem is IntegerValue iv ? iv.Value : ((LongValue)elem).Value;
+                            double divisor = scalarDivisor;
+                            
+                            if (divisor == 0.0 && dividend == 0.0)
+                                divResult = new FloatValue(0.0);
+                            else if (divisor == 0)
+                                throw new Exception("Division by zero");
+                            else
+                                divResult = new FloatValue(dividend / divisor);
+                        }
+                        else if (allIntegers)
+                        {
+                            // All integers and no remainder - do integer division directly
+                            long dividend = elem is IntegerValue iv ? iv.Value : ((LongValue)elem).Value;
+                            
+                            if (scalarDivisor == 0 && dividend == 0)
+                                divResult = new IntegerValue(0);
+                            else if (scalarDivisor == 0)
+                                throw new Exception("Division by zero");
+                            else
+                                divResult = scalarDivisor > int.MaxValue || scalarDivisor < int.MinValue || 
+                                           dividend > int.MaxValue || dividend < int.MinValue
+                                    ? new LongValue(dividend / scalarDivisor)
+                                    : new IntegerValue((int)(dividend / scalarDivisor));
+                        }
+                        else
+                        {
+                            divResult = Divide(elem, b);
+                        }
+                        
+                        // Check for special 0%0 case with adjacent large numbers
+                        divResult = CheckZeroDivisionSpecialCase(elem, b, divResult, i, vecA4.Elements, Enumerable.Repeat(b, vecA4.Elements.Count).ToList());
+                        
+                        result.Add(divResult);
+                    }
+                    return new VectorValue(result);
+                }
             }
             
             // Handle scalar / vector operations
-            if (b is VectorValue vectorB)
+            if (b is VectorValue vectorB4)
             {
-                // For scalar / vector, we need to divide scalar by each element
-                var result = new List<K3Value>();
-                foreach (var element in vectorB.Elements)
+                // Check if scalar is integer and all vector elements are integers, and if any division has remainder
+                bool allIntegers = (a is IntegerValue or LongValue) && 
+                                   vectorB4.Elements.All(e => e is IntegerValue or LongValue);
+                
+                long scalarDividend = 0;
+                if (a is IntegerValue aiv) scalarDividend = aiv.Value;
+                else if (a is LongValue alv) scalarDividend = alv.Value;
+                
+                bool anyHasRemainder = false;
+                if (allIntegers)
                 {
-                    result.Add(Divide(a, element));
+                    anyHasRemainder = vectorB4.Elements.Any(e => {
+                        long divisor = e is IntegerValue iv ? iv.Value : ((LongValue)e).Value;
+                        return divisor != 0 && scalarDividend % divisor != 0;
+                    });
+                }
+                
+                var result = new List<K3Value>();
+                for (int i = 0; i < vectorB4.Elements.Count; i++)
+                {
+                    var elem = vectorB4.Elements[i];
+                    K3Value divResult;
+                    
+                    if (allIntegers && anyHasRemainder)
+                    {
+                        // Cast to float and do float division
+                        double dividend = scalarDividend;
+                        double divisor = elem is IntegerValue iv ? iv.Value : ((LongValue)elem).Value;
+                        
+                        if (divisor == 0.0 && dividend == 0.0)
+                            divResult = new FloatValue(0.0);
+                        else if (divisor == 0)
+                            throw new Exception("Division by zero");
+                        else
+                            divResult = new FloatValue(dividend / divisor);
+                    }
+                    else if (allIntegers)
+                    {
+                        // All integers and no remainder - do integer division directly
+                        long divisor = elem is IntegerValue iv ? iv.Value : ((LongValue)elem).Value;
+                        
+                        if (divisor == 0 && scalarDividend == 0)
+                            divResult = new IntegerValue(0);
+                        else if (divisor == 0)
+                            throw new Exception("Division by zero");
+                        else
+                            divResult = divisor > int.MaxValue || divisor < int.MinValue || 
+                                       scalarDividend > int.MaxValue || scalarDividend < int.MinValue
+                                ? new LongValue(scalarDividend / divisor)
+                                : new IntegerValue((int)(scalarDividend / divisor));
+                    }
+                    else
+                    {
+                        divResult = Divide(a, elem);
+                    }
+                    
+                    // Check for special 0%0 case with adjacent large numbers
+                    divResult = CheckZeroDivisionSpecialCase(a, elem, divResult, i, Enumerable.Repeat(a, vectorB4.Elements.Count).ToList(), vectorB4.Elements);
+                    
+                    result.Add(divResult);
                 }
                 return new VectorValue(result);
             }
             
             throw new Exception($"Cannot divide {a.Type} and {b.Type}");
+        }
+        
+        /// <summary>
+        /// Check if this is the special 0%0 case in a vector where adjacent elements have very large values.
+        /// Per K spec: 0.0%0.0 returns 0.0 unless in a vector with very large adjacent numbers, then returns 0i or -0i.
+        /// </summary>
+        private K3Value CheckZeroDivisionSpecialCase(K3Value left, K3Value right, K3Value result, int index, List<K3Value> leftElements, List<K3Value> rightElements)
+        {
+            // Only apply to the 0%0 case
+            if (!IsZero(left) || !IsZero(right))
+                return result;
+            
+            // Check if result is currently 0, 0j, or 0.0 (not already special 0i/-0i)
+            bool isCurrentlyZero = (result is IntegerValue iv && iv.Value == 0) ||
+                                   (result is LongValue lv && lv.Value == 0) ||
+                                   (result is FloatValue fv && fv.Value == 0.0);
+            
+            if (!isCurrentlyZero)
+                return result;
+            
+            // Check adjacent elements for very large values
+            bool hasLargeNeighbor = false;
+            bool neighborIsPositive = true;
+            
+            // Check previous element
+            if (index > 0)
+            {
+                var prevLeft = leftElements[index - 1];
+                var prevRight = rightElements[index - 1];
+                var neighborValue = GetDivisionResultValue(prevLeft, prevRight);
+                if (IsVeryLarge(neighborValue))
+                {
+                    hasLargeNeighbor = true;
+                    neighborIsPositive = neighborValue > 0;
+                }
+            }
+            
+            // Check next element
+            if (!hasLargeNeighbor && index < leftElements.Count - 1)
+            {
+                var nextLeft = leftElements[index + 1];
+                var nextRight = rightElements[index + 1];
+                var neighborValue = GetDivisionResultValue(nextLeft, nextRight);
+                if (IsVeryLarge(neighborValue))
+                {
+                    hasLargeNeighbor = true;
+                    neighborIsPositive = neighborValue > 0;
+                }
+            }
+            
+            if (hasLargeNeighbor)
+            {
+                // Return 0i or -0i based on neighbor's sign
+                return neighborIsPositive ? new FloatValue(float.PositiveInfinity) : new FloatValue(float.NegativeInfinity);
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// Check if a value is zero (for any numeric type)
+        /// </summary>
+        private bool IsZero(K3Value value)
+        {
+            return (value is IntegerValue iv && iv.Value == 0) ||
+                   (value is LongValue lv && lv.Value == 0) ||
+                   (value is FloatValue fv && fv.Value == 0.0);
+        }
+        
+        /// <summary>
+        /// Get the result value of dividing two numbers (for checking if neighbor is large)
+        /// </summary>
+        private double GetDivisionResultValue(K3Value left, K3Value right)
+        {
+            try
+            {
+                double GetNumericValue(K3Value v)
+                {
+                    if (v is IntegerValue iv) return iv.Value;
+                    if (v is LongValue lv) return lv.Value;
+                    if (v is FloatValue fv) return fv.Value;
+                    return 0;
+                }
+                
+                double l = GetNumericValue(left);
+                double r = GetNumericValue(right);
+                
+                if (r == 0)
+                    return l >= 0 ? double.PositiveInfinity : double.NegativeInfinity;
+                
+                return l / r;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        
+        /// <summary>
+        /// Check if a value is "very large" (approaching infinity threshold)
+        /// </summary>
+        private bool IsVeryLarge(double value)
+        {
+            // Very large threshold - using a high value that would indicate
+            // the neighbor operation produces an extremely large result
+            const double veryLargeThreshold = 1e100;
+            return Math.Abs(value) > veryLargeThreshold || double.IsInfinity(value);
         }
 
         private K3Value Min(K3Value a, K3Value b)

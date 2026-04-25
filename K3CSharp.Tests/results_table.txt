@@ -242,7 +242,7 @@ foo - 12 │ 20                   │                      ║
 ║ dyadic_times_atom_vector.k                         │ 3 * 1 2 3            │ 3 6 9                │                      ║
 ║ dyadic_times_vector_atom.k                         │ 1 2 3 * 4            │ 4 8 12               │                      ║
 ║ dyadic_divide_vector_vector.k                      │ 6 8 10 % 2 4 5       │ 3 2 2                │                      ║
-║ dyadic_divide_atom_vector.k                        │ 12 % 2 3 4           │ 6.0 4.0 3.0          │                      ║
+║ dyadic_divide_atom_vector.k                        │ 12 % 2 3 4           │ 6 4 3                │                      ║
 ║ dyadic_divide_vector_atom.k                        │ 4 6 8 % 2            │ 2 3 4                │                      ║
 ║ dyadic_min_vector_vector.k                         │ 5 8 3 & 2 9 4        │ 2 8 3                │                      ║
 ║ dyadic_min_atom_vector.k                           │ 3 & 5 2 8            │ 3 2 3                │                      ║
@@ -731,9 +731,9 @@ b: 20
 ║ division_mixed_float_int_zero_by_zero.k            │ 0.0%0                │ 0.0                  │                      ║
 ║ division_mixed_long_float_zero_by_zero.k           │ 0j%0.0               │ 0.0                  │                      ║
 ║ division_mixed_float_long_zero_by_zero.k           │ 0.0%0j               │ 0.0                  │                      ║
-║ division_vector_zero_by_zero_normal.k              │ 10 0 10 % 1 0 1      │ (10.0;0;10.0)        │                      ║
-║ division_vector_zero_by_zero_large_positive.k      │ 1e308 0 10 % 1 0 1   │ (1e+308;0i;10)       │                      ║
-║ division_vector_zero_by_zero_large_negative.k      │ -1e308 0 10 % 1 0 1  │ (-1e+308;-0i;10)     │                      ║
+║ division_vector_zero_by_zero_normal.k              │ 10 0 10 % 1 0 1      │ 10 0 10              │                      ║
+║ division_vector_zero_by_zero_large_positive.k      │ 1e308 0 10 % 1 0 1   │ 1e+308 0i 10.0       │                      ║
+║ division_vector_zero_by_zero_large_negative.k      │ -1e308 0 10 % 1 0 1  │ -1e+308 -0i 10.0     │                      ║
 ║ k_tree_assignment_absolute_foo.k                   │ .k.foo: 42           │                      │                      ║
 ║ k_tree_retrieve_absolute_foo.k                     │ .k.foo: 42
 .k.foo    │ 42                   │                      ║
@@ -2192,7 +2192,7 @@ Actual: Error: Function execution error: Vector mod requires all elements to be 
 Test: idioms_11_256_groups_of_ones_pointed.k
 Input: y:0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1; x:0 0 0 1 0 0 0 0 1 0 0 1 0 0 0 1; y&a=|\x*a:+\>':0,y
 Expected: 0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1
-Actual: Error: Cannot multiply Integer by Function
+Actual: Error: Cannot multiply Integer and Function
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_292_groups_of_ones_pointed.k
 Input: y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y]
@@ -2423,7 +2423,7 @@ Input: x:"255"
 h:"0123456789abcdef"
 h[16 _vs 10 _sv _ic[x]-_ic"0"]
 Expected: "ff"
-Actual: Error: Cannot subtract Character values
+Actual: Error: Cannot subtract Character and Integer
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_75_decimal_from_hex.k
 Input: h:"0123456789abcdef"
@@ -2512,7 +2512,7 @@ Actual: Error: Function execution error: Cannot floor Vector
 Test: idioms_17_175_primes_to_n.k
 Input: pn:{[n]&0,2=+/0={x!/:x}1+!n};pn 30
 Expected: 2 3 5 7 11 13 17 19 23 29
-Actual: Error: Function execution error: Cannot add Integer to Null
+Actual: Error: Function execution error: Cannot add Null and Integer
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_260_figurate_numbers.k
 Input: a:10#1;2(+\)/a
@@ -2682,7 +2682,7 @@ Actual: 26 40 39
 Test: idioms_22_146_compound_interest.k
 Input: x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0]
 Expected: 1.005
-Actual: ((1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1);(1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1);(1.005 1.010025 1.015075 1.020151;1 1 1 1;1.015 1.030225 1.045678 1.061364;1 1 1 1))
+Actual: ((1.005 1.010025 1.015075 1.020151;1.01 1.0201 1.030301 1.040604;1.015 1.030225 1.045678 1.061364;1.02 1.0404 1.061208 1.082432);(1.005 1.010025 1.015075 1.020151;1.01 1.0201 1.030301 1.040604;1.015 1.030225 1.045678 1.061364;1.02 1.0404 1.061208 1.082432);(1.005 1.010025 1.015075 1.020151;1.01 1.0201 1.030301 1.040604;1.015 1.030225 1.045678 1.061364;1.02 1.0404 1.061208 1.082432))
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_22_186_annuity_coefficient.k
 Input: x:10 15 20 25;y:8 9 10 15;ac:{(y%100)%/:+1-(1+y%100)^\:-x};ac[x;y]
@@ -2697,7 +2697,7 @@ Actual: Error: Function execution error: Cannot apply monadic minus to Null
 Test: idioms_23_389_playing_order.k
 Input: log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6]
 Expected: 1 5 3 0 2 6 4 0
-Actual: Error: Function execution error: Function execution error: Cannot add Integer to Null
+Actual: Error: Function execution error: Function execution error: Cannot add Null and Integer
 ──────────────────────────────────────────────────────────────────────────
 Test: test_f_rec.k
 Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]

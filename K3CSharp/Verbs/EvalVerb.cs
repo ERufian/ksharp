@@ -260,14 +260,14 @@ namespace K3CSharp.Verbs
         }
         
         /// <summary>
-        /// Fallback evaluation - should only be used for operators without Verb Registry implementations
-        /// This method is intentionally generic and does not hardcode any operators
+        /// Fallback evaluation for operators without explicit Verb Registry implementations.
+        /// Delegates to the Evaluator's EvaluateVerb method to perform the operation.
         /// </summary>
         private static K3Value EvaluateOperatorUsingK3ValueMethods(string operatorSymbol, K3Value[] arguments)
         {
-            // This method should ideally never be called if Verb Registry is properly populated
-            // All operators should have Verb Registry implementations
-            throw new Exception($"Operator '{operatorSymbol}' not available in Verb Registry - implementation missing");
+            // Use the Evaluator's EvaluateVerb method to handle the operation
+            var evaluator = new Evaluator();
+            return evaluator.EvaluateVerb(operatorSymbol, arguments);
         }
         
         /// <summary>

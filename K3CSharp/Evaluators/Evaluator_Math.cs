@@ -888,9 +888,8 @@ namespace K3CSharp
                     resultRows.Add(new VectorValue(rowElements, -2)); // Float vector type
                 }
                 
-                // Create matrix and multiply by 1.0 to ensure all elements display as floats
-                var inverseMatrix = new VectorValue(resultRows);
-                return inverseMatrix.Multiply(new FloatValue(1.0));
+                // Create matrix - elements are already FloatValue
+                return new VectorValue(resultRows);
             }
             
             // For scalars, return reciprocal
