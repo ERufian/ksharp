@@ -1308,7 +1308,12 @@ namespace K3CSharp
             var result = new List<K3Value>();
             for (int i = 0; i < Elements.Count; i++)
             {
-                if (Elements[i] is IntegerValue intA && other.Elements[i] is IntegerValue intB)
+                // Handle nested vectors (matrices) recursively
+                if (Elements[i] is VectorValue vecA && other.Elements[i] is VectorValue vecB)
+                {
+                    result.Add(vecA.Minimum(vecB));
+                }
+                else if (Elements[i] is IntegerValue intA && other.Elements[i] is IntegerValue intB)
                     result.Add(new IntegerValue(Math.Min(intA.Value, intB.Value)));
                 else if (Elements[i] is LongValue longA && other.Elements[i] is LongValue longB)
                     result.Add(new LongValue(Math.Min(longA.Value, longB.Value)));
@@ -1325,7 +1330,12 @@ namespace K3CSharp
             var result = new List<K3Value>();
             foreach (var element in Elements)
             {
-                if (element is IntegerValue intA && scalar is IntegerValue intB)
+                // Handle nested vectors (matrices) recursively
+                if (element is VectorValue vecA)
+                {
+                    result.Add(vecA.Minimum(scalar));
+                }
+                else if (element is IntegerValue intA && scalar is IntegerValue intB)
                     result.Add(new IntegerValue(Math.Min(intA.Value, intB.Value)));
                 else if (element is LongValue longA && scalar is LongValue longB)
                     result.Add(new LongValue(Math.Min(longA.Value, longB.Value)));
@@ -1345,7 +1355,12 @@ namespace K3CSharp
             var result = new List<K3Value>();
             for (int i = 0; i < Elements.Count; i++)
             {
-                if (Elements[i] is IntegerValue intA && other.Elements[i] is IntegerValue intB)
+                // Handle nested vectors (matrices) recursively
+                if (Elements[i] is VectorValue vecA && other.Elements[i] is VectorValue vecB)
+                {
+                    result.Add(vecA.Maximum(vecB));
+                }
+                else if (Elements[i] is IntegerValue intA && other.Elements[i] is IntegerValue intB)
                     result.Add(new IntegerValue(Math.Max(intA.Value, intB.Value)));
                 else if (Elements[i] is LongValue longA && other.Elements[i] is LongValue longB)
                     result.Add(new LongValue(Math.Max(longA.Value, longB.Value)));
@@ -1362,7 +1377,12 @@ namespace K3CSharp
             var result = new List<K3Value>();
             foreach (var element in Elements)
             {
-                if (element is IntegerValue intA && scalar is IntegerValue intB)
+                // Handle nested vectors (matrices) recursively
+                if (element is VectorValue vecA)
+                {
+                    result.Add(vecA.Maximum(scalar));
+                }
+                else if (element is IntegerValue intA && scalar is IntegerValue intB)
                     result.Add(new IntegerValue(Math.Max(intA.Value, intB.Value)));
                 else if (element is LongValue longA && scalar is LongValue longB)
                     result.Add(new LongValue(Math.Max(longA.Value, longB.Value)));
