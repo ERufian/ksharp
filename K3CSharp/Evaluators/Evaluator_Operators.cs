@@ -1169,10 +1169,14 @@ namespace K3CSharp
                 {
                     indices.Add(i);
                 }
-                
-                // Simple stable sort implementation
-                indices.Sort((i, j) => CompareValues(vecA.Elements[i], vecA.Elements[j]));
-                
+
+                // Stable sort: compare values, and if equal, preserve original order by comparing indices
+                indices.Sort((i, j) =>
+                {
+                    int cmp = CompareValues(vecA.Elements[i], vecA.Elements[j]);
+                    return cmp != 0 ? cmp : i.CompareTo(j);
+                });
+
                 var result = new List<K3Value>();
                 foreach (var index in indices)
                 {
@@ -1180,7 +1184,7 @@ namespace K3CSharp
                 }
                 return new VectorValue(result, -1); // Integer vector
             }
-            
+
             throw new Exception("Rank error: grade-up operator '<' requires a vector argument");
         }
 
@@ -1193,10 +1197,14 @@ namespace K3CSharp
                 {
                     indices.Add(i);
                 }
-                
-                // Simple stable sort implementation (descending)
-                indices.Sort((i, j) => CompareValues(vecA.Elements[j], vecA.Elements[i]));
-                
+
+                // Stable sort (descending): compare values, and if equal, preserve original order by comparing indices
+                indices.Sort((i, j) =>
+                {
+                    int cmp = CompareValues(vecA.Elements[j], vecA.Elements[i]);
+                    return cmp != 0 ? cmp : i.CompareTo(j);
+                });
+
                 var result = new List<K3Value>();
                 foreach (var index in indices)
                 {
@@ -1204,7 +1212,7 @@ namespace K3CSharp
                 }
                 return new VectorValue(result, -1); // Integer vector
             }
-            
+
             throw new Exception("Rank error: grade-down operator '>' requires a vector argument");
         }
 
@@ -1230,13 +1238,7 @@ namespace K3CSharp
             }
 
             // For vectors and other types, use ToString comparison
-            int comparison = string.Compare(a.ToString(), b.ToString(), StringComparison.Ordinal);
-            
-            // For stable sorting: if equal, preserve original order
-            if (comparison == 0)
-                return -1; // a comes before b in original order
-            
-            return comparison;
+            return string.Compare(a.ToString(), b.ToString(), StringComparison.Ordinal);
         }
 
         private K3Value Shape(K3Value a)

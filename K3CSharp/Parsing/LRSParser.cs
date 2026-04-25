@@ -1635,13 +1635,50 @@ namespace K3CSharp.Parsing
         internal ASTNode? ParseSubExpressionForMonadic(List<Token> tokens, ref int position)
         {
             if (tokens.Count == 0) return null;
-            if (tokens.Count == 1) return CreateNodeFromToken(tokens[0]);
+            if (tokens.Count == 1)
+            {
+                position = 1; // Consume the single token
+                return CreateNodeFromToken(tokens[0]);
+            }
             
             // Handle parenthesized expressions using grouping parser
             if (tokens[0].Type == TokenType.LEFT_PAREN)
             {
                 var tempGroupingParser = new LRSGroupingParser(tokens, BuildParseTree, this);
-                return tempGroupingParser.ParseParentheses(ref position);
+                var groupedResult = tempGroupingParser.ParseParentheses(ref position);
+                
+                // Check if there are remaining tokens after the parenthesized expression
+                if (position < tokens.Count)
+                {
+                    // There are remaining tokens - the parenthesized result is the left operand
+                    // and the remaining tokens form an operation with it
+                    var remainingTokens = tokens.GetRange(position, tokens.Count - position);
+                    
+                    // Check if the first remaining token is an operator
+                    if (remainingTokens.Count > 0 && OperatorDetector.IsDyadicOperator(remainingTokens[0].Type))
+                    {
+                        // The first remaining token is the operator
+                        var opToken = remainingTokens[0];
+                        var rightTokens = remainingTokens.GetRange(1, remainingTokens.Count - 1);
+                        
+                        // Parse the right operand
+                        var rightPos = 0;
+                        var rightNode = ParseSubExpressionForMonadic(rightTokens, ref rightPos);
+                        
+                        // Create dyadic node: groupedResult OP rightNode
+                        var dyadicNode = new ASTNode(ASTNodeType.DyadicOp);
+                        dyadicNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(opToken.Type));
+                        if (groupedResult != null) dyadicNode.Children.Add(groupedResult);
+                        if (rightNode != null) dyadicNode.Children.Add(rightNode);
+                        
+                        // Update position to consume all tokens since we handled the remaining ones
+                        position = tokens.Count;
+                        
+                        return dyadicNode;
+                    }
+                }
+                
+                return groupedResult;
             }
             
             // Handle bracket expressions using grouping parser

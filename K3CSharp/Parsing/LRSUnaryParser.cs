@@ -132,7 +132,14 @@ namespace K3CSharp.Parsing
                 // Use parent parser to handle the grouped expression
                 var position = 0;
                 var groupedResult = parentParser.ParseSubExpressionForMonadic(tokens, ref position);
-                
+
+                // If ParseSubExpressionForMonadic consumed all tokens and returned a result, use it directly
+                // This avoids double-wrapping when the parent parser already handled remaining tokens
+                if (position >= tokens.Count && groupedResult != null)
+                {
+                    return groupedResult;
+                }
+
                 // Check if there are remaining tokens after the parenthesized expression
                 // This handles cases like (&x)!2 where !2 should form a dyadic operation with (&x)
                 if (position < tokens.Count)
@@ -140,22 +147,18 @@ namespace K3CSharp.Parsing
                     // There are remaining tokens - create a dyadic operation
                     // The parenthesized result is the left operand, remaining tokens form right operand
                     var remainingTokens = tokens.GetRange(position, tokens.Count - position);
-                    
-                    // Use parent parser to parse the remaining expression
-                    var position2 = 0;
-                    var rightOperand = parentParser.ParseSubExpressionForMonadic(remainingTokens, ref position2);
-                    
+
                     // Check if the first remaining token is an operator (dyadic)
                     if (remainingTokens.Count > 0 && OperatorDetector.IsDyadicOperator(remainingTokens[0].Type))
                     {
                         // The first remaining token is the operator
                         var opToken = remainingTokens[0];
                         var rightTokens = remainingTokens.GetRange(1, remainingTokens.Count - 1);
-                        
+
                         // Parse the right operand
                         var rightPos = 0;
                         var rightNode = parentParser.ParseSubExpressionForMonadic(rightTokens, ref rightPos);
-                        
+
                         // Create dyadic node: groupedResult OP rightNode
                         var dyadicNode = new ASTNode(ASTNodeType.DyadicOp);
                         dyadicNode.Value = new SymbolValue(GetOperatorSymbol(opToken.Type));
@@ -170,7 +173,7 @@ namespace K3CSharp.Parsing
                         return groupedResult;
                     }
                 }
-                
+
                 return groupedResult;
             }
             
