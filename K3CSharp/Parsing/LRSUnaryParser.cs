@@ -211,7 +211,7 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
-        /// Check if all tokens are atomic (no operators)
+        /// Check if all tokens are atomic (no operators and no grouping delimiters)
         /// </summary>
         private bool AllTokensAreAtomic(List<Token> tokens)
         {
@@ -219,8 +219,22 @@ namespace K3CSharp.Parsing
             {
                 if (IsOperatorToken(token.Type))
                     return false;
+                // Also check for grouping delimiters - they are not atomic
+                if (IsGroupingDelimiter(token.Type))
+                    return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Check if token is a grouping delimiter (parenthesis, bracket, brace)
+        /// </summary>
+        private bool IsGroupingDelimiter(TokenType tokenType)
+        {
+            return tokenType == TokenType.LEFT_PAREN || tokenType == TokenType.RIGHT_PAREN ||
+                   tokenType == TokenType.LEFT_BRACKET || tokenType == TokenType.RIGHT_BRACKET ||
+                   tokenType == TokenType.LEFT_BRACE || tokenType == TokenType.RIGHT_BRACE ||
+                   tokenType == TokenType.SEMICOLON;
         }
         
         /// <summary>

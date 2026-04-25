@@ -1372,13 +1372,13 @@ y:1
 <x*1 -1[y] │ 2 6 7 8 3 5 1 4...   │                      ║
 ║ idioms_06_33_sort_matrix_on_col.k                  │ x:(37 41 41 72 60 0;91 59 5 19 17 26;24 90 28 63 42 56;75 67 45 14 38 49;85 11 23 61 64 44)
 y:2
-x[<x[;y];] │ Error: CreateNo...   │ (91 59 5 19 17 ...   ║
+x[<x[;y];] │ (91 59 5 19 17 ...   │                      ║
 ║ idioms_06_8_sort_rows_ascending.k                  │ sa:{x[<x]}
 x:(6 3 3 9 7;9 4 4 7 9;9 4 7 8 9)
 sa'x │ (3 3 6 7 9;4 4 ...   │                      ║
 ║ idioms_06_32_sort_indices_by_data.k                │ x:2 3 4 5 0 1 8 7 6
 y:79 74 78 76 77 75 73 72 71
-x[<y[x]] │ Error: CreateNo...   │ 8 7 6 1 5 3 4 2 0    ║
+x[<y[x]] │ 8 7 6 1 5 3 4 2 0    │                      ║
 ║ idioms_06_18_sort_strings_alpha.k                  │ w:("once";"more";"into")
 w[<`$w] │ ("into";"more";...   │                      ║
 ║ idioms_06_19_sort_char_matrix.k                    │ m:("scion";"icons";"coins")
@@ -1455,7 +1455,7 @@ y:"a"
 x&&\x=|\x │ 0 1 0 0 0 0 0        │                      ║
 ║ idioms_08_284_sum_marked.k                         │ x:1 2 3 4 5 6 7
 y:1 1 1 2 2 3 3
-+/'x[=y] │ Error: Vector i...   │ 6 9 13               ║
++/'x[=y] │ 1 2 3                │ 6 9 13               ║
 ║ idioms_08_305_invert_between_ones.k                │ x:1 0 1 0 0 1 0 0 1
 (~x)&(+\x)!2 │ 0 1 0 0 0 0 1 1 0    │                      ║
 ║ idioms_08_307_invert_after_first_one.k             │ x:0 0 1 1 0 1
@@ -1495,7 +1495,7 @@ x[&(!#x)!2] │ "bdfhjln"            │                      ║
 g:0 6 5
 y:9
 (y+(y!x)?/:g)!#x │ 0 0 0                │ 2 12 14              ║
-║ idioms_08_512_select_by_markers.k                  │ x:2 3 4#1+!24; y:1 0 0 1; x[;;&y] │ Error: Vector i...   │ ((1 4;5 8;9 12)...   ║
+║ idioms_08_512_select_by_markers.k                  │ x:2 3 4#1+!24; y:1 0 0 1; x[;;&y] │ ((1 2 3 4;5 6 7...   │ ((1 4;5 8;9 12)...   ║
 ║ idioms_08_530_index_last_occurrence.k              │ x:3 0 4 3 1 4 4 3 3 1
 y:3
 *|&x=y │ 8                    │                      ║
@@ -1516,17 +1516,17 @@ x+y*x=0 │ 10 7 8 7 2           │                      ║
 ║ idioms_08_181_classify.k                           │ x:87 9 931 7 27 92 654 1416 7 911
 y:0 50 100 1000
 -1++/x>/:y │ 1 1 1 1              │ 1 0 2 0 0 1 2 3...   ║
-║ idioms_08_587_first_column_matrix.k                │ x:(0 1 2 3; 4 5 6 7; 8 9 10 11); x[;,0] │ Error: Vector i...   │ (,0;,4;,8)           ║
+║ idioms_08_587_first_column_matrix.k                │ x:(0 1 2 3; 4 5 6 7; 8 9 10 11); x[;,0] │ (,0;,4;,8)           │                      ║
 ║ idioms_08_602_choosing_by_sign.k                   │ sg:{(x>0)-(x<0)}
 y:"-0+"
 x:-54
 y[1+sg[x]] │ "-"                  │                      ║
 ║ idioms_08_607_vector_from_column.k                 │ x:3 4#!12
-x[;0]      │ Error: Vector i...   │ 0 4 8                ║
+x[;0]      │ (,0;,4;,8)           │ 0 4 8                ║
 ║ idioms_08_623_conditional_change_of_sign.k         │ x:-9
 y:1
 x*-1^y      │ 9                    │ 9.0                  ║
-║ idioms_09_25_double_quotes.k                       │ f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a │ Error: CreateNo...   │ "Did he say, \"...   ║
+║ idioms_09_25_double_quotes.k                       │ f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a │ Error: Function...   │ "Did he say, \"...   ║
 ║ idioms_09_42_move_blanks_to_end.k                  │ x:" sign if i cant "
 x[<" "=x] │ "significant     "   │                      ║
 ║ idioms_09_160_move_blanks_to_end.k                 │ x:"sign if i cant"; x[<x=" "] │ "significant   "     │                      ║
@@ -1623,7 +1623,7 @@ x:1 0 0 0 1 0 0 0 1 0 1 1 0 0
 (&x)_ y │ ("each";"word";...   │                      ║
 ║ idioms_10_499_rows_starting_with.k                 │ x:("abcd";"efgh";"ijkl";"mnop")
 y:"ai"
-x[&x[;0] _lin y] │ Error: Variable...   │ ("abcd";"ijkl")      ║
+x[&x[;0] _lin y] │ ("abcd";"efgh";...   │ ("abcd";"ijkl")      ║
 ║ idioms_10_576_prepend_y_items.k                    │ x:1 3 5
 y:2
 g:10
@@ -1850,7 +1850,7 @@ y:8
 y _vs x    │ 1 4 4                │                      ║
 ║ idioms_15_56_hex_from_decimal_chars.k              │ x:"255"
 h:"0123456789abcdef"
-h[16 _vs 10 _sv _ic[x]-_ic"0"] │ Error: CreateNo...   │ "ff"                 ║
+h[16 _vs 10 _sv _ic[x]-_ic"0"] │ "ff"                 │                      ║
 ║ idioms_15_75_decimal_from_hex.k                    │ h:"0123456789abcdef"
 x:"ff"
 16 _sv h?/:x │ Error: _sv: all...   │ 255                  ║
@@ -1868,8 +1868,8 @@ ar["MCMIX"] │ Error: Function...   │ 1909                 ║
 t:$100 100 100 _vs x
 1_,/"/",'t │ Error: length e...   │ "98/12/31"           ║
 ║ idioms_16_104_date_ascending_format.k              │ d:98 12 31;+/d[2],2#60,d[1],2#60,d[0] │ 103                  │                      ║
-║ idioms_16_107_american_date.k                      │ d:1998 12 31;$d[1]   │ Error: CreateNo...   │ "12"                 ║
-║ idioms_16_105_12hour_clock.k                       │ t:13 37 21;$t[0]     │ Error: CreateNo...   │ "13"                 ║
+║ idioms_16_107_american_date.k                      │ d:1998 12 31;$d[1]   │ "12"                 │                      ║
+║ idioms_16_105_12hour_clock.k                       │ t:13 37 21;$t[0]     │ "13"                 │                      ║
 ║ idioms_16_463_is_leap_year.k                       │ x:2000
 ((0=x!4)&~(0=x!100))|(0=x!400) │ 1                    │                      ║
 ║ idioms_16_74_days_in_month.k                       │ x:2
@@ -1914,7 +1914,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_18_224_extend_distance_table.k              │ x:(0 50 80 20 999;50 0 20 40 30;80 20 0 999 30;20 40 999 0 10;999 30 30 10 0);x(&/+)\:x │                      │ (0 50 70 20 30;...   ║
 ║ idioms_18_318_herons_rule.k                        │ x:3 4 5;hr:{(*/(+/x%2)-0,x)^0.5};hr[x] │ 0n                   │ 6.0                  ║
 ║ idioms_18_131_complementary_angle.k                │ x:0.25;_acos[_sin x] │ 1.320796             │                      ║
-║ idioms_18_132_rotation_matrix.k                    │ x:0.25;((_cos[x];-_sin[x]);(_sin[x];_cos[x])) │ Error: CreateNo...   │ (0.9689124 -0.2...   ║
+║ idioms_18_132_rotation_matrix.k                    │ x:0.25;((_cos[x];-_sin[x]);(_sin[x];_cos[x])) │ (0.9689124 -0.2...   │                      ║
 ║ idioms_19_199_multiplication_table.k               │ mt:{{x*\:x}[1+!x]};mt 5 │                      │ (1 2 3 4 5;2 4 ...   ║
 ║ idioms_19_155_greatest_common_divisor.k            │ gcd:{*|1+&&/'0=x!/:1+!&/x};x:6 9 12;gcd x │ ()                   │ 3                    ║
 ║ idioms_19_451_arithmetic_progression.k             │ ap:{[x;y;g]x+g*!1+_(y-x)%g};ap[3;20;5] │ 3 8 13 18            │                      ║
@@ -1956,39 +1956,25 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_21_321_y_th_moment.k                        │ x:44 77 48 24 28 36 17 49;ym:{(+/(x-(+/x)%#x)^y)%#x};ym[x;2] │ 309.2344             │                      ║
 ║ idioms_21_128_linear_fit_coefficients.k            │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z │ Error: _lsq req...   │ 4.587803 0.7927486   ║
 ║ idioms_21_125_linear_fit_predicted.k               │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a) │ Error: _mul req...   │ 55.32371 60.080...   ║
-║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: CreateNo...   │ 35.2829 0.00817742   ║
-║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: CreateNo...   │ 56 60 66 70 78.0     ║
+║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: _lsq req...   │ 35.2829 0.00817742   ║
+║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: _lsq req...   │ 56 60 66 70 78.0     ║
 ║ idioms_21_173_assign_to_classes.k                  │ f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h] │ Error: Function...   │ 0 2 4 2              ║
-║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ Error: Vector i...   │ (26 40 39;40 39...   ║
+║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ 26 40 39             │ (26 40 39;40 39...   ║
 ║ idioms_21_546_is_count_of_atoms_1.k                │ cs:{#,//x};co:{1=cs[x]};co[1 1 1#35] │ 1                    │                      ║
 ║ idioms_22_77_present_value.k                       │ pv:{[c;t;d]+/c*d^t};c:0.1 0.1 1.1;t:1 2 3;d:0.9;pv[c;t;d] │ 0.9729               │                      ║
 ║ idioms_22_82_future_value.k                        │ x:10 15 20 25;y:5;fv:{+/x*(1+y%100)^|!#x};fv[x;y] │ 74.11375             │                      ║
 ║ idioms_22_146_compound_interest.k                  │ x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0] │ ((1.005 1.01002...   │ 1.005                ║
 ║ idioms_22_186_annuity_coefficient.k                │ x:10 15 20 25;y:8 9 10 15;ac:{(y%100)%/:+1-(1+y%100)^\:-x};ac[x;y] │ (8.5899346e-013...   │ (0.1490295 0.15...   ║
 ║ idioms_22_286_fifo_stock.k                         │ x:5;y:1 2 3 4 5;ff:{-':0,0|(+\y)-x};ff[x;y] │ Error: Function...   │ 0 0 1 4 5            ║
-║ idioms_23_389_playing_order.k                      │ log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6] │ Error: CreateNo...   │ 1 5 3 0 2 6 4 0      ║
+║ idioms_23_389_playing_order.k                      │ log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6] │ Error: Function...   │ 1 5 3 0 2 6 4 0      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1168/1315 tests passed (88.8%)                                                                             ║
+║ SUMMARY: 1175/1315 tests passed (89.4%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_06_33_sort_matrix_on_col.k
-Input: x:(37 41 41 72 60 0;91 59 5 19 17 26;24 90 28 63 42 56;75 67 45 14 38 49;85 11 23 61 64 44)
-y:2
-x[<x[;y];]
-Expected: (91 59 5 19 17 26;85 11 23 61 64 44;24 90 28 63 42 56;37 41 41 72 60 0;75 67 45 14 38 49)
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_06_32_sort_indices_by_data.k
-Input: x:2 3 4 5 0 1 8 7 6
-y:79 74 78 76 77 75 73 72 71
-x[<y[x]]
-Expected: 8 7 6 1 5 3 4 2 0
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_07_26_insert_after_equals.k
 Input: x:"abc=,d=,fgh="
 g:&x="="
@@ -2063,7 +2049,7 @@ Input: x:1 2 3 4 5 6 7
 y:1 1 1 2 2 3 3
 +/'x[=y]
 Expected: 6 9 13
-Actual: Error: Vector indices must be integers, got Vector
+Actual: 1 2 3
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_333_quick_membership.k
 Input: x:5 3 7 2
@@ -2083,7 +2069,7 @@ Actual: 0 0 0
 Test: idioms_08_512_select_by_markers.k
 Input: x:2 3 4#1+!24; y:1 0 0 1; x[;;&y]
 Expected: ((1 4;5 8;9 12);(13 16;17 20;21 24))
-Actual: Error: Vector indices must be integers, got Null
+Actual: ((1 2 3 4;5 6 7 8;9 10 11 12);(13 14 15 16;17 18 19 20;21 22 23 24))
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_531_last_occurrence_index_each.k
 Input: x:"aabbbcccc"
@@ -2104,16 +2090,11 @@ y:0 50 100 1000
 Expected: 1 0 2 0 0 1 2 3 0 2
 Actual: 1 1 1 1
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_587_first_column_matrix.k
-Input: x:(0 1 2 3; 4 5 6 7; 8 9 10 11); x[;,0]
-Expected: (,0;,4;,8)
-Actual: Error: Vector indices must be integers, got Null
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_607_vector_from_column.k
 Input: x:3 4#!12
 x[;0]
 Expected: 0 4 8
-Actual: Error: Vector indices must be integers, got Null
+Actual: (,0;,4;,8)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_623_conditional_change_of_sign.k
 Input: x:-9
@@ -2125,12 +2106,12 @@ Actual: 9
 Test: idioms_09_25_double_quotes.k
 Input: f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a
 Expected: "Did he say, \"\"Hello\"\"?"
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+Actual: Error: Function execution error: Undefined variable: ssr
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_147_string_locations.k
 Input: x:"**"; y:"*abcugj**jy***kmhix**12"; ss:{z[&y[z+\:!#x]~\:x]}; ss[x;y;&((1-#x)_ y)=*x]
 Expected: 7 11 12 19
-Actual: Error: Function execution error: Vector indices must be integers, got Vector
+Actual: Error: Function execution error: Cannot compare Character and Vector with =
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_184_right_justify_fields.k
 Input: x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g]
@@ -2225,7 +2206,7 @@ Input: x:("abcd";"efgh";"ijkl";"mnop")
 y:"ai"
 x[&x[;0] _lin y]
 Expected: ("abcd";"ijkl")
-Actual: Error: Variable 'x' is not a function
+Actual: ("abcd";"efgh";"ijkl";"mnop")
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_7_subvector_grade_up.k
 Input: x:1 0 0 1 0 0 1 0
@@ -2486,13 +2467,6 @@ np x
 Expected: 1 2 3 5
 Actual: Error: Function execution error: Undefined variable: log10
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_15_56_hex_from_decimal_chars.k
-Input: x:"255"
-h:"0123456789abcdef"
-h[16 _vs 10 _sv _ic[x]-_ic"0"]
-Expected: "ff"
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_75_decimal_from_hex.k
 Input: h:"0123456789abcdef"
 x:"ff"
@@ -2525,16 +2499,6 @@ t:$100 100 100 _vs x
 1_,/"/",'t
 Expected: "98/12/31"
 Actual: Error: length error: 0 != 3
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_16_107_american_date.k
-Input: d:1998 12 31;$d[1]
-Expected: "12"
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_16_105_12hour_clock.k
-Input: t:13 37 21;$t[0]
-Expected: "13"
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_457_is_integral.k
 Input: ii:{x=_ x}
@@ -2626,11 +2590,6 @@ Test: idioms_18_318_herons_rule.k
 Input: x:3 4 5;hr:{(*/(+/x%2)-0,x)^0.5};hr[x]
 Expected: 6.0
 Actual: 0n
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_18_132_rotation_matrix.k
-Input: x:0.25;((_cos[x];-_sin[x]);(_sin[x];_cos[x]))
-Expected: (0.9689124 -0.247404;0.247404 0.9689124)
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_199_multiplication_table.k
 Input: mt:{{x*\:x}[1+!x]};mt 5
@@ -2745,12 +2704,12 @@ Actual: Error: _mul requires matrices represented as nested vectors
 Test: idioms_21_127_exponential_fit_coefficients.k
 Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a
 Expected: 35.2829 0.00817742
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_124_exponential_fit_predicted.k
 Input: x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]]
 Expected: 56 60 66 70 78.0
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_173_assign_to_classes.k
 Input: f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h]
@@ -2760,7 +2719,7 @@ Actual: Error: Function execution error: Verb '#:' found in registry but not imp
 Test: idioms_21_201_moving_index.k
 Input: x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y]
 Expected: (26 40 39;40 39 28;39 28 27;28 27 48)
-Actual: Error: Vector indices must be integers, got Vector
+Actual: 26 40 39
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_22_146_compound_interest.k
 Input: x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0]
@@ -2780,7 +2739,7 @@ Actual: Error: Function execution error: Cannot apply monadic minus to Null
 Test: idioms_23_389_playing_order.k
 Input: log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6]
 Expected: 1 5 3 0 2 6 4 0
-Actual: Error: CreateNodeFromToken called with non-atomic token: LEFT_BRACKET([)
+Actual: Error: Function execution error: Function execution error: Cannot add Integer to Null
 ──────────────────────────────────────────────────────────────────────────
 Test: test_f_rec.k
 Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]

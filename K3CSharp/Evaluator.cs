@@ -1098,7 +1098,25 @@ namespace K3CSharp
                     // Regular dyadic operation - evaluate right before left (K right-to-left semantics)
                     bool previousIntermediate2 = isIntermediateAssignment;
                     isIntermediateAssignment = true; // Mark as intermediate for right side evaluation
-                    var right = Evaluate(node.Children[1]);
+                    
+                    // Special handling for APPLY with Block node (multi-dimensional indexing)
+                    K3Value right;
+                    if (op.Value.ToString() == "@" && node.Children[1].Type == ASTNodeType.Block)
+                    {
+                        // For multi-dimensional indexing x[a;b;c], collect all indices from Block
+                        var block = node.Children[1];
+                        var indices = new List<K3Value>();
+                        foreach (var child in block.Children)
+                        {
+                            indices.Add(Evaluate(child) ?? new NullValue());
+                        }
+                        right = new VectorValue(indices);
+                    }
+                    else
+                    {
+                        right = Evaluate(node.Children[1]);
+                    }
+                    
                     isIntermediateAssignment = previousIntermediate2; // Restore previous context
 
                     var left = Evaluate(node.Children[0]);
@@ -2949,7 +2967,18 @@ namespace K3CSharp
                 }
                 else if (index is VectorValue indexVec)
                 {
-                    // Multiple indices: return vector of elements at specified positions
+                    // Check if this is multi-dimensional indexing (matrix indexing)
+                    // e.g., x[<x[;y];] where indexVec contains [vector_of_row_indices; null]
+                    bool isMultiDimensional = indexVec.Elements.Count > 0 && 
+                        indexVec.Elements.Any(e => e is VectorValue || e is NullValue);
+                    
+                    if (isMultiDimensional)
+                    {
+                        // Multi-dimensional indexing: x[rows;cols;...]
+                        return MultiDimensionalIndex(vec, indexVec);
+                    }
+                    
+                    // Single-dimensional indexing: return elements at specified positions
                     var result = new List<K3Value>();
                     foreach (var idxValue in indexVec.Elements)
                     {
@@ -3360,6 +3389,117 @@ namespace K3CSharp
             }
             
             throw new Exception("Index operation requires dictionary or vector");
+        }
+
+        /// <summary>
+        /// Handle multi-dimensional indexing for matrices/tables
+        /// e.g., x[rows;cols] where rows and cols are vectors or null
+        /// </summary>
+        private K3Value MultiDimensionalIndex(VectorValue matrix, VectorValue indexVec)
+        {
+            if (indexVec.Elements.Count == 0)
+            {
+                return matrix; // No indices specified, return entire matrix
+            }
+
+            // Get row indices (first dimension)
+            var rowIndexValue = indexVec.Elements[0];
+            List<int> rowIndices;
+            
+            if (rowIndexValue is NullValue || (rowIndexValue is VectorValue riv && riv.Elements.Count == 0))
+            {
+                // Null or empty means all rows
+                rowIndices = Enumerable.Range(0, matrix.Elements.Count).ToList();
+            }
+            else if (rowIndexValue is VectorValue rowIdxVec)
+            {
+                // Vector of row indices
+                rowIndices = new List<int>();
+                foreach (var idx in rowIdxVec.Elements)
+                {
+                    if (idx is IntegerValue intIdx)
+                    {
+                        rowIndices.Add(intIdx.Value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Row indices must be integers, got {idx.Type}");
+                    }
+                }
+            }
+            else if (rowIndexValue is IntegerValue singleRow)
+            {
+                rowIndices = new List<int> { singleRow.Value };
+            }
+            else
+            {
+                throw new Exception($"Row index must be integer or vector of integers, got {rowIndexValue.Type}");
+            }
+
+            // Get column indices (second dimension) if provided
+            List<int>? colIndices = null;
+            if (indexVec.Elements.Count > 1)
+            {
+                var colIndexValue = indexVec.Elements[1];
+                if (colIndexValue is NullValue || (colIndexValue is VectorValue civ && civ.Elements.Count == 0))
+                {
+                    // Null or empty means all columns
+                    colIndices = null;
+                }
+                else if (colIndexValue is VectorValue colIdxVec)
+                {
+                    colIndices = new List<int>();
+                    foreach (var idx in colIdxVec.Elements)
+                    {
+                        if (idx is IntegerValue intIdx)
+                        {
+                            colIndices.Add(intIdx.Value);
+                        }
+                        else
+                        {
+                            throw new Exception($"Column indices must be integers, got {idx.Type}");
+                        }
+                    }
+                }
+                else if (colIndexValue is IntegerValue singleCol)
+                {
+                    colIndices = new List<int> { singleCol.Value };
+                }
+            }
+
+            // Select rows
+            var selectedRows = new List<K3Value>();
+            foreach (var rowIdx in rowIndices)
+            {
+                if (rowIdx < 0 || rowIdx >= matrix.Elements.Count)
+                {
+                    throw new Exception($"Row index {rowIdx} out of bounds for matrix with {matrix.Elements.Count} rows");
+                }
+
+                var row = matrix.Elements[rowIdx];
+                
+                // If column selection is specified and row is a vector, apply it
+                if (colIndices != null && row is VectorValue rowVec)
+                {
+                    var selectedElements = new List<K3Value>();
+                    foreach (var colIdx in colIndices)
+                    {
+                        if (colIdx < 0 || colIdx >= rowVec.Elements.Count)
+                        {
+                            throw new Exception($"Column index {colIdx} out of bounds for row with {rowVec.Elements.Count} elements");
+                        }
+                        selectedElements.Add(rowVec.Elements[colIdx]);
+                    }
+                    selectedRows.Add(new VectorValue(selectedElements));
+                }
+                else
+                {
+                    // No column selection or row is not a vector, include entire row
+                    selectedRows.Add(row);
+                }
+            }
+
+            return new VectorValue(selectedRows);
         }
 
         

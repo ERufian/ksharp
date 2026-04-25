@@ -1222,6 +1222,13 @@ namespace K3CSharp
             if (a is SymbolValue symA && b is SymbolValue symB)
                 return string.Compare(symA.Value, symB.Value, StringComparison.Ordinal);
             
+            // For single-element vectors, compare the inner values directly
+            if (a is VectorValue vecA && b is VectorValue vecB &&
+                vecA.Elements.Count == 1 && vecB.Elements.Count == 1)
+            {
+                return CompareValues(vecA.Elements[0], vecB.Elements[0]);
+            }
+
             // For vectors and other types, use ToString comparison
             int comparison = string.Compare(a.ToString(), b.ToString(), StringComparison.Ordinal);
             

@@ -1516,13 +1516,17 @@ namespace K3CSharp.Parsing
                     }
                     else
                     {
+                        // Multi-argument bracket indexing: x[a;b;c] - use APPLY with Block
+                        // This handles matrix indexing where semicolons separate dimensions
                         var argNodes = new List<ASTNode>();
                         foreach (var argTokens in splitArgs)
                         {
                             var argNode = argTokens.Count > 0 ? EvaluateFromRight(argTokens) : ASTNode.MakeLiteral(new NullValue());
                             argNodes.Add(argNode ?? ASTNode.MakeLiteral(new NullValue()));
                         }
-                        return ASTNode.MakeFunctionCall(identifierNode, argNodes);
+                        // Create a Block with all index arguments for multi-dimensional indexing
+                        var indexBlock = new ASTNode(ASTNodeType.Block, null, argNodes);
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexBlock);
                     }
                 }
             }
@@ -1653,7 +1657,44 @@ namespace K3CSharp.Parsing
                 var tempGroupingParser = new LRSGroupingParser(tokens, BuildParseTree, this);
                 return tempGroupingParser.ParseBraces(ref position);
             }
-            
+
+            // Handle identifier[bracket] indexing pattern (e.g., x[;y] inside monadic operator)
+            if (tokens.Count >= 2 &&
+                (tokens[0].Type == TokenType.IDENTIFIER || tokens[0].Type == TokenType.FUNCTION) &&
+                tokens[1].Type == TokenType.LEFT_BRACKET)
+            {
+                var bracketEnd = FindMatchingBracket(tokens, 1);
+                if (bracketEnd != -1 && bracketEnd == tokens.Count - 1)
+                {
+                    var identifier = tokens[0];
+                    var identifierNode = CreateNodeFromToken(identifier);
+                    var bracketContent = tokens.GetRange(2, bracketEnd - 2);
+
+                    // Split by top-level semicolons to handle multi-arg indexing: x[a;b;c]
+                    var splitArgs = SplitBracketArguments(bracketContent, int.MaxValue);
+                    if (splitArgs.Count == 1)
+                    {
+                        var indexNode = splitArgs[0].Count > 0
+                            ? EvaluateFromRight(splitArgs[0])
+                            : null;
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode,
+                            indexNode ?? ASTNode.MakeLiteral(new NullValue()));
+                    }
+                    else
+                    {
+                        // Multi-dimensional indexing: x[a;b;c] - use APPLY with Block
+                        var argNodes = new List<ASTNode>();
+                        foreach (var argTokens in splitArgs)
+                        {
+                            var argNode = argTokens.Count > 0 ? EvaluateFromRight(argTokens) : ASTNode.MakeLiteral(new NullValue());
+                            argNodes.Add(argNode ?? ASTNode.MakeLiteral(new NullValue()));
+                        }
+                        var indexBlock = new ASTNode(ASTNodeType.Block, null, argNodes);
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexBlock);
+                    }
+                }
+            }
+
             // Check for verb+adverb patterns (e.g., |/x in ~|/x)
             // Must be checked before monadic to avoid splitting verb+adverb incorrectly
             if (tokens.Count >= 2)
