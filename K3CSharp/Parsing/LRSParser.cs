@@ -1341,7 +1341,7 @@ namespace K3CSharp.Parsing
                 // Period expressions (dictionaries) handled by DOT_APPLY/MAKE operators
                 // These will be caught by the dyadic/monadic parsing below
             }
-                
+
             // Check for implicit vector creation (sequences of atomic literals like "1 2 3 4 5")
             // This applies to both Pure and Safe LRS modes
             if (expressionTokens.Count >= 2)
@@ -1350,7 +1350,49 @@ namespace K3CSharp.Parsing
                 if (implicitVector != null)
                     return implicitVector;
             }
-                
+
+            // Check for implicit apply: (vector_literal)indices
+            // Only applies when: (1) content is a simple vector literal (no operators),
+            // and (2) following tokens are simple atomic literals (indices, no operators)
+            if (expressionTokens.Count >= 3 && expressionTokens[0].Type == TokenType.LEFT_PAREN)
+            {
+                // Find the matching closing paren
+                int depth = 1;
+                int parenEnd = 1;
+                while (parenEnd < expressionTokens.Count && depth > 0)
+                {
+                    if (expressionTokens[parenEnd].Type == TokenType.LEFT_PAREN) depth++;
+                    else if (expressionTokens[parenEnd].Type == TokenType.RIGHT_PAREN) depth--;
+                    parenEnd++;
+                }
+
+                // If we found a closing paren and there are tokens after it
+                if (depth == 0 && parenEnd < expressionTokens.Count)
+                {
+                    var vectorTokens = expressionTokens.GetRange(1, parenEnd - 2); // Exclude parens
+                    var indexTokens = expressionTokens.Skip(parenEnd).ToList();
+
+                    // Check if vector content is a simple literal sequence (no operators)
+                    bool isSimpleVector = IsSimpleLiteralSequence(vectorTokens);
+                    // Check if index tokens are simple literals (no operators)
+                    bool isSimpleIndex = IsSimpleLiteralSequence(indexTokens);
+
+                    if (isSimpleVector && isSimpleIndex)
+                    {
+                        // Parse the vector and index
+                        var vectorNode = EvaluateFromRight(expressionTokens.GetRange(0, parenEnd));
+                        ASTNode? indexNode = indexTokens.Count == 1
+                            ? LRSAtomicParser.ParseAtomicToken(indexTokens[0], this)
+                            : EvaluateFromRight(indexTokens);
+
+                        if (vectorNode != null && indexNode != null)
+                        {
+                            return ASTNode.MakeDyadicOp(TokenType.APPLY, vectorNode, indexNode);
+                        }
+                    }
+                }
+            }
+
             // Check for statements first (statements have lower precedence than verbs but higher than separators)
             if (expressionTokens.Count >= 2)
             {
@@ -2812,7 +2854,35 @@ namespace K3CSharp.Parsing
             // The evaluator will determine the proper K3Value type based on element types
             return ASTNode.MakeVector(elements);
         }
-        
+
+        /// <summary>
+        /// Check if a sequence of tokens consists only of simple literals (no operators)
+        /// Used to detect implicit apply patterns like (9 7 6)2 2 1 1 0 0
+        /// </summary>
+        private bool IsSimpleLiteralSequence(List<Token> tokens)
+        {
+            if (tokens.Count == 0)
+                return false;
+
+            foreach (var token in tokens)
+            {
+                // Allow only atomic literal types (no operators, no delimiters)
+                switch (token.Type)
+                {
+                    case TokenType.INTEGER:
+                    case TokenType.LONG:
+                    case TokenType.FLOAT:
+                    case TokenType.CHARACTER:
+                    case TokenType.CHARACTER_VECTOR:
+                    case TokenType.SYMBOL:
+                        continue; // These are valid literal types
+                    default:
+                        return false; // Any operator or other token type disqualifies
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         /// Get the statement parser for handling assignment statements in sub-expressions
         /// </summary>

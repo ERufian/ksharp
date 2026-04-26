@@ -986,6 +986,13 @@ namespace K3CSharp.Tests
 
                 ("square_bracket_vector_single.k", "14"),
 
+                // Implicit apply tests for variables
+                ("implicit_apply_vector_basic.k", "6 6 7 7 9 9"),
+
+                ("implicit_apply_string_index.k", "\"bro\""),
+
+                ("implicit_apply_vector_mixed.k", "10 30 50"),
+
                 ("bracket_sysverb_ic.k", "32 97 65 48"),
 
                 ("bracket_sysverb_atan.k", "0.5235988"),
