@@ -2663,6 +2663,12 @@ namespace K3CSharp
                 case "_tanh":
                     if (arguments.Count == 1) return MathTanh(arguments[0]);
                     throw new Exception("_tanh requires 1 argument");
+                case "_log":
+                    if (arguments.Count == 1) return MathLog(arguments[0]);
+                    throw new Exception("_log requires 1 argument");
+                case "_exp":
+                    if (arguments.Count == 1) return MathExp(arguments[0]);
+                    throw new Exception("_exp requires 1 argument");
                 // Database functions
                 case "_ic":
                     if (arguments.Count == 1) return Ic(arguments[0]);
@@ -2967,17 +2973,53 @@ namespace K3CSharp
                 }
                 else if (index is VectorValue indexVec)
                 {
+                    // Check if this is each-indexing (vector of index vectors)
+                    // e.g., x[(0 2 4; 1 3)] returns (x[0 2 4]; x[1 3])
+                    bool isEachIndexing = indexVec.Elements.Count > 0 &&
+                        indexVec.Elements.All(e => e is VectorValue);
+
+                    if (isEachIndexing)
+                    {
+                        // Each indexing: index x with each vector in the index
+                        var eachResult = new List<K3Value>();
+                        foreach (var idxVector in indexVec.Elements)
+                        {
+                            if (idxVector is VectorValue iv)
+                            {
+                                var indexedElements = new List<K3Value>();
+                                foreach (var idxValue in iv.Elements)
+                                {
+                                    if (idxValue is IntegerValue intIdx)
+                                    {
+                                        int idx = intIdx.Value;
+                                        if (idx < 0 || idx >= vec.Elements.Count)
+                                        {
+                                            throw new Exception($"Index {idx} out of bounds for vector of length {vec.Elements.Count}");
+                                        }
+                                        indexedElements.Add(vec.Elements[idx]);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Vector indices must be integers, got {idxValue.Type}");
+                                    }
+                                }
+                                eachResult.Add(new VectorValue(indexedElements));
+                            }
+                        }
+                        return new VectorValue(eachResult);
+                    }
+
                     // Check if this is multi-dimensional indexing (matrix indexing)
                     // e.g., x[<x[;y];] where indexVec contains [vector_of_row_indices; null]
-                    bool isMultiDimensional = indexVec.Elements.Count > 0 && 
+                    bool isMultiDimensional = indexVec.Elements.Count > 0 &&
                         indexVec.Elements.Any(e => e is VectorValue || e is NullValue);
-                    
+
                     if (isMultiDimensional)
                     {
                         // Multi-dimensional indexing: x[rows;cols;...]
                         return MultiDimensionalIndex(vec, indexVec);
                     }
-                    
+
                     // Single-dimensional indexing: return elements at specified positions
                     var result = new List<K3Value>();
                     foreach (var idxValue in indexVec.Elements)

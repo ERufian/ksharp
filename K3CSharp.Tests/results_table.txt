@@ -1439,7 +1439,7 @@ x?&/x │ 4                    │                      ║
 x?|/x │ 8                    │                      ║
 ║ idioms_08_80_scattered_indexing.k                  │ x:2 3 4# _ci 97+!24; x ./:(0 0 0;1 1 3;1 2 2) │ "atw"                │                      ║
 ║ idioms_08_145_count_between_endpoints.k            │ x:(66 8 6 4 86; 82 91 52 53 89; 43 0 62 3 17; 0 26 81 2 12; 37 41 41 72 60); l:10; h:80; +/'(x>l)&(x<h) │ 1 2 3 2 5            │                      ║
-║ idioms_08_150_sum_items_given_by_y.k               │ x:_log[1+!5]; y:1 4 1 4 1; +/'x[=y] │ Error: Undefine...   │ 2.70805 2.079442     ║
+║ idioms_08_150_sum_items_given_by_y.k               │ x:_log[1+!5]; y:1 4 1 4 1; +/'x[=y] │ 2.70805 2.079442     │                      ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(?x)?/:x │ 7 7 7 7 7 7 7        │ 10 20 30 20 30 ...   ║
 ║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20; z:"abcde"; x:"dcbbbaceeaeccbecbaea"; sc:{+/'((&#z),y)[=z,x]}; sc[x;y;z] │ over(+)              │ 54 43 50 1 62        ║
 ║ idioms_08_153_index_of_rows.k                      │ x:1+3 4#!12; y:(1 0 3 0; 0 6 0 8; 9 0 0 12); x ?/:'y │ (0 4 2 4;4 1 4 ...   │                      ║
@@ -1455,7 +1455,7 @@ y:"a"
 x&&\x=|\x │ 0 1 0 0 0 0 0        │                      ║
 ║ idioms_08_284_sum_marked.k                         │ x:1 2 3 4 5 6 7
 y:1 1 1 2 2 3 3
-+/'x[=y] │ 1 2 3                │ 6 9 13               ║
++/'x[=y] │ 6 9 13               │                      ║
 ║ idioms_08_305_invert_between_ones.k                │ x:1 0 1 0 0 1 0 0 1
 (~x)&(+\x)!2 │ 0 1 0 0 0 0 1 1 0    │                      ║
 ║ idioms_08_307_invert_after_first_one.k             │ x:0 0 1 1 0 1
@@ -1541,7 +1541,7 @@ rtb x │ "trailing blanks"    │                      ║
 nctb:{-+/&\|" "=x}
 rj:{(nctb x)!x}
 rj x │ " trailing blanks"   │                      ║
-║ idioms_09_147_string_locations.k                   │ x:"**"; y:"*abcugj**jy***kmhix**12"; ss:{z[&y[z+\:!#x]~\:x]}; ss[x;y;&((1-#x)_ y)=*x] │ Error: Function...   │ 7 11 12 19           ║
+║ idioms_09_147_string_locations.k                   │ x:"**"; y:"*abcugj**jy***kmhix**12"; ss:{z[&y[z+\:!#x]~\:x]}; ss[x;y;&((1-#x)_ y)=*x] │ 7 11 12 19           │                      ║
 ║ idioms_09_184_right_justify_fields.k               │ x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g] │ ()                   │ "   ab  cde fgh...   ║
 ║ idioms_09_185_left_justify_fields.k                │ x:"abcdefghij"; y:2 3 4 1; g:5; lj:{[x;y;g],/g#/:((+\0,-1_ y)_ x),\:g#" "}; lj[x;y;g] │ "ab   cde  fghi...   │                      ║
 ║ idioms_09_217_index_last_nonblank.k                │ x:("love's not "; "time's fool "; "though rosy "); ln:{*|&~" "=x}; ln'x │ 9 10 10              │                      ║
@@ -1959,7 +1959,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: _lsq req...   │ 35.2829 0.00817742   ║
 ║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: _lsq req...   │ 56 60 66 70 78.0     ║
 ║ idioms_21_173_assign_to_classes.k                  │ f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h] │ Error: Function...   │ 0 2 4 2              ║
-║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ 26 40 39             │ (26 40 39;40 39...   ║
+║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ (26 40 39;40 39...   │                      ║
 ║ idioms_21_546_is_count_of_atoms_1.k                │ cs:{#,//x};co:{1=cs[x]};co[1 1 1#35] │ 1                    │                      ║
 ║ idioms_22_77_present_value.k                       │ pv:{[c;t;d]+/c*d^t};c:0.1 0.1 1.1;t:1 2 3;d:0.9;pv[c;t;d] │ 0.9729               │                      ║
 ║ idioms_22_82_future_value.k                        │ x:10 15 20 25;y:5;fv:{+/x*(1+y%100)^|!#x};fv[x;y] │ 74.11375             │                      ║
@@ -1970,16 +1970,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1181/1315 tests passed (89.8%)                                                                             ║
+║ SUMMARY: 1185/1315 tests passed (90.1%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_08_150_sum_items_given_by_y.k
-Input: x:_log[1+!5]; y:1 4 1 4 1; +/'x[=y]
-Expected: 2.70805 2.079442
-Actual: Error: Undefined variable: _log
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_151_efficient_execution_repeated.k
 Input: f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(?x)?/:x
 Expected: 10 20 30 20 30 20 10
@@ -2005,13 +2000,6 @@ Input: x:"blanks at end "
 (" "=x) _sv 1
 Expected: 2
 Actual: Error: _sv: left argument must be integer (single base) or vector (multiple radies), right argument must be integer vector
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_284_sum_marked.k
-Input: x:1 2 3 4 5 6 7
-y:1 1 1 2 2 3 3
-+/'x[=y]
-Expected: 6 9 13
-Actual: 1 2 3
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_333_quick_membership.k
 Input: x:5 3 7 2
@@ -2069,11 +2057,6 @@ Test: idioms_09_25_double_quotes.k
 Input: f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a
 Expected: "Did he say, \"\"Hello\"\"?"
 Actual: Error: Function execution error: Undefined variable: ssr
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_09_147_string_locations.k
-Input: x:"**"; y:"*abcugj**jy***kmhix**12"; ss:{z[&y[z+\:!#x]~\:x]}; ss[x;y;&((1-#x)_ y)=*x]
-Expected: 7 11 12 19
-Actual: Error: Function execution error: Cannot compare Character and Vector with =
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_184_right_justify_fields.k
 Input: x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g]
@@ -2673,11 +2656,6 @@ Test: idioms_21_173_assign_to_classes.k
 Input: f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h]
 Expected: 0 2 4 2
 Actual: Error: Function execution error: Verb '#:' found in registry but not implemented in EvaluateDyadicOperatorWithRegistry
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_21_201_moving_index.k
-Input: x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y]
-Expected: (26 40 39;40 39 28;39 28 27;28 27 48)
-Actual: 26 40 39
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_22_146_compound_interest.k
 Input: x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0]
