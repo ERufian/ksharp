@@ -504,7 +504,6 @@ namespace K3CSharp.Parsing
                 result = BuildParseTreeFromRight(expressionTokens);
             else
                 result = EvaluateFromRight(expressionTokens);
-                
             return result;
         }
         
@@ -550,7 +549,8 @@ namespace K3CSharp.Parsing
             {
                 if (tokens[1].Type == TokenType.COLON)
                     return statementParser.ParseStatement(tokens);
-                if (tokens.Count >= 4 && IsVerbToken(tokens[1].Type) && tokens[2].Type == TokenType.COLON)
+                // Handle: x?: (3 tokens) or x+:y (4+ tokens)
+                if (IsVerbToken(tokens[1].Type) && tokens[2].Type == TokenType.COLON)
                     return statementParser.ParseStatement(tokens);
                 if (tokens[1].Type == TokenType.GLOBAL_ASSIGNMENT)
                     return statementParser.ParseStatement(tokens);
@@ -1418,9 +1418,9 @@ namespace K3CSharp.Parsing
                     return statementParser.ParseStatement(expressionTokens);
                 }
                 
-                // Apply-and-assign: IDENTIFIER VERB COLON expression  (i+:1, x-:5, etc.)
-                if (expressionTokens.Count >= 4 &&
-                    IsVerbToken(expressionTokens[1].Type) &&
+                // Apply-and-assign: IDENTIFIER VERB COLON expression  (i+:1, x-:5, x?:, etc.)
+                // Handle both 3 tokens (x?:) and 4+ tokens (x+:y)
+                if (IsVerbToken(expressionTokens[1].Type) &&
                     expressionTokens[2].Type == TokenType.COLON)
                 {
                     return statementParser.ParseStatement(expressionTokens);

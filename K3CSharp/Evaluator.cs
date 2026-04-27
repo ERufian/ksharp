@@ -91,7 +91,6 @@ namespace K3CSharp
         {
             if (node == null)
                 return new NullValue();
-                
             return EvaluateNode(node) ?? new NullValue();
         }
 
@@ -169,11 +168,11 @@ namespace K3CSharp
                         var variableName = node.Value is SymbolValue varSym ? varSym.Value : node.Value?.ToString() ?? "";
                         var operatorSymbol = node.Children[0].Value as SymbolValue;
                         var rightArgument = Evaluate(node.Children[1]);
-                        
+
                         if (operatorSymbol != null)
                         {
                             var opName = operatorSymbol.Value;
-                            
+
                             // Indexed apply-and-assign: a[i]+:y or a[]:y — amend at index path or all elements
                             if (node.Children.Count >= 3)
                             {
@@ -205,16 +204,29 @@ namespace K3CSharp
                                 SetVariable(variableName, amended);
                                 return amended;
                             }
-                            
+
                             // Get current value of variable
                             var currentValue = GetVariable(variableName);
-                            
+
+                            // Monadic apply-and-assign: operator is monadic-only OR right argument is null
+                            // e.g., x?: has NullValue right argument, triggering monadic unique
+                            if (IsMonadicOnlyVerb(opName) || rightArgument is NullValue)
+                            {
+                                // Apply monadic operator to current value
+                                var monadicResult = ApplyMonadicVerb(opName, currentValue);
+                                // Assign result to a new variable named {variableName}?
+                                // e.g., x?: creates variable x? with unique values
+                                var newVariableName = variableName + "?";
+                                SetVariable(newVariableName, monadicResult);
+                                return monadicResult;
+                            }
+
                             // Apply operator to current value and right argument
                             var opNode = new ASTNode(ASTNodeType.DyadicOp);
                             opNode.Value = new SymbolValue(opName);
                             opNode.Children.Add(ASTNode.MakeLiteral(currentValue));
                             opNode.Children.Add(ASTNode.MakeLiteral(rightArgument));
-                            
+
                             // Evaluate the operation
                             var result = EvaluateDyadicOp(opNode);
                             

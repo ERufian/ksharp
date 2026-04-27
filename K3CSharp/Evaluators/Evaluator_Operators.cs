@@ -819,22 +819,19 @@ namespace K3CSharp
         public K3Value Match(K3Value a, K3Value b)
         {
             // For match comparison (~ operator)
-            if (a is FloatValue floatA && b is FloatValue floatB)
-            {
-                // Check for equality first - important for special values like infinities
-                if (floatA.Value == floatB.Value)
-                    return new IntegerValue(1);
-                
-                double maxAbs = Math.Max(Math.Abs(floatA.Value), Math.Abs(floatB.Value));
-                double threshold = maxAbs * 0.00001; // 0.001 percent
-                return new IntegerValue(Math.Abs(floatA.Value - floatB.Value) < threshold ? 1 : 0);
-            }
-            
+
+            // Handle null values
+            if (a is NullValue && b is NullValue)
+                return new IntegerValue(1);
+            if (a is NullValue || b is NullValue)
+                return new IntegerValue(0);
+
+            // Handle vector comparison
             if (a is VectorValue vecAMatch && b is VectorValue vecBMatch)
             {
                 if (vecAMatch.Elements.Count != vecBMatch.Elements.Count)
                     return new IntegerValue(0);
-                
+
                 for (int i = 0; i < vecAMatch.Elements.Count; i++)
                 {
                     var result = Match(vecAMatch.Elements[i], vecBMatch.Elements[i]);
@@ -843,17 +840,46 @@ namespace K3CSharp
                 }
                 return new IntegerValue(1);
             }
-            
-            if (a is IntegerValue intA && b is IntegerValue intB)
-                return new IntegerValue(intA.Value == intB.Value ? 1 : 0);
-            if (a is LongValue longA && b is LongValue longB)
-                return new IntegerValue(longA.Value == longB.Value ? 1 : 0);
+
+            // Handle cross-type numeric comparisons
+            // Check if both are numeric types
+            bool aIsNumeric = IsNumericValue(a);
+            bool bIsNumeric = IsNumericValue(b);
+
+            if (aIsNumeric && bIsNumeric)
+            {
+                // Convert both to double for tolerant comparison
+                double numA = GetNumericValue(a);
+                double numB = GetNumericValue(b);
+
+                // Tolerant equality for numeric types
+                if (numA == numB)
+                    return new IntegerValue(1);
+
+                double maxAbs = Math.Max(Math.Abs(numA), Math.Abs(numB));
+                double threshold = maxAbs * 0.00001; // 0.001 percent
+                return new IntegerValue(Math.Abs(numA - numB) < threshold ? 1 : 0);
+            }
+
+            // Handle same-type comparisons for non-numeric types
             if (a is CharacterValue charA && b is CharacterValue charB)
                 return new IntegerValue(charA.Value == charB.Value ? 1 : 0);
             if (a is SymbolValue symA && b is SymbolValue symB)
                 return new IntegerValue(symA.Value == symB.Value ? 1 : 0);
-            
+
+            // Different types that are not both numeric - not equal
+            if (aIsNumeric != bIsNumeric)
+                return new IntegerValue(0);
+
             throw new Exception($"Cannot compare {a.Type} and {b.Type} with =");
+        }
+
+        /// <summary>
+        /// Check if a value is numeric (Integer, Long, or Float)
+        /// </summary>
+        private bool IsNumericValue(K3Value value)
+        {
+            return value is IntegerValue or LongValue or FloatValue;
         }
 
         public K3Value Equal(K3Value a, K3Value b)

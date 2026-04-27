@@ -135,7 +135,18 @@ namespace K3CSharp.Parsing
             var leftTokens = tokens.GetRange(0, assignmentIndex);
             var rightTokens = tokens.GetRange(assignmentIndex + 1, tokens.Count - assignmentIndex - 1);
             
-            if (leftTokens.Count == 0 || rightTokens.Count == 0)
+            // Check for apply-and-assign pattern: IDENTIFIER VERB COLON (e.g., x?:)
+            // This pattern allows empty right side for monadic operators
+            bool isApplyAndAssignPattern = assignmentToken.Type == TokenType.COLON &&
+                                            leftTokens.Count == 2 &&
+                                            leftTokens[0].Type == TokenType.IDENTIFIER &&
+                                            VerbRegistry.IsVerbToken(leftTokens[1].Type);
+            
+            if (leftTokens.Count == 0)
+                return null;
+            
+            // Empty right side is only allowed for apply-and-assign patterns (e.g., x?:)
+            if (rightTokens.Count == 0 && !isApplyAndAssignPattern)
                 return null;
             
             // Check if this is a modified assignment operator (apply and assign)
@@ -147,8 +158,9 @@ namespace K3CSharp.Parsing
                 return ParseApplyAndAssignStatement(leftTokens, assignmentToken, rightTokens);
             }
             
-            // Case 2: apply-and-assign with separate tokens: IDENTIFIER VERB COLON expression
-            // e.g., i+:1 tokenized as [IDENTIFIER(i), PLUS(+), COLON(:), INTEGER(1)]
+            // Case 2: apply-and-assign with separate tokens: IDENTIFIER VERB COLON [expression]
+            // e.g., i+:1 tokenized as [IDENTIFIER(i), PLUS(+), COLON(:), INTEGER(1)] - dyadic
+            // e.g., x?: tokenized as [IDENTIFIER(x), QUESTION(?), COLON(:)] - monadic
             // Here leftTokens=[IDENTIFIER,VERB] and assignmentToken=COLON
             if (assignmentToken.Type == TokenType.COLON &&
                 leftTokens.Count == 2 &&
@@ -160,9 +172,15 @@ namespace K3CSharp.Parsing
                 applyAndAssignNode.Value = new SymbolValue(leftTokens[0].Lexeme);
                 var opSymbol = VerbRegistry.GetDyadicOperatorSymbol(leftTokens[1].Type);
                 applyAndAssignNode.Children.Add(ASTNode.MakeLiteral(new SymbolValue(opSymbol)));
+                
+                // Parse right side expression (may be null for monadic case)
                 var applyRightNode = ParseRightSideExpression(rightTokens);
                 if (applyRightNode == null)
-                    return null;
+                {
+                    // Monadic case: no right argument provided (e.g., x?:)
+                    // Use NullValue as placeholder - evaluator will handle monadic dispatch
+                    applyRightNode = ASTNode.MakeLiteral(new NullValue());
+                }
                 applyAndAssignNode.Children.Add(applyRightNode);
                 return applyAndAssignNode;
             }

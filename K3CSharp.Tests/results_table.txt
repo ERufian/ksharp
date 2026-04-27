@@ -197,11 +197,6 @@ foo - 12 │ 20                   │                      ║
 ║ underflow_regular_int.k                            │ -2147483639 - 40     │ 2147483617           │                      ║
 ║ parentheses_basic.k                                │ 1 + 2 * 3            │ 7                    │                      ║
 ║ parentheses_grouping.k                             │ (1 + 2) * 3          │ 9                    │                      ║
-║ debug_mult_only.k                                  │ 3 * 7                │ 21                   │                      ║
-║ debug_no_outer_paren.k                             │ 1 + 2 * 3 + 4        │ 15                   │                      ║
-║ debug_left_paren.k                                 │ (1 + 2)              │ 3                    │                      ║
-║ debug_simple_mult.k                                │ (1 + 2) * (3 + 4)    │ 21                   │                      ║
-║ debug_double_nested.k                              │ ((1+2)*(3+4))        │ 21                   │                      ║
 ║ parentheses_nested.k                               │ (1 + (2 * 3))        │ 7                    │                      ║
 ║ parentheses_nested1.k                              │ ((1 + 2) * (3 + 4))  │ 21                   │                      ║
 ║ parentheses_nested2.k                              │ (10 % (2 + (3 * 4))) │ 0.7142857            │                      ║
@@ -1445,6 +1440,10 @@ x?|/x │ 8                    │                      ║
 ║ idioms_08_80_scattered_indexing.k                  │ x:2 3 4# _ci 97+!24; x ./:(0 0 0;1 1 3;1 2 2) │ "atw"                │                      ║
 ║ idioms_08_145_count_between_endpoints.k            │ x:(66 8 6 4 86; 82 91 52 53 89; 43 0 62 3 17; 0 26 81 2 12; 37 41 41 72 60); l:10; h:80; +/'(x>l)&(x<h) │ 1 2 3 2 5            │                      ║
 ║ idioms_08_150_sum_items_given_by_y.k               │ x:_log[1+!5]; y:1 4 1 4 1; +/'x[=y] │ 2.70805 2.079442     │                      ║
+║ idioms_08_151a_search_uniques.k                    │ x:1 2 3 2 3 2 1
+(?x)?/:x │ 0 1 2 1 2 1 0        │                      ║
+║ idioms_08_151b_search_uniques_and_assign.k         │ x:1 2 3 2 3 2 1
+(x?:)?/:x │ 0 1 2 1 2 1 0        │                      ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(x?:)?/:x │ 7 7 7 7 7 7 7        │ 10 20 30 20 30 ...   ║
 ║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20; z:"abcde"; x:"dcbbbaceeaeccbecbaea"; sc:{+/'((&#z),y)[=z,x]}; sc[x;y;z] │ over(+)              │ 54 43 50 1 62        ║
 ║ idioms_08_153_index_of_rows.k                      │ x:1+3 4#!12; y:(1 0 3 0; 0 6 0 8; 9 0 0 12); x ?/:'y │ (0 4 2 4;4 1 4 ...   │                      ║
@@ -1609,8 +1608,8 @@ x?/:y │ 3 3 3                │ 0 5 8 2              ║
 ║ idioms_10_210_remove_leading_blank_columns.k       │ x:3 9#"   ed cba"; rtr:{x[&||\|~x~\:(#+x)#" "]}; +|rtr[|+x] │ Error: Function...   │ ("ed cba";"ed c...   ║
 ║ idioms_10_211_remove_leading_blank_rows.k          │ x:|+3 9#"abc de "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x] │ Error: Function...   │ ("eee";"ddd";" ...   ║
 ║ idioms_10_216_rows_starting_with_y.k               │ x:("sit";"sat";"sin";"tin"); y:"si"; rb:{x[&&/'y _lin/:x]}; rb[x;y] │ ("sit";"sin")        │                      ║
-║ idioms_10_218_single_blank_row.k                   │ x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x] │ Error: Function...   │ ("aaa";"   ";"b...   ║
-║ idioms_10_220_remove_duplicate_blank_columns.k     │ x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x] │ Error: Function...   │ ("a b c d";"a b...   ║
+║ idioms_10_218_single_blank_row.k                   │ x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x] │ "a"                  │ ("aaa";"   ";"b...   ║
+║ idioms_10_220_remove_duplicate_blank_columns.k     │ x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x] │ "a"                  │ ("a b c d";"a b...   ║
 ║ idioms_10_225_remove_blank_rows.k                  │ x:("aaa";"bbb";"   ";"ccc";"   ")
 x _dv "   " │ ("aaa";"bbb";"c...   │                      ║
 ║ idioms_10_226_remove_blank_columns.k               │ x:+4 4#"xxxx    hhhh  ii"; +(+x)_dv " " │ ("xxxx";"    ";...   │ ("x h ";"x h ";...   ║
@@ -1752,7 +1751,7 @@ y:"efgh"
 (^m)_vs &,/m │ (0 0 1 1;0 2 0 2)    │                      ║
 ║ idioms_12_71_connectivity_matrix_from_list.k       │ y:(0 1;0 2;1 0;1 2;2 2); x:3; (x,x)#(!x*x)_lin x _sv/:y │ Error: _sv: num...   │ (0 1 1;1 0 1;0 ...   ║
 ║ idioms_12_148_node_matrix_from_connection.k        │ x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x] │ Error: Function...   │ (0 0 2 1 1;2 1 ...   ║
-║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ Error: Cannot c...   │ (1 1 0 0 0;0 -1...   ║
+║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ 0 0 0 0              │ (1 1 0 0 0;0 -1...   ║
 ║ idioms_12_51_indices.k                             │ ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x] │ ,0 1 2               │ (0 0 0 1 1 1;0 ...   ║
 ║ idioms_12_81_raveled_index.k                       │ x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3 │ 19                   │                      ║
 ║ idioms_12_58_pair_each_element.k                   │ x:"abcd"; y:"efgh"; x,/:\:y │ (("ae";"af";"ag...   │ ("ae";"af";"ag"...   ║
@@ -1765,7 +1764,7 @@ x ./: 2#'!#x │ 1 6 11               │                      ║
 ║ idioms_12_429_matrix_with_diagonal.k               │ x:5 9 6 7 2
 (2##x)#,/x,'(2##x)#0 │ (5 9 6 7 2 0 0 ...   │ (5 0 0 0 0;0 9 ...   ║
 ║ idioms_12_197_identity_matrix.k                    │ id:{(!x)=\:!x}
-id 4  │ Error: Function...   │ (1 0 0 0;0 1 0 ...   ║
+id 4  │ 0 0 0 0              │ (1 0 0 0;0 1 0 ...   ║
 ║ idioms_12_163_polynomial_product.k                 │ x:2 3 4; y:1 2 3; +/y*/:x^/:!#y │ 7 26 63              │ 26                   ║
 ║ idioms_12_195_upper_triangular.k                   │ ut:{{~x>\:x}[!x]}
 ut 4 │                      │ (1 1 1 1;0 1 1 ...   ║
@@ -1883,7 +1882,7 @@ lp:((0=y!4)&~(0=y!100))|(0=y!400)
 (0 31 28 31 30 31 30 31 31 30 31 30 31+0,(0,lp,10#0))[x] │ 29                   │                      ║
 ║ idioms_17_603_conditional_change_of_sign.k         │ y:1 2 3 4 5 6;x:0 1 0 1 1 0;y*1 -1[x] │ 1 -2 3 -4 -5 6       │                      ║
 ║ idioms_17_457_is_integral.k                        │ ii:{x=_ x}
-ii[3.0]   │ Error: Function...   │ 1                    ║
+ii[3.0]   │ 1                    │                      ║
 ║ idioms_17_62_fractional_part.k                     │ x:3.7
 x-_ x          │ 0.7                  │                      ║
 ║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Vector m...   │ 0 0 0 0.4 0.4 0.9    ║
@@ -1937,7 +1936,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_430_polynomial_derivative.k              │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
 ║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 13                   │ 8.5                  ║
 ║ idioms_19_281_taylor_series_value.k                │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
-║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ Error: Function...   │ (1 1 4 4;1 4 1 4)    ║
+║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ ()                   │ (1 1 4 4;1 4 1 4)    ║
 ║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ Error: Function...   │ ,14                  ║
 ║ idioms_20_159_is_range_of_x_1.k                    │ x:1 1 1 1 1;1=#?x    │ 1                    │                      ║
 ║ idioms_20_180_is_x_in_range.k                      │ hc:{1 0~/:~x<\:y};x:19 20 21 39 40 41;y:20 40;hc[x;y] │ 0 0 0 0 0 0          │ 0 1 1 1 0 0          ║
@@ -1975,7 +1974,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1188/1318 tests passed (90.1%)                                                                             ║
+║ SUMMARY: 1186/1315 tests passed (90.2%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2073,7 +2072,7 @@ Input: x:"   abcd e  fg   "
 lt:{x[&(|\a)&||\|a:~x=" "]}
 lt x
 Expected: "abcd e  fg"
-Actual: Error: Function execution error: Cannot compare Null and Vector with =
+Actual: Error: Function execution error: Undefined variable: a
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_297_spread_marked_field_heads.k
 Input: x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y]
@@ -2120,12 +2119,12 @@ Actual: Error: Function execution error: Cannot compare Character and Vector wit
 Test: idioms_10_218_single_blank_row.k
 Input: x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x]
 Expected: ("aaa";"   ";"bbb";"   ";"ccc";"   ";"ddd")
-Actual: Error: Function execution error: Cannot compare Null and Vector with =
+Actual: "a"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_220_remove_duplicate_blank_columns.k
 Input: x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x]
 Expected: ("a b c d";"a b c d";"a b c d")
-Actual: Error: Function execution error: Cannot compare Null and Vector with =
+Actual: "a"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_226_remove_blank_columns.k
 Input: x:+4 4#"xxxx    hhhh  ii"; +(+x)_dv " "
@@ -2235,7 +2234,7 @@ Actual: Error: Function expects 3 arguments, got 4
 Test: idioms_12_157_connection_matrix_from_node.k
 Input: x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x
 Expected: (1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1)
-Actual: Error: Cannot compare Vector and Integer with =
+Actual: 0 0 0 0
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_51_indices.k
 Input: ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x]
@@ -2277,7 +2276,7 @@ Test: idioms_12_197_identity_matrix.k
 Input: id:{(!x)=\:!x}
 id 4
 Expected: (1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1)
-Actual: Error: Function execution error: Cannot compare Integer and Vector with =
+Actual: 0 0 0 0
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_163_polynomial_product.k
 Input: x:2 3 4; y:1 2 3; +/y*/:x^/:!#y
@@ -2446,12 +2445,6 @@ t:$100 100 100 _vs x
 Expected: "98/12/31"
 Actual: Error: length error: 0 != 3
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_457_is_integral.k
-Input: ii:{x=_ x}
-ii[3.0]
-Expected: 1
-Actual: Error: Function execution error: Cannot compare Float and Integer with =
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_478_fractional_part.k
 Input: x:0 1 -2 3.4 -5.6 -6.1;x!1
 Expected: 0 0 0 0.4 0.4 0.9
@@ -2590,7 +2583,7 @@ Actual: 13
 Test: idioms_19_48_saddle_point_indices.k
 Input: x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x
 Expected: (1 1 4 4;1 4 1 4)
-Actual: Error: Function execution error: Function execution error: Function execution error: Function execution error: Cannot compare Vector and Integer with =
+Actual: ()
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_262_saddle_point_value.k
 Input: x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]]

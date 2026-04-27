@@ -736,16 +736,6 @@ namespace K3CSharp.Tests
                 ("parentheses_basic.k", "7"),
 
                 ("parentheses_grouping.k", "9"),
-
-                ("debug_mult_only.k", "21"),
-                
-                ("debug_no_outer_paren.k", "15"),
-                
-                ("debug_left_paren.k", "3"),
-                
-                ("debug_simple_mult.k", "21"),
-                
-                ("debug_double_nested.k", "21"),
                 
                 ("parentheses_nested.k", "7"),
 
@@ -1273,9 +1263,7 @@ namespace K3CSharp.Tests
 
                 // Unique operator
 
-                ("unique_operator.k", "1 2 3"),
-
-                
+                ("unique_operator.k", "1 2 3"),               
 
                 // Variable tests
 
@@ -2516,6 +2504,8 @@ namespace K3CSharp.Tests
                 ("idioms_08_80_scattered_indexing.k", "\"atw\""),
                 ("idioms_08_145_count_between_endpoints.k", "1 2 3 2 5"),
                 ("idioms_08_150_sum_items_given_by_y.k", "2.70805 2.079442"),
+                ("idioms_08_151a_search_uniques.k", "0 1 2 1 2 1 0"),
+                ("idioms_08_151b_search_uniques_and_assign.k", "0 1 2 1 2 1 0"),
                 ("idioms_08_151_efficient_execution_repeated.k", "10 20 30 20 30 20 10"),
                 ("idioms_08_152_sum_by_ordered_codes.k", "54 43 50 1 62"),
                 ("idioms_08_153_index_of_rows.k", "(0 4 2 4;4 1 4 3;0 4 4 3)"),
