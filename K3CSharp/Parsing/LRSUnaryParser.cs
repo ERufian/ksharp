@@ -169,7 +169,6 @@ namespace K3CSharp.Parsing
                     else
                     {
                         // No operator found - just return the grouped result
-                        // (this shouldn't happen in valid K code, but handle gracefully)
                         return groupedResult;
                     }
                 }

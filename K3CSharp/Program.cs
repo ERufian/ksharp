@@ -251,6 +251,9 @@ namespace K3CSharp
                 var lexer = new Lexer(input);
                 var tokens = lexer.Tokenize();
                 
+                // Preprocess for implicit indexing/apply
+                tokens = lexer.PreprocessImplicitIndexing(tokens);
+                
                 // Use ParserConfig for consistent parser selection
                 var ast = ParserConfig.ParseWithConfig(tokens, input);
                 return evaluator.Evaluate(ast) ?? new NullValue();

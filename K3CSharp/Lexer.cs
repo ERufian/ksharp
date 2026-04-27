@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace K3CSharp
 {
@@ -17,6 +18,35 @@ namespace K3CSharp
             this.input = input;
             position = 0;
         }
+
+        /// <summary>
+        /// Preprocess token list to insert @ operators for implicit indexing/apply
+        /// Pattern: )( followed by ( -> insert @ between them
+        /// This handles the K language feature where consecutive parenthesized expressions
+        /// imply implicit indexing (if left is a noun) or implicit apply (if left is a verb)
+        /// </summary>
+        public List<Token> PreprocessImplicitIndexing(List<Token> tokens)
+        {
+            var result = new List<Token>();
+            
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                result.Add(tokens[i]);
+                
+                // Check if current token is RIGHT_PAREN and next token is LEFT_PAREN
+                // Insert APPLY (@) between them for implicit indexing
+                if (i < tokens.Count - 1 && 
+                    tokens[i].Type == TokenType.RIGHT_PAREN && 
+                    tokens[i + 1].Type == TokenType.LEFT_PAREN)
+                {
+                    var applyToken = new Token(TokenType.APPLY, "@", tokens[i].Position);
+                    result.Add(applyToken);
+                }
+            }
+            
+            return result;
+        }
+
         public Token? PeekNextToken()
         {
             if (null == tokens) return null;

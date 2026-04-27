@@ -3171,6 +3171,9 @@ namespace K3CSharp.Tests
                             // Handle regular K expressions
                             var lexer = new Lexer(accumulatedLine);
                             var tokens = lexer.Tokenize();
+                            
+                            // Preprocess for implicit indexing/apply
+                            tokens = lexer.PreprocessImplicitIndexing(tokens);
 
                             // Set current test name for failure tracking
                             LRSParserWrapper.SetCurrentTestName(fileName);

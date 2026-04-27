@@ -588,6 +588,7 @@ namespace K3CSharp.Parsing
                     : pos >= tokens.Count;
                 if (groupingResult != null && allConsumed)
                     return groupingResult;
+                
             }
             
             // Check for verb-immediate-left adverb patterns FIRST (highest priority)

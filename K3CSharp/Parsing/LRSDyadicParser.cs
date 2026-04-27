@@ -124,12 +124,36 @@ namespace K3CSharp.Parsing
             // This handles cases like (1 2 3) +' (4 5 6) where the verb+adverb is in the middle
             // Must respect grouping depth to avoid matching inside parenthesized sub-expressions
             int adverbScanDepth = 0;
+            
+            // First, check if there's a dyadic @ operator at depth 0 that should take precedence over adverb patterns
+            // This handles cases like (f'x)@((x?:)?/:x) where @ should be the main operator
+            bool hasApplyAtDepth0 = false;
+            int applyPosition = -1;
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (tokens[i].Type == TokenType.LEFT_PAREN || tokens[i].Type == TokenType.LEFT_BRACKET || tokens[i].Type == TokenType.LEFT_BRACE)
+                    adverbScanDepth++;
+                else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
+                    adverbScanDepth--;
+                else if (adverbScanDepth == 0 && tokens[i].Type == TokenType.APPLY)
+                {
+                    hasApplyAtDepth0 = true;
+                    applyPosition = i;
+                    break;
+                }
+            }
+            
+            adverbScanDepth = 0; // Reset depth for the adverb scan
             for (int i = 0; i < tokens.Count - 1; i++)
             {
                 if (tokens[i].Type == TokenType.LEFT_PAREN || tokens[i].Type == TokenType.LEFT_BRACKET || tokens[i].Type == TokenType.LEFT_BRACE)
                     adverbScanDepth++;
                 else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
                     adverbScanDepth--;
+                    
+                // Skip adverb pattern if there's an @ operator at depth 0 that should take precedence
+                if (hasApplyAtDepth0 && adverbScanDepth == 0 && i > applyPosition)
+                    continue;
                     
                 // Also handle VERB COLON ADVERB (disambiguating colon: e.g. +:/)
                 bool hasColonAdverb = adverbScanDepth == 0 &&

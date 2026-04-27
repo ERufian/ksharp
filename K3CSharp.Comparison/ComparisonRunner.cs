@@ -478,6 +478,8 @@ namespace K3CSharp.Comparison
                 {
                     var lexer = new Lexer(accumulatedLine);
                     var tokens = lexer.Tokenize();
+                    // Preprocess for implicit indexing/apply
+                    tokens = lexer.PreprocessImplicitIndexing(tokens);
                     var ast = ParserConfig.ParseWithConfig(tokens, accumulatedLine);
                     
                     if (ast != null)
