@@ -1444,8 +1444,9 @@ x?|/x │ 8                    │                      ║
 (?x)?/:x │ 0 1 2 1 2 1 0        │                      ║
 ║ idioms_08_151b_search_uniques_and_assign.k         │ x:1 2 3 2 3 2 1
 (x?:)?/:x │ 0 1 2 1 2 1 0        │                      ║
+║ idioms_08_151_efficient_execution_explicit.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)[(x?:)?/:x] │ 10 20 30 20 30 ...   │                      ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(x?:)?/:x │ 7 7 7 7 7 7 7        │ 10 20 30 20 30 ...   ║
-║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20; z:"abcde"; x:"dcbbbaceeaeccbecbaea"; sc:{+/'((&#z),y)[=z,x]}; sc[x;y;z] │ over(+)              │ 54 43 50 1 62        ║
+║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]}; sc2:+/'y@(=x)z?/:?x;(sc[x;y;z];sc2[x;y;z]) │ Error: Vector i...   │ (54 43 50 1 62;...   ║
 ║ idioms_08_153_index_of_rows.k                      │ x:1+3 4#!12; y:(1 0 3 0; 0 6 0 8; 9 0 0 12); x ?/:'y │ (0 4 2 4;4 1 4 ...   │                      ║
 ║ idioms_08_156_classify_into_classes.k              │ x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1 │ Error: Function...   │ 6 9 0 0 6 8 0        ║
 ║ idioms_08_182_consecutive_repeated_indices.k       │ x:"aaabccccdeee"; {x[&1<#:'x]}[=x] │ Error: Function...   │ (0 1 2;4 5 6 7;...   ║
@@ -1974,7 +1975,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1186/1315 tests passed (90.2%)                                                                             ║
+║ SUMMARY: 1187/1316 tests passed (90.2%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -1985,9 +1986,9 @@ Expected: 10 20 30 20 30 20 10
 Actual: 7 7 7 7 7 7 7
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_152_sum_by_ordered_codes.k
-Input: y:1+!20; z:"abcde"; x:"dcbbbaceeaeccbecbaea"; sc:{+/'((&#z),y)[=z,x]}; sc[x;y;z]
-Expected: 54 43 50 1 62
-Actual: over(+)
+Input: y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]}; sc2:+/'y@(=x)z?/:?x;(sc[x;y;z];sc2[x;y;z])
+Expected: (54 43 50 1 62;54 43 50 1 62)
+Actual: Error: Vector indices must be integers, got Character
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_156_classify_into_classes.k
 Input: x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1
