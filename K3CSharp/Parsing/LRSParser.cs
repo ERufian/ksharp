@@ -1457,6 +1457,46 @@ namespace K3CSharp.Parsing
                 }
             }
 
+            // TARGETED FIX for idiom pattern: (=x)z?/:?x
+            // Pattern: (paren_expr) IDENTIFIER VERB ADVERB ...
+            // This specifically handles (=x)z?/:?x where (=x) should apply to z?/:?x
+            if (expressionTokens.Count >= 5 &&
+                expressionTokens[0].Type == TokenType.LEFT_PAREN)
+            {
+                // Find matching paren (FindMatchingBracket only handles [])
+                int depth = 1;
+                int parenEnd = 1;
+                while (parenEnd < expressionTokens.Count && depth > 0)
+                {
+                    if (expressionTokens[parenEnd].Type == TokenType.LEFT_PAREN) depth++;
+                    else if (expressionTokens[parenEnd].Type == TokenType.RIGHT_PAREN) depth--;
+                    parenEnd++;
+                }
+                parenEnd--; // back up to the closing paren
+                
+                if (parenEnd > 0 && parenEnd < expressionTokens.Count - 3)
+                {
+                    // Check for pattern: ) IDENTIFIER VERB ADVERB
+                    if (expressionTokens[parenEnd + 1].Type == TokenType.IDENTIFIER &&
+                        VerbRegistry.IsVerbToken(expressionTokens[parenEnd + 2].Type) &&
+                        VerbRegistry.IsAdverbToken(expressionTokens[parenEnd + 3].Type))
+                    {
+                        var leftTokens = expressionTokens.GetRange(0, parenEnd + 1);
+                        var rightTokens = expressionTokens.GetRange(parenEnd + 1, expressionTokens.Count - parenEnd - 1);
+                        
+                        var leftNode = BuildParseTree ? 
+                            BuildParseTreeFromRight(leftTokens) : EvaluateFromRight(leftTokens);
+                        var rightNode = BuildParseTree ? 
+                            BuildParseTreeFromRight(rightTokens) : EvaluateFromRight(rightTokens);
+                        
+                        if (leftNode != null && rightNode != null)
+                        {
+                            return ASTNode.MakeDyadicOp(TokenType.APPLY, leftNode, rightNode);
+                        }
+                    }
+                }
+            }
+
             // Check for adverb operations (only if expression starts with adverb or contains clear adverb patterns)
             bool hasAdverbPattern = false;
             foreach (var token in expressionTokens)

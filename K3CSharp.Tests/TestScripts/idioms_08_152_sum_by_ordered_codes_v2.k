@@ -1,0 +1,1 @@
+y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc2:{+/'y@(=x)z?/:?x};sc2[x;y;z]

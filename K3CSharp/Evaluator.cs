@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using K3CSharp.Parsing;
@@ -316,7 +317,7 @@ namespace K3CSharp
                         throw new Exception("MonadicOp must have a verb symbol as its value");
                     
                     // Use the same monadic operator evaluation as in EvaluateDyadicOp
-                    return verbSymbol.Value switch
+                    var monoResult = verbSymbol.Value switch
                     {
                         "-" => MonadicMinus(operand),
                         "+" => Transpose(operand),
@@ -411,6 +412,7 @@ namespace K3CSharp
                         "_dispose" => DisposeFunction(new List<K3Value> { operand }),
                         _ => throw new Exception($"Unknown monadic operator: {verbSymbol.Value}")
                     };
+                    return monoResult;
 
                 case ASTNodeType.TetradicOp:
                     return EvaluateTetradicOp(node);
@@ -3234,12 +3236,39 @@ namespace K3CSharp
                 return right ?? throw new ArgumentNullException(nameof(right));
             }
             
+            // @ operator for function application: data @ function
+            // When right is a function, apply it to the left operand
+            if (right is FunctionValue funcVal)
+            {
+                var tempNode = new ASTNode(ASTNodeType.Function);
+                tempNode.Value = funcVal;
+                return CallDirectFunction(tempNode, new List<K3Value> { left ?? new NullValue() });
+            }
+            if (right is ProjectedFunctionValue projVal)
+            {
+                return CallProjectedFunction(projVal, new List<K3Value> { left ?? new NullValue() });
+            }
+            if (right is AdverbProjectedFunctionValue adverbVal)
+            {
+                return CallAdverbProjectedFunction(adverbVal, new List<K3Value> { left ?? new NullValue() });
+            }
+            
+            // Function application with multiple arguments: f[x;y;z] where left is FunctionValue and right is VectorValue
+            if (left is FunctionValue funcLeft && right is VectorValue argVec)
+            {
+                System.Console.WriteLine($"DEBUG AtIndex: calling function with {argVec.Elements.Count} args");
+                var tempNode = new ASTNode(ASTNodeType.Function);
+                tempNode.Value = funcLeft;
+                return CallDirectFunction(tempNode, argVec.Elements.ToList());
+            }
+            
             // Regular indexing operation
             return AtIndexOperation(left ?? throw new ArgumentNullException(nameof(left)), right ?? throw new ArgumentNullException(nameof(right)));
         }
 
         private K3Value AtIndexOperation(K3Value data, K3Value index)
         {
+            System.Console.WriteLine($"DEBUG AtIndexOperation: data={data.Type}, index={index.Type}");
             // Handle symbol as path to a dictionary or function
             if (data is SymbolValue sym)
             {

@@ -1446,7 +1446,8 @@ x?|/x │ 8                    │                      ║
 (x?:)?/:x │ 0 1 2 1 2 1 0        │                      ║
 ║ idioms_08_151_efficient_execution_explicit.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)[(x?:)?/:x] │ 10 20 30 20 30 ...   │                      ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(x?:)?/:x │ 10 20 30 20 30 ...   │                      ║
-║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]}; sc2:+/'y@(=x)z?/:?x;(sc[x;y;z];sc2[x;y;z]) │ Error: Index mu...   │ (54 43 50 1 62;...   ║
+║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]};sc[x;y;z] │ over(+)              │ 54 43 50 1 62        ║
+║ idioms_08_152_sum_by_ordered_codes_v2.k            │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc2:{+/'y@(=x)z?/:?x};sc2[x;y;z] │ 54 43 50 1 62        │                      ║
 ║ idioms_08_153_index_of_rows.k                      │ x:1+3 4#!12; y:(1 0 3 0; 0 6 0 8; 9 0 0 12); x ?/:'y │ (0 4 2 4;4 1 4 ...   │                      ║
 ║ idioms_08_156_classify_into_classes.k              │ x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1 │ Error: Function...   │ 6 9 0 0 6 8 0        ║
 ║ idioms_08_182_consecutive_repeated_indices.k       │ x:"aaabccccdeee"; {x[&1<#:'x]}[=x] │ Error: Function...   │ (0 1 2;4 5 6 7;...   ║
@@ -1806,8 +1807,8 @@ x,'-x       │ (1 -1;-3 3;5 -5)     │                      ║
 ║ idioms_12_590_matrix_and_vector.k                  │ x:(1 2 3;4 5 6); y:7 8; x,\:y │ (1 2 3 7 8;4 5 ...   │                      ║
 ║ idioms_12_612_rank_of_array.k                      │ #^(1 2 3;4 5 6)      │ 2                    │                      ║
 ║ idioms_13_166_bar_chart_down.k                     │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ Error: Function...   │ ("    X  ";"   ...   ║
-║ idioms_13_170_bar_chart_horizontal_normalized.k    │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Index mu...   │ ("X    ";"XXXX ...   ║
-║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ Error: Index mu...   │ ("XX        ";"...   ║
+║ idioms_13_170_bar_chart_horizontal_normalized.k    │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Function...   │ ("X    ";"XXXX ...   ║
+║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ Error: Function...   │ ("XX        ";"...   ║
 ║ idioms_13_144_histogram.k                          │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ Error: Function...   │ ("            "...   ║
 ║ idioms_13_464_framing_matrix.k                     │ x:4 4#"abcdefghijklmnop"
 +"-",'(+"|",'x,'"|"),'"-" │ ("-|abcd|-";"-|...   │ ("------";"|abc...   ║
@@ -1975,15 +1976,15 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1188/1316 tests passed (90.3%)                                                                             ║
+║ SUMMARY: 1189/1317 tests passed (90.3%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
 Test: idioms_08_152_sum_by_ordered_codes.k
-Input: y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]}; sc2:+/'y@(=x)z?/:?x;(sc[x;y;z];sc2[x;y;z])
-Expected: (54 43 50 1 62;54 43 50 1 62)
-Actual: Error: Index must be integer or vector of integers, got Function
+Input: y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]};sc[x;y;z]
+Expected: 54 43 50 1 62
+Actual: over(+)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_156_classify_into_classes.k
 Input: x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1
@@ -2345,12 +2346,12 @@ Actual: Error: Function expects 3 arguments, got 7
 Test: idioms_13_170_bar_chart_horizontal_normalized.k
 Input: x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]]
 Expected: ("X    ";"XXXX ";"XX   ";"XXX  ";"X    ";"     ";"XXX  ";"XXX  ";"XXXXX";"XX   ")
-Actual: Error: Index must be integer or vector of integers, got Function
+Actual: Error: Function execution error: Cannot subtract Integer and Character
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_171_bar_chart_horizontal.k
 Input: x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]]
 Expected: ("XX        ";"XXXXXXXX  ";"XXXXX     ";"XXXXXX    ";"XXX       ";"X         ";"XXXXXXX   ";"XXXXXXX   ";"XXXXXXXXXX";"XXXX      ")
-Actual: Error: Index must be integer or vector of integers, got Function
+Actual: Error: Function execution error: Cannot enumerate Vector
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_144_histogram.k
 Input: x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d]
