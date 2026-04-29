@@ -1456,7 +1456,7 @@ y:"a"
 &x=y │ 0 5                  │                      ║
 ║ idioms_08_176_ordinal_of_word.k                    │ ow:{+/~y<1+&x=" "}; x:"ordinal of word in x pointed at by y"; ow[x;26] │ 5                    │                      ║
 ║ idioms_08_79_index_last_nonblank.k                 │ x:"blanks at end "
-(" "=x) _sv 1 │ Error: _sv: lef...   │ 2                    ║
+(" "=x) _sv 1 │ 2                    │                      ║
 ║ idioms_08_261_first_group_of_ones.k                │ x:0 1 0 1 0 1 0
 x&&\x=|\x │ 0 1 0 0 0 0 0        │                      ║
 ║ idioms_08_284_sum_marked.k                         │ x:1 2 3 4 5 6 7
@@ -1751,7 +1751,7 @@ y:"efgh"
 (,x),(,y) │ ("abcd";"efgh")      │                      ║
 ║ idioms_12_50_connectivity_list.k                   │ m:(1 0 1;1 0 1)
 (^m)_vs &,/m │ (0 0 1 1;0 2 0 2)    │                      ║
-║ idioms_12_71_connectivity_matrix_from_list.k       │ y:(0 1;0 2;1 0;1 2;2 2); x:3; (x,x)#(!x*x)_lin x _sv/:y │ Error: _sv: num...   │ (0 1 1;1 0 1;0 ...   ║
+║ idioms_12_71_connectivity_matrix_from_list.k       │ y:(0 1;0 2;1 0;1 2;2 2); x:3; (x,x)#(!x*x)_lin x _sv/:y │ Error: _sv: all...   │ (0 1 1;1 0 1;0 ...   ║
 ║ idioms_12_148_node_matrix_from_connection.k        │ x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x] │ Error: Function...   │ (0 0 2 1 1;2 1 ...   ║
 ║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ 0 0 0 0              │ (1 1 0 0 0;0 -1...   ║
 ║ idioms_12_51_indices.k                             │ ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x] │ (0 0 0 1 1 1;0 ...   │                      ║
@@ -1932,7 +1932,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_164_divisors.k                           │ dv:{&0=x!/:!1+x};x:363;dv[x] │ Error: Function...   │ 1 3 11 33 121 363    ║
 ║ idioms_19_47_polynomial_with_roots.k               │ x:1 2 3;{(x,0)-y*0,x}/1,x │ 1 -6 11 -6           │                      ║
 ║ idioms_19_67_extrapolated_value.k                  │ x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x │ Error: y must b...   │ 25.0                 ║
-║ idioms_19_69_polynomial_value_at_points.k          │ x:-1 0 2;y:4 0 5 1;x _sv\:y │ Error: _sv: dig...   │ -8 1 43              ║
+║ idioms_19_69_polynomial_value_at_points.k          │ x:-1 0 2;y:4 0 5 1;x _sv\:y │ -8 1 43              │                      ║
 ║ idioms_19_126_polynomial_fit.k                     │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: _lsq req...   │ 5 -1 3.999997 1...   ║
 ║ idioms_19_363_solve_quadratic.k                    │ qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15] │ 5.0 3.0              │ 5 3.0                ║
 ║ idioms_19_430_polynomial_derivative.k              │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
@@ -1976,17 +1976,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1204/1317 tests passed (91.4%)                                                                             ║
+║ SUMMARY: 1206/1317 tests passed (91.6%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_08_79_index_last_nonblank.k
-Input: x:"blanks at end "
-(" "=x) _sv 1
-Expected: 2
-Actual: Error: _sv: left argument must be integer (single base) or vector (multiple radies), right argument must be integer vector
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_333_quick_membership.k
 Input: x:5 3 7 2
 y:8 5 2 6 1 9
@@ -2188,7 +2182,7 @@ Actual: ,34 31 51 29 35 17 89
 Test: idioms_12_71_connectivity_matrix_from_list.k
 Input: y:(0 1;0 2;1 0;1 2;2 2); x:3; (x,x)#(!x*x)_lin x _sv/:y
 Expected: (0 1 1;1 0 1;0 0 1)
-Actual: Error: _sv: number of radices must match number of digits
+Actual: Error: _sv: all elements must be integers
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_148_node_matrix_from_connection.k
 Input: x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x]
@@ -2376,14 +2370,14 @@ Input: h:"0123456789abcdef"
 x:"ff"
 16 _sv h?/:x
 Expected: 255
-Actual: Error: _sv: all elements in right argument must be integers
+Actual: Error: _sv: all elements must be integers
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_66_selection_encoded_list.k
 Input: x:("red";"green";"blue";"yellow")
 y:2 2#1 0 0 1
 x[2 _sv+y]
 Expected: ("blue";"green")
-Actual: Error: _sv: all elements in right argument must be integers
+Actual: Error: _sv: all elements must be integers
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_342_arabic_from_roman.k
 Input: ar:{+/_ a*-1^a<1!a:0,1000 500 100 50 10 5 1["MDCLXVI"?/:x]}
@@ -2508,11 +2502,6 @@ Test: idioms_19_67_extrapolated_value.k
 Input: x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x
 Expected: 25.0
 Actual: Error: y must be a list of vectors representing matrix rows
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_69_polynomial_value_at_points.k
-Input: x:-1 0 2;y:4 0 5 1;x _sv\:y
-Expected: -8 1 43
-Actual: Error: _sv: digit 1 is out of range for base -1
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_126_polynomial_fit.k
 Input: x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1]

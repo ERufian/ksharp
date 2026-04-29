@@ -442,28 +442,74 @@ namespace K3CSharp
         private K3Value Sv(K3Value left, K3Value right)
         {
             // _sv (Scalar from Vector) function
-            // Performs numeric base or radix conversion
-            // Left argument is the base or radices, right argument is integer vector
+            // Performs numeric base or radix conversion using Horner's method
+            // Left argument is the base or radices (integer atom or vector)
+            // Right argument is the digits (integer atom or vector)
+            // An atom paired with a list is replicated to match the list length
             
-            if (left is IntegerValue leftInt && right is VectorValue rightVec)
+            // Normalize arguments to vectors
+            VectorValue leftVec, rightVec;
+            
+            if (left is IntegerValue leftInt)
             {
-                // Single base case
-                return SvSingleBase(leftInt.Value, rightVec);
+                leftVec = new VectorValue(new List<K3Value> { leftInt });
             }
-            else if (left is VectorValue leftVec && right is VectorValue rightVec2)
+            else if (left is VectorValue lv)
             {
-                // Multiple radices case
-                return SvMultipleRadices(leftVec, rightVec2);
+                leftVec = lv;
             }
             else
             {
-                throw new Exception("_sv: left argument must be integer (single base) or vector (multiple radies), right argument must be integer vector");
+                throw new Exception("_sv: left argument must be integer or vector");
+            }
+            
+            if (right is IntegerValue rightInt)
+            {
+                rightVec = new VectorValue(new List<K3Value> { rightInt });
+            }
+            else if (right is VectorValue rv)
+            {
+                rightVec = rv;
+            }
+            else
+            {
+                throw new Exception("_sv: right argument must be integer or vector");
+            }
+            
+            // K semantics: replicate atom to match vector length
+            if (leftVec.Elements.Count == 1 && rightVec.Elements.Count > 1)
+            {
+                // Replicate left atom to match right length
+                var replicated = new List<K3Value>();
+                for (int i = 0; i < rightVec.Elements.Count; i++)
+                    replicated.Add(leftVec.Elements[0]);
+                leftVec = new VectorValue(replicated);
+            }
+            else if (rightVec.Elements.Count == 1 && leftVec.Elements.Count > 1)
+            {
+                // Replicate right atom to match left length
+                var replicated = new List<K3Value>();
+                for (int i = 0; i < leftVec.Elements.Count; i++)
+                    replicated.Add(rightVec.Elements[0]);
+                rightVec = new VectorValue(replicated);
+            }
+            
+            if (leftVec.Elements.Count == 1)
+            {
+                return SvSingleBase(leftVec, rightVec);
+            }
+            else
+            {
+                return SvMultipleRadices(leftVec, rightVec);
             }
         }
         
-        private K3Value SvSingleBase(long baseValue, VectorValue digits)
+        private K3Value SvSingleBase(VectorValue radices, VectorValue digits)
         {
-            // Convert digits from given base to base 10
+            // Single radix case: use the first radix element for all digits
+            long baseValue = (radices.Elements[0] is IntegerValue iv) ? iv.Value : 0;
+            
+            // Convert digits from given base to base 10 using right-to-left evaluation
             long result = 0;
             long multiplier = 1;
             
@@ -472,11 +518,7 @@ namespace K3CSharp
             {
                 if (digits.Elements[i] is IntegerValue digit)
                 {
-                    var digitValue = ((IntegerValue)digits.Elements[i]).Value;
-                    if (digitValue < 0 || digitValue >= baseValue)
-                    {
-                        throw new Exception($"_sv: digit {digitValue} is out of range for base {baseValue}");
-                    }
+                    var digitValue = digit.Value;
                     result += digitValue * multiplier;
                     multiplier *= baseValue;
                 }
@@ -491,36 +533,21 @@ namespace K3CSharp
         
         private K3Value SvMultipleRadices(VectorValue radices, VectorValue digitVec)
         {
-            // Convert digits from mixed radices to base 10
-            if (radices.Elements.Count != digitVec.Elements.Count)
-            {
-                throw new Exception("_sv: number of radices must match number of digits");
-            }
-            
+            // Convert digits from mixed radices to base 10 using Horner's method
+            // Process from left to right: result = result * radix + digit
             long result = 0;
             
-            // Process from left to right (most significant to least significant)
             for (int i = 0; i < digitVec.Elements.Count; i++)
             {
                 if (i < radices.Elements.Count && radices.Elements[i] is IntegerValue radix && digitVec.Elements[i] is IntegerValue digit)
                 {
-                    var radixValue = ((IntegerValue)radices.Elements[i]).Value;
-                    var digitValue = ((IntegerValue)digitVec.Elements[i]).Value;
-                    
-                    if (radixValue <= 0)
-                    {
-                        throw new Exception($"_sv: radix {radixValue} must be positive");
-                    }
-                    if (digitValue < 0 || digitValue >= radixValue)
-                    {
-                        throw new Exception($"_sv: digit {digitValue} is out of range for radix {radixValue}");
-                    }
-                    
+                    var radixValue = radix.Value;
+                    var digitValue = digit.Value;
                     result = result * radixValue + digitValue;
                 }
                 else
                 {
-                    throw new Exception("_sv: all elements must be integers and radices must be positive integers");
+                    throw new Exception("_sv: all elements must be integers");
                 }
             }
             
