@@ -1391,6 +1391,40 @@ namespace K3CSharp.Parsing
                             return ASTNode.MakeDyadicOp(TokenType.APPLY, vectorNode, indexNode);
                         }
                     }
+                    else if (indexTokens.Count >= 1 && indexTokens[0].Type == TokenType.LEFT_BRACKET)
+                    {
+                        // Complex expression followed by bracket indexing: (expr)[index]
+                        // e.g., ((&#z),y)[=z,x]
+                        // Parse the parenthesized expression as the data
+                        var dataNode = EvaluateFromRight(expressionTokens.GetRange(0, parenEnd));
+                        if (dataNode != null)
+                        {
+                            // Parse the bracket contents as the index argument
+                            int bracketEnd = FindMatchingBracket(indexTokens, 0);
+                            if (bracketEnd > 0)
+                            {
+                                var bracketContent = indexTokens.GetRange(1, bracketEnd - 1);
+                                ASTNode? indexNode = null;
+                                if (bracketContent.Count == 1)
+                                {
+                                    indexNode = LRSAtomicParser.ParseAtomicToken(bracketContent[0], this);
+                                }
+                                else if (bracketContent.Count > 0)
+                                {
+                                    indexNode = EvaluateFromRight(bracketContent);
+                                }
+                                else
+                                {
+                                    indexNode = ASTNode.MakeLiteral(new NullValue());
+                                }
+
+                                if (indexNode != null)
+                                {
+                                    return ASTNode.MakeDyadicOp(TokenType.APPLY, dataNode, indexNode);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -2486,7 +2520,7 @@ namespace K3CSharp.Parsing
             // Create verb node
             var verbNode = CreateNodeFromToken(verbToken);
             
-            // Check for chained adverbs: verb/'x, verb//x, verb/\x, etc.
+            // Check for nested adverbs: verb/'x, verb//x, verb/\x, etc.
             // Per spec: "a modified verb is also a verb" — adverbs bind closest to the verb first.
             // One-adverb-at-a-time: build nested 2-child nodes where each outer adverb wraps
             // the inner modified verb. Inner modified verb is ADVERB(verb) with 1 child.

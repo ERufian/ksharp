@@ -963,7 +963,7 @@ namespace K3CSharp
                 var rightArg3 = Evaluate(node.Children[2]);
                 
                 // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
-                // route to dyadic chained-adverb handler.
+                // route to dyadic nested-adverb handler.
                 bool isModifiedVerb3 = verbNode3.Type == ASTNodeType.DyadicOp &&
                     verbNode3.Children.Count == 1 && verbNode3.Value is SymbolValue;
                 if (isModifiedVerb3)
@@ -985,7 +985,7 @@ namespace K3CSharp
                 var verbNodeTw = node.Children[0];
                 
                 // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
-                // route to dyadic chained-adverb handler.
+                // route to dyadic nested-adverb handler.
                 bool isModifiedVerbTw = verbNodeTw.Type == ASTNodeType.DyadicOp &&
                     verbNodeTw.Children.Count == 1 && verbNodeTw.Value is SymbolValue;
                 if (isModifiedVerbTw)
@@ -1428,7 +1428,7 @@ namespace K3CSharp
         /// <summary>
         /// One-adverb-at-a-time dyadic: apply only the outermost adverb, keeping the inner modified
         /// verb as an AST node that gets re-evaluated for each element during iteration.
-        /// Handles dyadic chained-adverb expressions like x,''-x or y _di\:\: 0 2.
+        /// Handles dyadic nested-adverb expressions like x,''-x or y _di\:\: 0 2.
         /// </summary>
         private K3Value ApplyOuterAdverbWithModifiedVerbDyadic(string adverbName, ASTNode modifiedVerbNode, K3Value left, K3Value right)
         {
@@ -1506,7 +1506,7 @@ namespace K3CSharp
                 case "over" or "/":
                 {
                     // Over (dyadic): n f/ x means apply f n-times with f being dyadic
-                    // For modified verb chained adverbs, treat as fold with left as seed
+                    // For modified verb nested adverbs, treat as fold with left as seed
                     if (right is VectorValue rv)
                     {
                         var acc = left;

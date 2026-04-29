@@ -1446,7 +1446,7 @@ x?|/x │ 8                    │                      ║
 (x?:)?/:x │ 0 1 2 1 2 1 0        │                      ║
 ║ idioms_08_151_efficient_execution_explicit.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)[(x?:)?/:x] │ 10 20 30 20 30 ...   │                      ║
 ║ idioms_08_151_efficient_execution_repeated.k       │ f:{10*x}; x:1 2 3 2 3 2 1; (f'x)(x?:)?/:x │ 10 20 30 20 30 ...   │                      ║
-║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]};sc[x;y;z] │ over(+)              │ 54 43 50 1 62        ║
+║ idioms_08_152_sum_by_ordered_codes.k               │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]};sc[x;y;z] │ 54 43 50 1 62        │                      ║
 ║ idioms_08_152_sum_by_ordered_codes_v2.k            │ y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc2:{+/'y@(=x)z?/:?x};sc2[x;y;z] │ 54 43 50 1 62        │                      ║
 ║ idioms_08_153_index_of_rows.k                      │ x:1+3 4#!12; y:(1 0 3 0; 0 6 0 8; 9 0 0 12); x ?/:'y │ (0 4 2 4;4 1 4 ...   │                      ║
 ║ idioms_08_156_classify_into_classes.k              │ x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1 │ Error: Function...   │ 6 9 0 0 6 8 0        ║
@@ -1695,7 +1695,7 @@ y:1 0 0 1 0 1 0 0
 ║ idioms_11_291_sums_infixes.k                       │ y:1 2 3 4 5
 x:1 0 1 0 1
 +/'(&x)_ y │ 3 7 5                │                      ║
-║ idioms_11_292_groups_of_ones_pointed.k             │ y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y] │ Error: Function...   │ 1 1 1 0 0 0 0        ║
+║ idioms_11_292_groups_of_ones_pointed.k             │ y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y] │ 1 1 1 0 0 0 0        │                      ║
 ║ idioms_11_296_starting_positions_from_lengths.k    │ x:2 3 1 5
 +\-1 _ 0,x │ 0 2 5 6              │                      ║
 ║ idioms_11_300_gth_infix.k                          │ x:1 0 0 1 0 1 0 0 0 1 0
@@ -1956,7 +1956,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_20_565_is_x_within_range_inclusive.k        │ oi:{(~y[0]>x)&(~x>y[1])};y:3 8;x:5;oi[x;y] │ 1                    │                      ║
 ║ idioms_21_325_average_mean.k                       │ av:{(+/x)%#x};av[1 10 100] │ 1.0                  │ 37.0                 ║
 ║ idioms_21_237_weighted_average.k                   │ y:78 80 90 88 72;x:20 15 20 22 19;(+/x*y)%#x │ 1572.8               │                      ║
-║ idioms_21_24_median.k                              │ x:61 20 51 12 34 31 51 29 35 17 89;x[(<x)[_.5*#x]] │ 61 20 51 12 34 ...   │ 34                   ║
+║ idioms_21_24_median.k                              │ x:61 20 51 12 34 31 51 29 35 17 89;x[(<x)[_.5*#x]] │ 34                   │                      ║
 ║ idioms_21_319_standard_deviation.k                 │ x:44 77 48 24 28 36 17 49 90 91;std:{((+/(x-(+/x)%#x)^2)%#x)^0.5};std[x] │ Error: Function...   │ 25.48411             ║
 ║ idioms_21_320_variance.k                           │ x:44 77 48 24 28 36 17 49 90 91.0;var:{(+/(x-(+/x)%#x)^2)%#x};var[x] │ Error: Function...   │ 649.44               ║
 ║ idioms_21_321_y_th_moment.k                        │ x:44 77 48 24 28 36 17 49;ym:{(+/(x-(+/x)%#x)^y)%#x};ym[x;2] │ 309.2344             │                      ║
@@ -1976,16 +1976,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1189/1317 tests passed (90.3%)                                                                             ║
+║ SUMMARY: 1192/1317 tests passed (90.5%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_08_152_sum_by_ordered_codes.k
-Input: y:1+!20;z:"abcde";x:"dcbbbaceeaeccbecbaea";sc:{+/'((&#z),y)[=z,x]};sc[x;y;z]
-Expected: 54 43 50 1 62
-Actual: over(+)
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_156_classify_into_classes.k
 Input: x:10; y:260 416 18 27 265 336 4; sm:{x-&/x}; nr:{y*x%|/y}; +/~nr[x;sm[y]]</:1+!x-1
 Expected: 6 9 0 0 6 8 0
@@ -2177,11 +2172,6 @@ Test: idioms_11_256_groups_of_ones_pointed.k
 Input: y:0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1; x:0 0 0 1 0 0 0 0 1 0 0 1 0 0 0 1; y&a=|\x*a:+\>':0,y
 Expected: 0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1
 Actual: Error: Cannot multiply Integer and Function
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_11_292_groups_of_ones_pointed.k
-Input: y:1 1 1 0 0 1 1; x:0 1 0 1 0 0 0; go:{y&a _lin(a:+\y>-1 _ 0,y)[&x&y]}; go[x;y]
-Expected: 1 1 1 0 0 0 0
-Actual: Error: Function execution error: Undefined variable: a
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_415_lengths_of_one_infixes.k
 Input: x:0 0 1 1 1 0 0 1 1 1 1 0 1
@@ -2611,11 +2601,6 @@ Test: idioms_21_325_average_mean.k
 Input: av:{(+/x)%#x};av[1 10 100]
 Expected: 37.0
 Actual: 1.0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_21_24_median.k
-Input: x:61 20 51 12 34 31 51 29 35 17 89;x[(<x)[_.5*#x]]
-Expected: 34
-Actual: 61 20 51 12 34 31 51 29 35 17 89
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_319_standard_deviation.k
 Input: x:44 77 48 24 28 36 17 49 90 91;std:{((+/(x-(+/x)%#x)^2)%#x)^0.5};std[x]
