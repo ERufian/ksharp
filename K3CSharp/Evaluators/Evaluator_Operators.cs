@@ -708,6 +708,10 @@ namespace K3CSharp
                 return new IntegerValue(longA.Value < longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new IntegerValue(floatA.Value < floatB.Value ? 1 : 0);
+            if (a is IntegerValue intA2 && b is FloatValue floatB2)
+                return new IntegerValue(intA2.Value < floatB2.Value ? 1 : 0);
+            if (a is FloatValue floatA2 && b is IntegerValue intB2)
+                return new IntegerValue(floatA2.Value < intB2.Value ? 1 : 0);
             
             // Handle character comparisons based on ASCII values
             if (a is CharacterValue charA && b is CharacterValue charB)
@@ -766,6 +770,10 @@ namespace K3CSharp
                 return new IntegerValue(longA.Value > longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new IntegerValue(floatA.Value > floatB.Value ? 1 : 0);
+            if (a is IntegerValue intA2 && b is FloatValue floatB2)
+                return new IntegerValue(intA2.Value > floatB2.Value ? 1 : 0);
+            if (a is FloatValue floatA2 && b is IntegerValue intB2)
+                return new IntegerValue(floatA2.Value > intB2.Value ? 1 : 0);
             
             // Handle character comparisons based on ASCII values
             if (a is CharacterValue charA && b is CharacterValue charB)
@@ -1311,6 +1319,10 @@ namespace K3CSharp
                 return new IntegerValue(longA.Value < longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new IntegerValue(floatA.Value < floatB.Value ? 1 : 0);
+            if (a is IntegerValue intA2 && b is FloatValue floatB2)
+                return new IntegerValue(intA2.Value < floatB2.Value ? 1 : 0);
+            if (a is FloatValue floatA2 && b is IntegerValue intB2)
+                return new IntegerValue(floatA2.Value < intB2.Value ? 1 : 0);
             if (a is CharacterValue charA && b is CharacterValue charB)
                 return new IntegerValue(charA.Value[0] < charB.Value[0] ? 1 : 0);
             
@@ -1334,6 +1346,10 @@ namespace K3CSharp
                 return new IntegerValue(longA.Value > longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new IntegerValue(floatA.Value > floatB.Value ? 1 : 0);
+            if (a is IntegerValue intA2 && b is FloatValue floatB2)
+                return new IntegerValue(intA2.Value > floatB2.Value ? 1 : 0);
+            if (a is FloatValue floatA2 && b is IntegerValue intB2)
+                return new IntegerValue(floatA2.Value > intB2.Value ? 1 : 0);
             if (a is CharacterValue charA && b is CharacterValue charB)
                 return new IntegerValue(charA.Value[0] > charB.Value[0] ? 1 : 0);
             

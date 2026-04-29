@@ -47,6 +47,9 @@ namespace K3CSharp
                 }
             }
             
+            // Sort parameters alphabetically (x, y, z order)
+            parameters.Sort();
+            
             return parameters;
         }
     }

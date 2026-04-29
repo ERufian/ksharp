@@ -1569,8 +1569,18 @@ namespace K3CSharp.Parsing
                     var afterBracketTokens = expressionTokens.GetRange(closingBracketEFR + 1, expressionTokens.Count - closingBracketEFR - 1);
                     if (afterBracketTokens.Count > 0 && OperatorDetector.SupportsDyadic(afterBracketTokens[0].Type))
                     {
-                        // Tokens after bracket start with a dyadic operator - fall through to dyadic parsing
-                        // This ensures sum[3;4]*2 is parsed as multiplication, not as function call with *2 as argument
+                        // Check if the operator is followed by an adverb (two-glyph adverb pattern like </:)
+                        // If so, this is actually an adverb application, not a dyadic operation.
+                        // The dyadic parser knows how to handle adverb patterns, so let it fall through.
+                        bool isTwoGlyphAdverb = afterBracketTokens.Count >= 2 &&
+                                                VerbRegistry.IsAdverbToken(afterBracketTokens[1].Type);
+                        if (!isTwoGlyphAdverb)
+                        {
+                            // Tokens after bracket start with a dyadic operator (without adverb) - 
+                            // fall through to dyadic parsing. This ensures sum[3;4]*2 is parsed as 
+                            // multiplication, not as function call with *2 as argument.
+                        }
+                        // If it's a two-glyph adverb, fall through to let the dyadic parser handle it
                     }
                     else
                     {
@@ -1628,7 +1638,7 @@ namespace K3CSharp.Parsing
                         var indexNode = splitArgs[0].Count > 0
                             ? EvaluateFromRight(splitArgs[0])
                             : null;
-                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode,
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, 
                             indexNode ?? ASTNode.MakeLiteral(new NullValue()));
                     }
                     else
@@ -2417,24 +2427,7 @@ namespace K3CSharp.Parsing
                      expressionTokens[1].Type == TokenType.ADVERB_BACKSLASH_COLON ||
                      expressionTokens[1].Type == TokenType.ADVERB_TICK_COLON))
                 {
-                    // Check that remaining tokens are valid arguments
-                    bool hasValidArgs = true;
-                    for (int i = 2; i < expressionTokens.Count; i++)
-                    {
-                        if (!LRSAtomicParser.CanBeParsedByAtomicParser(expressionTokens[i].Type) &&
-                            expressionTokens[i].Type != TokenType.LEFT_PAREN &&
-                            expressionTokens[i].Type != TokenType.LEFT_BRACE &&
-                            expressionTokens[i].Type != TokenType.LEFT_BRACKET)
-                        {
-                            hasValidArgs = false;
-                            break;
-                        }
-                    }
-                    
-                    if (hasValidArgs)
-                    {
-                        return ParseVerbTwoGlyphAdverb(expressionTokens);
-                    }
+                    return ParseVerbTwoGlyphAdverb(expressionTokens);
                 }
             }
             

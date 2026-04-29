@@ -588,6 +588,15 @@ namespace K3CSharp.Parsing
             
             // Extract only the function body part (after parameters) from original source
             string bodyText = ExtractBodyFromOriginalSource(originalSourceText);
+            
+            // If no explicit parameters, extract implicit parameters from body
+            if (parameters.Count == 0)
+            {
+                // Tokenize body text and extract implicit parameters
+                var bodyTokens = TokenizeBodyText(bodyText);
+                parameters = ImplicitParameterExtractor.ExtractImplicitParameters(bodyTokens);
+            }
+            
             var functionValue = new FunctionValue(bodyText, parameters, null!, originalSourceText);
             functionNode.Value = functionValue;
             
@@ -728,5 +737,13 @@ namespace K3CSharp.Parsing
             return sourceText.ToString();
         }
             
+        /// <summary>
+        /// Collect all tokens from body text by tokenizing it
+        /// </summary>
+        private List<Token> TokenizeBodyText(string bodyText)
+        {
+            var lexer = new Lexer(bodyText);
+            return lexer.Tokenize();
+        }
     }
 }
