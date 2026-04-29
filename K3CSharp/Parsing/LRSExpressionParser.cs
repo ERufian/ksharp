@@ -34,6 +34,11 @@ namespace K3CSharp.Parsing
                     break;
                 }
                 
+                // Update delimiter depth FIRST (before checking stopping conditions)
+                // so that brackets/parens/braces opened on this token are respected
+                // when evaluating whether the next token is a boundary.
+                delimiterDepth.UpdateDepth(token.Type);
+                
                 // Stop at other separators when at base level, but only if we have some tokens already
                 if (delimiterDepth.IsAtBaseLevel() && 
                     (token.Type == TokenType.SEMICOLON || token.Type == TokenType.NEWLINE) && 
@@ -69,9 +74,6 @@ namespace K3CSharp.Parsing
                     }
                 }
                     
-                // Update delimiter depth
-                delimiterDepth.UpdateDepth(token.Type);
-                
                 // Return if we've closed too many delimiters
                 if (delimiterDepth.HasNegativeDepth())
                 {

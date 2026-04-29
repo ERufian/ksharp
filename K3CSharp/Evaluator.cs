@@ -2544,7 +2544,7 @@ namespace K3CSharp
                         else if (arguments.Count == 2)
                         {
                             // Dyadic @ is AT - use AtIndex
-                            return AtIndex(arguments[0], arguments[1]);
+                            return AtIndex(arguments[0] ?? throw new ArgumentNullException(nameof(arguments)), arguments[1] ?? throw new ArgumentNullException(nameof(arguments)));
                         }
                         else
                         {
@@ -5470,27 +5470,30 @@ namespace K3CSharp
 
             private K3Value ApplyBaseVerb(string verb, K3Value[] arguments)
             {
+                if (arguments[0] == null)
+                    throw new ArgumentNullException(nameof(arguments), "First argument cannot be null");
+                    
                 return verb switch
                 {
-                    "+" => arguments.Length == 1 ? evaluator.Transpose(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("+", arguments[0], arguments[1]),
-                    "-" => arguments.Length == 1 ? evaluator.MonadicMinus(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("-", arguments[0], arguments[1]),
-                    "*" => arguments.Length == 1 ? evaluator.First(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("*", arguments[0], arguments[1]),
-                    "%" => arguments.Length == 1 ? throw new Exception("% operator requires 2 arguments") : evaluator.EvaluateDyadicOperatorWithRegistry("%", arguments[0], arguments[1]),
-                    "^" => arguments.Length == 1 ? evaluator.Power(arguments[0], new IntegerValue(1)) : evaluator.EvaluateDyadicOperatorWithRegistry("^", arguments[0], arguments[1]),
-                    "<" => arguments.Length == 1 ? evaluator.LessThan(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("<", arguments[0], arguments[1]),
-                    ">" => arguments.Length == 1 ? evaluator.GreaterThan(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry(">", arguments[0], arguments[1]),
-                    "=" => arguments.Length == 1 ? K3Value.Equals(arguments[0], new IntegerValue(0)) ? new IntegerValue(1) : new IntegerValue(0) : evaluator.EvaluateDyadicOperatorWithRegistry("=", arguments[0], arguments[1]),
-                    "!" => arguments.Length == 1 ? evaluator.Match(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("!", arguments[0], arguments[1]),
-                    "&" => arguments.Length == 1 ? evaluator.Where(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("&", arguments[0], arguments[1]),
-                    "|" => arguments.Length == 1 ? evaluator.Reverse(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("|", arguments[0], arguments[1]),
-                    "~" => arguments.Length == 1 ? evaluator.Match(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("~", arguments[0], arguments[1]),
-                    "," => arguments.Length == 1 ? evaluator.Enlist(arguments[0]) : evaluator.Join(arguments[0], arguments[1]),
-                    "." => evaluator.DotApply(arguments[0], arguments[1]),
-                    "@" => evaluator.AtIndex(arguments[0], arguments[1]),
-                    "#" => arguments.Length == 1 ? evaluator.Count(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("#", arguments[0], arguments[1]),
-                    "_" => arguments.Length == 1 ? evaluator.Floor(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("_", arguments[0], arguments[1]),
-                    "?" => arguments.Length == 1 ? evaluator.Unique(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("?", arguments[0], arguments[1]),
-                    "$" => arguments.Length == 1 ? evaluator.Format(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("$", arguments[0], arguments[1]),
+                    "+" => arguments.Length == 1 ? evaluator.Transpose(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("+", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "-" => arguments.Length == 1 ? evaluator.MonadicMinus(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("-", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "*" => arguments.Length == 1 ? evaluator.First(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("*", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "%" => arguments.Length == 1 ? throw new Exception("% operator requires 2 arguments") : evaluator.EvaluateDyadicOperatorWithRegistry("%", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "^" => arguments.Length == 1 ? evaluator.Power(arguments[0], new IntegerValue(1)) : evaluator.EvaluateDyadicOperatorWithRegistry("^", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "<" => arguments.Length == 1 ? evaluator.LessThan(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("<", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    ">" => arguments.Length == 1 ? evaluator.GreaterThan(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry(">", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "=" => arguments.Length == 1 ? K3Value.Equals(arguments[0], new IntegerValue(0)) ? new IntegerValue(1) : new IntegerValue(0) : evaluator.EvaluateDyadicOperatorWithRegistry("=", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "!" => arguments.Length == 1 ? evaluator.Match(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("!", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "&" => arguments.Length == 1 ? evaluator.Where(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("&", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "|" => arguments.Length == 1 ? evaluator.Reverse(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("|", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "~" => arguments.Length == 1 ? evaluator.Match(arguments[0], new IntegerValue(0)) : evaluator.EvaluateDyadicOperatorWithRegistry("~", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "," => arguments.Length == 1 ? evaluator.Enlist(arguments[0]) : evaluator.Join(arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "." => evaluator.DotApply(arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "@" => evaluator.AtIndex(arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "#" => arguments.Length == 1 ? evaluator.Count(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("#", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "_" => arguments.Length == 1 ? evaluator.Floor(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("_", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "?" => arguments.Length == 1 ? evaluator.Unique(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("?", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "$" => arguments.Length == 1 ? evaluator.Format(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("$", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     _ => throw new Exception($"Unknown verb: {verb}")
                 };
             }

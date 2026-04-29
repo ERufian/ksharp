@@ -1651,9 +1651,10 @@ namespace K3CSharp.Parsing
                             var argNode = argTokens.Count > 0 ? EvaluateFromRight(argTokens) : ASTNode.MakeLiteral(new NullValue());
                             argNodes.Add(argNode ?? ASTNode.MakeLiteral(new NullValue()));
                         }
-                        // Create a Block with all index arguments for multi-dimensional indexing
-                        var indexBlock = new ASTNode(ASTNodeType.Block, null, argNodes);
-                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexBlock);
+                        // Create an ExpressionList with all index arguments for multi-dimensional indexing
+                        // ExpressionList evaluates all children and returns them as a VectorValue
+                        var indexList = new ASTNode(ASTNodeType.ExpressionList, null, argNodes);
+                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexList);
                     }
                 }
             }

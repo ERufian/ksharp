@@ -31,26 +31,46 @@ namespace K3CSharp
         /// </summary>
         public static List<string> ExtractImplicitParameters(List<Token> bodyTokens)
         {
-            var parameters = new List<string>();
-            var seenParameters = new HashSet<string>();
+            var assignedLocals = new HashSet<string>();
+            var seen = new HashSet<string>();
             
-            foreach (var token in bodyTokens)
+            // First pass: identify all locally-assigned variables (identifier followed by colon)
+            for (int i = 0; i < bodyTokens.Count; i++)
             {
-                // Look for identifier tokens that are single lowercase letters (a-z)
-                if (token.Type == TokenType.IDENTIFIER && 
-                    token.Lexeme.Length == 1 && 
+                var token = bodyTokens[i];
+                if (token.Type == TokenType.IDENTIFIER &&
+                    token.Lexeme.Length == 1 &&
                     char.IsLower(token.Lexeme[0]) &&
-                    !seenParameters.Contains(token.Lexeme))
+                    i + 1 < bodyTokens.Count &&
+                    bodyTokens[i + 1].Type == TokenType.COLON)
                 {
-                    parameters.Add(token.Lexeme);
-                    seenParameters.Add(token.Lexeme);
+                    assignedLocals.Add(token.Lexeme);
                 }
             }
             
-            // Sort parameters alphabetically (x, y, z order)
-            parameters.Sort();
+            // Collect which of x/y/z appear as non-local identifiers in the body
+            foreach (var token in bodyTokens)
+            {
+                if (token.Type == TokenType.IDENTIFIER &&
+                    (token.Lexeme == "x" || token.Lexeme == "y" || token.Lexeme == "z") &&
+                    !assignedLocals.Contains(token.Lexeme))
+                {
+                    seen.Add(token.Lexeme);
+                }
+            }
             
-            return parameters;
+            // K implicit parameter rules:
+            //   z present -> [x;y;z]
+            //   y present (no z) -> [x;y]
+            //   x present (no y,z) -> [x]
+            //   none present -> []
+            if (seen.Contains("z"))
+                return new List<string> { "x", "y", "z" };
+            if (seen.Contains("y"))
+                return new List<string> { "x", "y" };
+            if (seen.Contains("x"))
+                return new List<string> { "x" };
+            return new List<string>();
         }
     }
 }
