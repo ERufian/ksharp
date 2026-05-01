@@ -1515,7 +1515,7 @@ y:8 2 3 4 9 5 7 1 10 6 8 2
 y:3 1 4 1 5 9
 (~x=y)?1 │ 4                    │                      ║
 ║ idioms_08_554_select_from_g.k                      │ g:("William Shakespeare"; "John Milton"; "Jonathan Swift"; "Jane Austen"; "John Keats"; "Charles Dickens"); y:1564 1608 1667 1775 1795 1812; x:1775; g[y?x] │ "Jane Austen"        │                      ║
-║ idioms_08_567_select_based_on_g.k                  │ x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g │ `cold`white`sho...   │ `cold `white `s...   ║
+║ idioms_08_567_select_based_on_g.k                  │ x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g │ `cold`white`sho...   │                      ║
 ║ idioms_08_574_y_where_x_is_zero.k                  │ x:0 7 8 0 2
 y:10 4 6 7 3
 x+y*x=0 │ 10 7 8 7 2           │                      ║
@@ -1531,7 +1531,7 @@ y[1+sg[x]] │ "-"                  │                      ║
 x[;0]      │ 0 4 8                │                      ║
 ║ idioms_08_623_conditional_change_of_sign.k         │ x:-9
 y:1
-x*-1^y      │ 9                    │ 9.0                  ║
+x*-1^y      │ 9                    │                      ║
 ║ idioms_09_25_double_quotes.k                       │ f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a │ Error: Untermin...   │ "Did he say, \"...   ║
 ║ idioms_09_42_move_blanks_to_end.k                  │ x:" sign if i cant "
 x[<" "=x] │ "significant     "   │                      ║
@@ -1976,7 +1976,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1221/1317 tests passed (92.7%)                                                                             ║
+║ SUMMARY: 1223/1317 tests passed (92.9%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -1985,18 +1985,6 @@ Test: idioms_08_512_select_by_markers.k
 Input: x:2 3 4#1+!24; y:1 0 0 1; x[;;&y]
 Expected: ((1 4;5 8;9 12);(13 16;17 20;21 24))
 Actual: ((1 2 3 4;5 6 7 8;9 10 11 12);(13 14 15 16;17 18 19 20;21 22 23 24))
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_567_select_based_on_g.k
-Input: x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g
-Expected: `cold `white `short `young
-Actual: `cold`white`short`young
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_623_conditional_change_of_sign.k
-Input: x:-9
-y:1
-x*-1^y
-Expected: 9.0
-Actual: 9
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_25_double_quotes.k
 Input: f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a

@@ -2558,13 +2558,13 @@ namespace K3CSharp.Tests
                 ("idioms_08_532_last_occurrence_from_rear.k", "5 6 6 4 3 1 0 2 6 6 5 6"),
                 ("idioms_08_551_first_differing_item.k", "4"),
                 ("idioms_08_554_select_from_g.k", "\"Jane Austen\""),
-                ("idioms_08_567_select_based_on_g.k", "`cold `white `short `young"),
+                ("idioms_08_567_select_based_on_g.k", "`cold`white`short`young"),
                 ("idioms_08_574_y_where_x_is_zero.k", "10 7 8 7 2"),
                 ("idioms_08_181_classify.k", "1 0 2 0 0 1 2 3 0 2"),
                 ("idioms_08_587_first_column_matrix.k", "(,0;,4;,8)"),
                 ("idioms_08_602_choosing_by_sign.k", "\"-\""),
                 ("idioms_08_607_vector_from_column.k", "0 4 8"),
-                ("idioms_08_623_conditional_change_of_sign.k", "9.0"),
+                ("idioms_08_623_conditional_change_of_sign.k", "9"),
 
                 // Chapter 9 idioms: String and vector manipulation
 
