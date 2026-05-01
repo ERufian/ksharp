@@ -533,6 +533,9 @@ namespace K3CSharp.Parsing
                 position++; // Consume ']'
             }
             
+            // Track start of body content for token extraction
+            int bodyContentStartPos = position;
+            
             // Parse function body - may contain multiple statements separated by semicolons
             var bodyExpressions = new List<ASTNode>();
             
@@ -589,11 +592,15 @@ namespace K3CSharp.Parsing
             // Extract only the function body part (after parameters) from original source
             string bodyText = ExtractBodyFromOriginalSource(originalSourceText);
             
-            // If no explicit parameters, extract implicit parameters from body
+            // If no explicit parameters, extract implicit parameters from body tokens
             if (parameters.Count == 0)
             {
-                // Tokenize body text and extract implicit parameters
-                var bodyTokens = TokenizeBodyText(bodyText);
+                // Use already-parsed body tokens to avoid re-tokenization issues with escape sequences
+                var bodyTokens = new List<Token>();
+                for (int i = bodyContentStartPos; i < position; i++)
+                {
+                    bodyTokens.Add(tokens[i]);
+                }
                 parameters = ImplicitParameterExtractor.ExtractImplicitParameters(bodyTokens);
             }
             
@@ -737,13 +744,5 @@ namespace K3CSharp.Parsing
             return sourceText.ToString();
         }
             
-        /// <summary>
-        /// Collect all tokens from body text by tokenizing it
-        /// </summary>
-        private List<Token> TokenizeBodyText(string bodyText)
-        {
-            var lexer = new Lexer(bodyText);
-            return lexer.Tokenize();
-        }
     }
 }

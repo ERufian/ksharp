@@ -1532,7 +1532,7 @@ x[;0]      │ 0 4 8                │                      ║
 ║ idioms_08_623_conditional_change_of_sign.k         │ x:-9
 y:1
 x*-1^y      │ 9                    │                      ║
-║ idioms_09_25_double_quotes.k                       │ f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a │ Error: Untermin...   │ "Did he say, \"...   ║
+║ idioms_09_25_double_quotes.k                       │ f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a │ "Did he say, \"...   │                      ║
 ║ idioms_09_42_move_blanks_to_end.k                  │ x:" sign if i cant "
 x[<" "=x] │ "significant     "   │                      ║
 ║ idioms_09_160_move_blanks_to_end.k                 │ x:"sign if i cant"; x[<x=" "] │ "significant   "     │                      ║
@@ -1976,16 +1976,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1224/1317 tests passed (92.9%)                                                                             ║
+║ SUMMARY: 1225/1317 tests passed (93.0%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_09_25_double_quotes.k
-Input: f:{_ssr[x;"\"";"\"\""]}; a:"Did he say, \"Hello\"?"; f a
-Expected: "Did he say, \"\"Hello\"\"?"
-Actual: Error: Unterminated string literal
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_184_right_justify_fields.k
 Input: x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g]
 Expected: "   ab  cde fghi    j"

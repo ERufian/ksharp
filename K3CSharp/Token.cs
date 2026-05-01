@@ -125,6 +125,7 @@ namespace K3CSharp
         VS,             // _vs vector from string
         SV,             // _sv string from vector
         SS,             // _ss string search
+        SSR,            // _ssr string search and replace
         SM,             // _sm string match
         CI,             // _ci character from integer
         IC,             // _ic integer from character

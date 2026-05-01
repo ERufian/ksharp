@@ -884,6 +884,43 @@ namespace K3CSharp
                 return new VectorValue(indices.Select(i => new IntegerValue(i)).Cast<K3Value>().ToList());
         }
 
+        private K3Value SsrFunction(K3Value text, K3Value pattern, K3Value replacement)
+        {
+            // _ssr (string search and replace) function
+            // Ternary verb: _ssr[text;pattern;replacement]
+            // Returns text with all occurrences of pattern replaced with replacement
+            
+            string textStr = text switch
+            {
+                CharacterValue charVal => charVal.Value,
+                SymbolValue symVal => symVal.Value,
+                VectorValue vecVal => ExtractStringFromVector(vecVal),
+                _ => throw new Exception("_ssr: first argument (text) must be character or symbol")
+            };
+            
+            string patternStr = pattern switch
+            {
+                CharacterValue charVal => charVal.Value,
+                SymbolValue symVal => symVal.Value,
+                VectorValue vecVal => ExtractStringFromVector(vecVal),
+                _ => throw new Exception("_ssr: second argument (pattern) must be character or symbol")
+            };
+            
+            string replacementStr = replacement switch
+            {
+                CharacterValue charVal => charVal.Value,
+                SymbolValue symVal => symVal.Value,
+                VectorValue vecVal => ExtractStringFromVector(vecVal),
+                _ => throw new Exception("_ssr: third argument (replacement) must be character or symbol")
+            };
+            
+            // Replace all occurrences of pattern with replacement
+            string resultStr = textStr.Replace(patternStr, replacementStr);
+            
+            // Return as character vector
+            return new VectorValue(resultStr.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());
+        }
+
         private K3Value GetenvFunction(K3Value operand)
         {
             string varName = operand switch

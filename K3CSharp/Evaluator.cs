@@ -2487,6 +2487,9 @@ namespace K3CSharp
                     return UnmarshallFunction(arguments);
                 case "_exit":
                     return ExitFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                case "_ssr":
+                    if (arguments.Count == 3) return SsrFunction(arguments[0], arguments[1], arguments[2]);
+                    throw new Exception("_ssr requires 3 arguments: text;pattern;replacement");
                 case ":":
                     // Check if this is conditional evaluation (3+ arguments) or regular assignment
                     if (arguments.Count >= 3)
@@ -5266,6 +5269,11 @@ namespace K3CSharp
             {
                 // Triadic at: dispatch to existing evaluator
                 return EvaluateTriadicAt(arg1Eval!, arg2Eval!, arg3Eval!);
+            }
+            else if (opName == "_ssr")
+            {
+                // _ssr is a ternary system function: _ssr[text;pattern;replacement]
+                return SsrFunction(arg1Eval!, arg2Eval!, arg3Eval!);
             }
             else
             {

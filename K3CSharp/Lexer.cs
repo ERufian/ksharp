@@ -948,6 +948,7 @@ namespace K3CSharp
                 "_vs" => new Token(TokenType.VS, opName, start),
                 "_sv" => new Token(TokenType.SV, opName, start),
                 "_ss" => new Token(TokenType.SS, opName, start),
+                "_ssr" => new Token(TokenType.SSR, opName, start),
                 "_sm" => new Token(TokenType.SM, opName, start),
                 "_ci" => new Token(TokenType.CI, opName, start),
                 "_ic" => new Token(TokenType.IC, opName, start),

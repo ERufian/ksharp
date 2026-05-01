@@ -39,6 +39,7 @@ namespace K3CSharp.Parsing
                 TokenType.IDENTIFIER => ParseIdentifier(token, parser),
                 TokenType.NULL => ParseNull(token),
                 TokenType.SS => ParseSystemVerb(token),
+                TokenType.SSR => ParseSystemVerb(token),
                 TokenType.TIME => ParseSystemVariable(token, "_t"),
                 TokenType.DAYS => ParseSystemVariable(token, "_T"),
                 TokenType.DIRECTORY => ParseSystemVariable(token, "_d"),
@@ -314,7 +315,7 @@ namespace K3CSharp.Parsing
                 TokenType.PID or TokenType.WHO or TokenType.USER or
                 TokenType.ADDRESS or TokenType.VERSION or TokenType.OS or
                 TokenType.CORES or TokenType.RAM or TokenType.MACHID or
-                TokenType.STACK => true,
+                TokenType.STACK or TokenType.SS or TokenType.SSR => true,
                 _ => false
             };
         }

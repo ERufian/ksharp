@@ -337,6 +337,7 @@ namespace K3CSharp
                 TokenType.VS => "_vs",
                 TokenType.SV => "_sv",
                 TokenType.SS => "_ss",
+                TokenType.SSR => "_ssr",
                 TokenType.SM => "_sm",
                 TokenType.CI => "_ci",
                 TokenType.IC => "_ic",
