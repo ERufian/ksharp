@@ -1528,7 +1528,7 @@ y:"-0+"
 x:-54
 y[1+sg[x]] │ "-"                  │                      ║
 ║ idioms_08_607_vector_from_column.k                 │ x:3 4#!12
-x[;0]      │ (,0;,4;,8)           │ 0 4 8                ║
+x[;0]      │ 0 4 8                │                      ║
 ║ idioms_08_623_conditional_change_of_sign.k         │ x:-9
 y:1
 x*-1^y      │ 9                    │ 9.0                  ║
@@ -1629,7 +1629,7 @@ x:1 0 0 0 1 0 0 0 1 0 1 1 0 0
 (&x)_ y │ ("each";"word";...   │                      ║
 ║ idioms_10_499_rows_starting_with.k                 │ x:("abcd";"efgh";"ijkl";"mnop")
 y:"ai"
-x[&x[;0] _lin y] │ ("abcd";"efgh";...   │ ("abcd";"ijkl")      ║
+x[&x[;0] _lin y] │ ("abcd";"ijkl")      │                      ║
 ║ idioms_10_576_prepend_y_items.k                    │ x:1 3 5
 y:2
 g:10
@@ -1758,7 +1758,7 @@ y:"efgh"
 ║ idioms_12_81_raveled_index.k                       │ x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3 │ 19                   │                      ║
 ║ idioms_12_58_pair_each_element.k                   │ x:"abcd"; y:"efgh"; x,/:\:y │ (("ae";"af";"ag...   │ ("ae";"af";"ag"...   ║
 ║ idioms_12_55_indices_containing.k                  │ x:"abcdef"; y:"ace"; &/y _lin/:x │ 0 0 0                │ 1 0 1 0 1 0          ║
-║ idioms_12_100_indexing_arbitrary_rank.k            │ x:2 3 4#_ci 97+!24; x[;1;] │ (,"efgh";,"qrst")    │ ("efgh";"qrst")      ║
+║ idioms_12_100_indexing_arbitrary_rank.k            │ x:2 3 4#_ci 97+!24; x[;1;] │ ("efgh";"qrst")      │                      ║
 ║ idioms_12_161_is_upper_triangular.k                │ y:(2 3 1 1;0 1 2 3;0 0 4 1;0 0 0 5); &/(^y)=!^y │ Error: Cannot e...   │ 1                    ║
 ║ idioms_12_162_is_lower_triangular.k                │ x:(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1); &/0=^x _vs/:!^x │ Error: Cannot e...   │ 1                    ║
 ║ idioms_12_525_main_diagonal.k                      │ x:(1 2 3 4;5 6 7 8;9 10 11 12)
@@ -1976,7 +1976,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1218/1317 tests passed (92.5%)                                                                             ║
+║ SUMMARY: 1221/1317 tests passed (92.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -1990,12 +1990,6 @@ Test: idioms_08_567_select_based_on_g.k
 Input: x:`hot `white `short `old; y:`cold `black `tall `young; g:1 0 0 1; (x,'y) ./: (!#g),'g
 Expected: `cold `white `short `young
 Actual: `cold`white`short`young
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_08_607_vector_from_column.k
-Input: x:3 4#!12
-x[;0]
-Expected: 0 4 8
-Actual: (,0;,4;,8)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_08_623_conditional_change_of_sign.k
 Input: x:-9
@@ -2084,13 +2078,6 @@ x~\:(#+x)#" "
 Expected: 0 1 0 0 1 0
 Actual: 0 0 0 0 0
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_10_499_rows_starting_with.k
-Input: x:("abcd";"efgh";"ijkl";"mnop")
-y:"ai"
-x[&x[;0] _lin y]
-Expected: ("abcd";"ijkl")
-Actual: ("abcd";"efgh";"ijkl";"mnop")
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_7_subvector_grade_up.k
 Input: x:1 0 0 1 0 0 1 0
 y:14 12 18 16 13 15 11 17
@@ -2163,11 +2150,6 @@ Test: idioms_12_55_indices_containing.k
 Input: x:"abcdef"; y:"ace"; &/y _lin/:x
 Expected: 1 0 1 0 1 0
 Actual: 0 0 0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_100_indexing_arbitrary_rank.k
-Input: x:2 3 4#_ci 97+!24; x[;1;]
-Expected: ("efgh";"qrst")
-Actual: (,"efgh";,"qrst")
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_161_is_upper_triangular.k
 Input: y:(2 3 1 1;0 1 2 3;0 0 4 1;0 0 0 5); &/(^y)=!^y

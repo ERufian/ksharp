@@ -3548,6 +3548,7 @@ namespace K3CSharp
             // Get row indices (first dimension)
             var rowIndexValue = indexVec.Elements[0];
             List<int> rowIndices;
+            bool explicitSingleRow = false;
             
             if (rowIndexValue is NullValue || (rowIndexValue is VectorValue riv && riv.Elements.Count == 0))
             {
@@ -3573,6 +3574,7 @@ namespace K3CSharp
             else if (rowIndexValue is IntegerValue singleRow)
             {
                 rowIndices = new List<int> { singleRow.Value };
+                explicitSingleRow = true;
             }
             else
             {
@@ -3581,6 +3583,7 @@ namespace K3CSharp
 
             // Get column indices (second dimension) if provided
             List<int>? colIndices = null;
+            bool singleColumnAsVector = false;  // true when col index is ,0 (1-item vector), false when 0 (atom)
             if (indexVec.Elements.Count > 1)
             {
                 var colIndexValue = indexVec.Elements[1];
@@ -3603,15 +3606,23 @@ namespace K3CSharp
                             throw new Exception($"Column indices must be integers, got {idx.Type}");
                         }
                     }
+                    // Track if this was a 1-item vector like ,0 (not an atom 0)
+                    singleColumnAsVector = colIdxVec.Elements.Count == 1;
                 }
                 else if (colIndexValue is IntegerValue singleCol)
                 {
                     colIndices = new List<int> { singleCol.Value };
                 }
+                else
+                {
+                    throw new Exception($"Column index must be integer or vector of integers, got {colIndexValue.Type}");
+                }
             }
 
             // Select rows
             var selectedRows = new List<K3Value>();
+            bool singleColumn = colIndices != null && colIndices.Count == 1;
+            
             foreach (var rowIdx in rowIndices)
             {
                 if (rowIdx < 0 || rowIdx >= matrix.Elements.Count)
@@ -3624,16 +3635,38 @@ namespace K3CSharp
                 // If column selection is specified and row is a vector, apply it
                 if (colIndices != null && row is VectorValue rowVec)
                 {
-                    var selectedElements = new List<K3Value>();
-                    foreach (var colIdx in colIndices)
+                    if (singleColumn)
                     {
+                        // Single column selection
+                        var colIdx = colIndices[0];
                         if (colIdx < 0 || colIdx >= rowVec.Elements.Count)
                         {
                             throw new Exception($"Column index {colIdx} out of bounds for row with {rowVec.Elements.Count} elements");
                         }
-                        selectedElements.Add(rowVec.Elements[colIdx]);
+                        var element = rowVec.Elements[colIdx];
+                        // If col index was ,0 (1-item vector), wrap result in 1-item vector
+                        if (singleColumnAsVector)
+                        {
+                            selectedRows.Add(new VectorValue(new List<K3Value> { element }));
+                        }
+                        else
+                        {
+                            selectedRows.Add(element);
+                        }
                     }
-                    selectedRows.Add(new VectorValue(selectedElements));
+                    else
+                    {
+                        var selectedElements = new List<K3Value>();
+                        foreach (var colIdx in colIndices)
+                        {
+                            if (colIdx < 0 || colIdx >= rowVec.Elements.Count)
+                            {
+                                throw new Exception($"Column index {colIdx} out of bounds for row with {rowVec.Elements.Count} elements");
+                            }
+                            selectedElements.Add(rowVec.Elements[colIdx]);
+                        }
+                        selectedRows.Add(new VectorValue(selectedElements));
+                    }
                 }
                 else
                 {
@@ -3642,6 +3675,12 @@ namespace K3CSharp
                 }
             }
 
+            // Single row: return the row directly (unwrap) - only when explicitly selected
+            if (explicitSingleRow && selectedRows.Count == 1)
+            {
+                return selectedRows[0];
+            }
+            
             return new VectorValue(selectedRows);
         }
 
