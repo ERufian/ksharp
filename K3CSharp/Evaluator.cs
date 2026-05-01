@@ -3545,143 +3545,113 @@ namespace K3CSharp
                 return matrix; // No indices specified, return entire matrix
             }
 
-            // Get row indices (first dimension)
-            var rowIndexValue = indexVec.Elements[0];
-            List<int> rowIndices;
-            bool explicitSingleRow = false;
+            // Parse all dimensions into a list of index lists (null means "all")
+            var dimensions = new List<List<int>?>();
+            var explicitSingleFlags = new List<bool>();
             
-            if (rowIndexValue is NullValue || (rowIndexValue is VectorValue riv && riv.Elements.Count == 0))
+            foreach (var dimValue in indexVec.Elements)
             {
-                // Null or empty means all rows
-                rowIndices = Enumerable.Range(0, matrix.Elements.Count).ToList();
+                var (indices, isExplicitSingle) = ParseDimensionIndex(dimValue);
+                dimensions.Add(indices);
+                explicitSingleFlags.Add(isExplicitSingle);
             }
-            else if (rowIndexValue is VectorValue rowIdxVec)
+            
+            // Apply dimensions recursively
+            return ApplyDimensions(matrix, dimensions, 0, explicitSingleFlags);
+        }
+
+        /// <summary>
+        /// Parse a dimension index value into a list of indices (null means "all elements")
+        /// </summary>
+        private (List<int>? indices, bool isExplicitSingle) ParseDimensionIndex(K3Value dimValue)
+        {
+            if (dimValue is NullValue || (dimValue is VectorValue v && v.Elements.Count == 0))
             {
-                // Vector of row indices
-                rowIndices = new List<int>();
-                foreach (var idx in rowIdxVec.Elements)
+                return (null, false); // All elements
+            }
+            else if (dimValue is VectorValue vec)
+            {
+                var indices = new List<int>();
+                foreach (var idx in vec.Elements)
                 {
                     if (idx is IntegerValue intIdx)
                     {
-                        rowIndices.Add(intIdx.Value);
+                        indices.Add(intIdx.Value);
                     }
                     else
                     {
-                        throw new Exception($"Row indices must be integers, got {idx.Type}");
+                        throw new Exception($"Indices must be integers, got {idx.Type}");
                     }
                 }
+                // 1-item vector like ,0 is NOT explicit single (returns 1-item vector)
+                return (indices, false);
             }
-            else if (rowIndexValue is IntegerValue singleRow)
+            else if (dimValue is IntegerValue single)
             {
-                rowIndices = new List<int> { singleRow.Value };
-                explicitSingleRow = true;
+                // Atom like 0 is explicit single (unwraps the result)
+                return (new List<int> { single.Value }, true);
             }
             else
             {
-                throw new Exception($"Row index must be integer or vector of integers, got {rowIndexValue.Type}");
+                throw new Exception($"Index must be integer or vector of integers, got {dimValue.Type}");
             }
+        }
 
-            // Get column indices (second dimension) if provided
-            List<int>? colIndices = null;
-            bool singleColumnAsVector = false;  // true when col index is ,0 (1-item vector), false when 0 (atom)
-            if (indexVec.Elements.Count > 1)
+        /// <summary>
+        /// Recursively apply dimensions to navigate nested structure
+        /// </summary>
+        private K3Value ApplyDimensions(K3Value value, List<List<int>?> dimensions, int depth, List<bool> explicitSingleFlags)
+        {
+            if (depth >= dimensions.Count)
             {
-                var colIndexValue = indexVec.Elements[1];
-                if (colIndexValue is NullValue || (colIndexValue is VectorValue civ && civ.Elements.Count == 0))
+                return value; // No more dimensions to apply
+            }
+            
+            var indices = dimensions[depth];
+            var isExplicitSingle = explicitSingleFlags[depth];
+            
+            if (value is VectorValue vec)
+            {
+                if (indices == null)
                 {
-                    // Null or empty means all columns
-                    colIndices = null;
-                }
-                else if (colIndexValue is VectorValue colIdxVec)
-                {
-                    colIndices = new List<int>();
-                    foreach (var idx in colIdxVec.Elements)
+                    // Select all elements, then apply remaining dimensions to each
+                    var results = new List<K3Value>();
+                    foreach (var element in vec.Elements)
                     {
-                        if (idx is IntegerValue intIdx)
-                        {
-                            colIndices.Add(intIdx.Value);
-                        }
-                        else
-                        {
-                            throw new Exception($"Column indices must be integers, got {idx.Type}");
-                        }
+                        results.Add(ApplyDimensions(element, dimensions, depth + 1, explicitSingleFlags));
                     }
-                    // Track if this was a 1-item vector like ,0 (not an atom 0)
-                    singleColumnAsVector = colIdxVec.Elements.Count == 1;
-                }
-                else if (colIndexValue is IntegerValue singleCol)
-                {
-                    colIndices = new List<int> { singleCol.Value };
+                    return new VectorValue(results);
                 }
                 else
                 {
-                    throw new Exception($"Column index must be integer or vector of integers, got {colIndexValue.Type}");
-                }
-            }
-
-            // Select rows
-            var selectedRows = new List<K3Value>();
-            bool singleColumn = colIndices != null && colIndices.Count == 1;
-            
-            foreach (var rowIdx in rowIndices)
-            {
-                if (rowIdx < 0 || rowIdx >= matrix.Elements.Count)
-                {
-                    throw new Exception($"Row index {rowIdx} out of bounds for matrix with {matrix.Elements.Count} rows");
-                }
-
-                var row = matrix.Elements[rowIdx];
-                
-                // If column selection is specified and row is a vector, apply it
-                if (colIndices != null && row is VectorValue rowVec)
-                {
-                    if (singleColumn)
+                    // Select specific indices
+                    var results = new List<K3Value>();
+                    foreach (var idx in indices)
                     {
-                        // Single column selection
-                        var colIdx = colIndices[0];
-                        if (colIdx < 0 || colIdx >= rowVec.Elements.Count)
+                        if (idx < 0 || idx >= vec.Elements.Count)
                         {
-                            throw new Exception($"Column index {colIdx} out of bounds for row with {rowVec.Elements.Count} elements");
+                            throw new Exception($"Index {idx} out of bounds for vector of length {vec.Elements.Count}");
                         }
-                        var element = rowVec.Elements[colIdx];
-                        // If col index was ,0 (1-item vector), wrap result in 1-item vector
-                        if (singleColumnAsVector)
-                        {
-                            selectedRows.Add(new VectorValue(new List<K3Value> { element }));
-                        }
-                        else
-                        {
-                            selectedRows.Add(element);
-                        }
+                        results.Add(ApplyDimensions(vec.Elements[idx], dimensions, depth + 1, explicitSingleFlags));
                     }
-                    else
+                    
+                    // If explicitly selected a single element (atom index), unwrap
+                    if (isExplicitSingle && results.Count == 1)
                     {
-                        var selectedElements = new List<K3Value>();
-                        foreach (var colIdx in colIndices)
-                        {
-                            if (colIdx < 0 || colIdx >= rowVec.Elements.Count)
-                            {
-                                throw new Exception($"Column index {colIdx} out of bounds for row with {rowVec.Elements.Count} elements");
-                            }
-                            selectedElements.Add(rowVec.Elements[colIdx]);
-                        }
-                        selectedRows.Add(new VectorValue(selectedElements));
+                        return results[0];
                     }
-                }
-                else
-                {
-                    // No column selection or row is not a vector, include entire row
-                    selectedRows.Add(row);
+                    return new VectorValue(results);
                 }
             }
-
-            // Single row: return the row directly (unwrap) - only when explicitly selected
-            if (explicitSingleRow && selectedRows.Count == 1)
+            else
             {
-                return selectedRows[0];
+                // Not a vector - can't apply non-null indices
+                if (indices != null)
+                {
+                    throw new Exception($"Cannot index into type {value.Type}");
+                }
+                return value;
             }
-            
-            return new VectorValue(selectedRows);
         }
 
         
