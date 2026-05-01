@@ -75,7 +75,12 @@ namespace K3CSharp.Tests
 
         {
 
-            var outputPath = Path.Combine(Path.GetDirectoryName(typeof(SimpleTestRunner).Assembly.Location)!, "results_table.txt");
+            var projectDir = Path.GetDirectoryName(typeof(SimpleTestRunner).Assembly.Location)!;
+            while (projectDir != null && !Directory.Exists(Path.Combine(projectDir, "TestScripts")))
+            {
+                projectDir = Path.GetDirectoryName(projectDir);
+            }
+            var outputPath = Path.Combine(projectDir ?? Path.GetDirectoryName(typeof(SimpleTestRunner).Assembly.Location)!, "results_table.txt");
 
             // Calculate the maximum filename length for auto-sizing
             var maxFileNameLength = testResults.Count > 0 ? Math.Max(25, testResults.Max(t => t.FileName.Length) + 2) : 25; // +2 for padding
