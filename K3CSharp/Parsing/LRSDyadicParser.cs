@@ -22,59 +22,122 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
-        /// Find the leftmost dyadic operator at the lowest nesting depth
-        /// For LRS: the leftmost operator splits the expression (left is atomic, right is recursively parsed)
+        /// Find the main dyadic operator using LRS (Long Right Scope) parsing
+        /// The main operator is the leftmost operator at depth 0 whose left operand is simple.
+        /// This gives it the longest right scope (takes the most to its right as right operand).
+        /// Treats VERB ADVERB as atomic units.
         /// </summary>
         /// <param name="tokens">Tokens to search</param>
         /// <returns>Index of dyadic operator, or -1 if none found</returns>
         public int FindRightmostOperator(List<Token> tokens)
         {
-            // The leftmost operator splits: left side is atomic, right side is recursively parsed
-            
+            // Use R->L scan to find rightmost operator with simple left operand
+            // This implements LRS (Long Right Scope) - the operator with the 
+            // longest right scope is the rightmost one with a complete left operand
             int depth = 0;
-
-            for (int i = 0; i < tokens.Count; i++)
+            
+            for (int i = tokens.Count - 1; i >= 0; i--)
             {
                 var currentToken = tokens[i];
                 
-                // Track grouping depth
-                if (currentToken.Type == TokenType.LEFT_PAREN || 
-                    currentToken.Type == TokenType.LEFT_BRACKET || 
-                    currentToken.Type == TokenType.LEFT_BRACE)
+                // Track grouping depth (reverse direction for R->L)
+                if (currentToken.Type == TokenType.RIGHT_PAREN || 
+                    currentToken.Type == TokenType.RIGHT_BRACKET || 
+                    currentToken.Type == TokenType.RIGHT_BRACE)
                 {
                     depth++;
                     continue;
                 }
-                else if (currentToken.Type == TokenType.RIGHT_PAREN || 
-                         currentToken.Type == TokenType.RIGHT_BRACKET || 
-                         currentToken.Type == TokenType.RIGHT_BRACE)
+                else if (currentToken.Type == TokenType.LEFT_PAREN || 
+                         currentToken.Type == TokenType.LEFT_BRACKET || 
+                         currentToken.Type == TokenType.LEFT_BRACE)
                 {
                     depth--;
                     continue;
                 }
                 
-                // Only consider operators at depth 0 (not inside grouping constructs)
+                // Skip adverbs - they're handled as part of modified verbs
+                if (IsAdverbToken(currentToken.Type))
+                {
+                    continue;
+                }
+                
+                // Only consider operators at depth 0
                 if (depth == 0 && IsDyadicOperatorDirect(currentToken.Type))
                 {
-                    // Skip verb+adverb patterns (VERB ADVERB or VERB COLON ADVERB)
+                    // Check if this verb is followed by an adverb (from L->R perspective)
+                    // When scanning R->L, we need to look ahead (i+1) to see if there's an adverb
                     if (i + 1 < tokens.Count && IsAdverbToken(tokens[i + 1].Type))
                     {
-                        i++; // Skip the adverb too
-                        continue;
-                    }
-                    // Skip VERB COLON ADVERB (disambiguating colon before adverb: e.g. +:/)
-                    if (i + 2 < tokens.Count && tokens[i + 1].Type == TokenType.COLON && IsAdverbToken(tokens[i + 2].Type))
-                    {
-                        i += 2; // Skip the colon and adverb
+                        // This VERB is followed by ADVERB, so it's a modified verb
+                        // Skip it - the adverb will create the modified verb node
                         continue;
                     }
                     
-                    // Return leftmost operator for LRS right-to-left evaluation
-                    return i;
+                    // Check VERB COLON ADVERB pattern
+                    if (i + 2 < tokens.Count && 
+                        tokens[i + 1].Type == TokenType.COLON && 
+                        IsAdverbToken(tokens[i + 2].Type))
+                    {
+                        // VERB COLON ADVERB pattern
+                        continue;
+                    }
+                    
+                    // Check if left operand is simple (atomic or parenthesized)
+                    // For LRS: the rightmost operator with a simple left operand
+                    // has the longest right scope
+                    if (HasSimpleLeftOperand(tokens, i))
+                    {
+                        return i;
+                    }
                 }
             }
             
             return -1;
+        }
+        
+        /// <summary>
+        /// Check if the tokens before position i form a simple (fully-resolved) operand.
+        /// For LRS: a left operand is simple if it contains no dyadic operators at depth 0.
+        /// This ensures the operator has the longest right scope.
+        /// Examples:
+        ///   - "1"        -> simple (single atom)
+        ///   - "1 2"      -> simple (vector literal, no operators)
+        ///   - "(1 + 2)"  -> simple (grouped expression resolves to a value)
+        ///   - "1 + 2"    -> NOT simple (contains unresolved + operator)
+        /// </summary>
+        private static bool HasSimpleLeftOperand(List<Token> tokens, int operatorIndex)
+        {
+            if (operatorIndex <= 0) return true; // No left operand (monadic)
+            
+            // Scan the left operand for any dyadic operator at depth 0.
+            // If none exist, the left side is a fully-resolved value (simple).
+            int depth = 0;
+            for (int i = 0; i < operatorIndex; i++)
+            {
+                var token = tokens[i];
+                
+                if (token.Type == TokenType.LEFT_PAREN || 
+                    token.Type == TokenType.LEFT_BRACKET || 
+                    token.Type == TokenType.LEFT_BRACE)
+                {
+                    depth++;
+                }
+                else if (token.Type == TokenType.RIGHT_PAREN || 
+                         token.Type == TokenType.RIGHT_BRACKET || 
+                         token.Type == TokenType.RIGHT_BRACE)
+                {
+                    depth--;
+                }
+                else if (depth == 0 && IsDyadicOperatorDirect(token.Type))
+                {
+                    // Left operand contains an unresolved dyadic operator,
+                    // meaning it is not yet a simple value.
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
         /// <summary>
@@ -113,6 +176,7 @@ namespace K3CSharp.Parsing
         
         /// <summary>
         /// Parse dyadic operation using LRS right-associative strategy
+        /// Scans R->L per spec to find rightmost operator at depth 0, treating VERB ADVERB as atomic
         /// </summary>
         /// <param name="tokens">Tokens to parse</param>
         /// <returns>AST node representing dyadic operation</returns>
@@ -120,161 +184,29 @@ namespace K3CSharp.Parsing
         {
             if (tokens.Count < 3) return null; // Need at least: left op right
             
-            // Find the leftmost dyadic operator at the lowest nesting depth in the token list at depth 0
-            // This handles cases like (1 2 3) +' (4 5 6) where the verb+adverb is in the middle
-            // Must respect grouping depth to avoid matching inside parenthesized sub-expressions
-            int adverbScanDepth = 0;
-            
-            // First, check if there's a dyadic @ operator at depth 0 that should take precedence over adverb patterns
-            // This handles cases like (f'x)@((x?:)?/:x) where @ should be the main operator
-            bool hasApplyAtDepth0 = false;
-            int applyPosition = -1;
-            for (int i = 0; i < tokens.Count; i++)
-            {
-                if (tokens[i].Type == TokenType.LEFT_PAREN || tokens[i].Type == TokenType.LEFT_BRACKET || tokens[i].Type == TokenType.LEFT_BRACE)
-                    adverbScanDepth++;
-                else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
-                    adverbScanDepth--;
-                else if (adverbScanDepth == 0 && tokens[i].Type == TokenType.APPLY)
-                {
-                    hasApplyAtDepth0 = true;
-                    applyPosition = i;
-                    break;
-                }
-            }
-            
-            adverbScanDepth = 0; // Reset depth for the adverb scan
-            for (int i = 0; i < tokens.Count - 1; i++)
-            {
-                if (tokens[i].Type == TokenType.LEFT_PAREN || tokens[i].Type == TokenType.LEFT_BRACKET || tokens[i].Type == TokenType.LEFT_BRACE)
-                    adverbScanDepth++;
-                else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
-                    adverbScanDepth--;
-                    
-                // Skip adverb pattern if there's an @ operator at depth 0 that should take precedence
-                if (hasApplyAtDepth0 && adverbScanDepth == 0 && i > applyPosition)
-                    continue;
-                    
-                // Also handle VERB COLON ADVERB (disambiguating colon: e.g. +:/)
-                bool hasColonAdverb = adverbScanDepth == 0 &&
-                                      i + 2 < tokens.Count &&
-                                      IsDyadicOperatorDirect(tokens[i].Type) &&
-                                      tokens[i + 1].Type == TokenType.COLON &&
-                                      IsAdverbToken(tokens[i + 2].Type);
-                if (adverbScanDepth == 0 && IsDyadicOperatorDirect(tokens[i].Type) && (IsAdverbToken(tokens[i + 1].Type) || hasColonAdverb))
-                {
-                    // Skip if the token immediately before this verb is another verb at depth 0
-                    // This indicates a monadic verb chain, not a left argument for the adverb
-                    // E.g., in ~=':x, the ~ before = is monadic, not the left arg of =':   
-                    if (i > 0 && IsDyadicOperatorDirect(tokens[i - 1].Type) && 
-                        OperatorDetector.SupportsMonadic(tokens[i - 1].Type))
-                    {
-                        continue;
-                    }
-                    // Skip if the token immediately before this verb is a colon (assignment).
-                    // The verb is then the start of an inline assignment's RHS, not a dyadic
-                    // operator with the entire left side as its left argument.
-                    // E.g., in `((y-1)_ a)-0,(-y)_ a:+\x`, `+\` is the RHS of `a:`, not a
-                    // dyadic adverb application of `+\` to `((y-1)_ a)-0,(-y)_ a:`.
-                    if (i > 0 && (tokens[i - 1].Type == TokenType.COLON || 
-                                  tokens[i - 1].Type == TokenType.GLOBAL_ASSIGNMENT))
-                    {
-                        continue;
-                    }
-                    var verbToken = tokens[i];
-                    // Determine if this is a VERB COLON ADVERB pattern
-                    bool hasDisambiguatingColon = hasColonAdverb;
-                    // Consume all consecutive adverbs after the verb (skipping over colon if present)
-                    int adverbStart = hasDisambiguatingColon ? i + 2 : i + 1;
-                    int adverbEnd = adverbStart;
-                    while (adverbEnd < tokens.Count && IsAdverbToken(tokens[adverbEnd].Type))
-                        adverbEnd++;
-                    // adverbEnd is now the index of the first non-adverb token after the verb
-                    var adverbTokens = tokens.GetRange(adverbStart, adverbEnd - adverbStart); // all adverb tokens
-                    var adverbToken = adverbTokens[adverbTokens.Count - 1]; // outermost adverb
-                    // Extract the tokens for the adverb operation
-                    // Everything before the verb is the left operand
-                    var adverbLeftTokens = tokens.GetRange(0, i);
-                    // Everything after ALL adverbs is the right operand
-                    var adverbRightTokens = tokens.GetRange(adverbEnd, tokens.Count - adverbEnd);
-                    
-                    // Build parse tree for left and right operands
-                    var leftNode = adverbLeftTokens.Count > 0 ? BuildParseTreeFromTokens(adverbLeftTokens) : null;
-                    var rightNode = adverbRightTokens.Count > 0 ? BuildParseTreeFromTokens(adverbRightTokens) : null;
-                    
-                    // Create base verb node — if disambiguating colon was present, use monadic verb name (e.g. "+:")
-                    ASTNode? verbNode;
-                    if (hasDisambiguatingColon)
-                    {
-                        string monadicVerbName = VerbRegistry.TokenTypeToVerbName(verbToken.Type) + ":";
-                        verbNode = new ASTNode(ASTNodeType.Literal, new SymbolValue(monadicVerbName));
-                    }
-                    else
-                    {
-                        verbNode = CreateNodeFromToken(verbToken);
-                    }
-                    if (verbNode == null)
-                    {
-                        throw new Exception($"Failed to create verb node from token: {verbToken.Type}({verbToken.Lexeme})");
-                    }
-                    
-                    // Build nested verb node for multiple adverbs (one-adverb-at-a-time per spec).
-                    // For verb/:\: the innermost adverb (/:) wraps the base verb, producing a
-                    // modified verb node; the outermost adverb (\:) then wraps that.
-                    // innerVerbNode starts as the base verb and is wrapped left-to-right through
-                    // the adverb list (adverbTokens[0] is closest to verb, last is outermost).
-                    ASTNode innerVerbNode = verbNode;
-                    for (int a = 0; a < adverbTokens.Count - 1; a++)
-                    {
-                        // Wrap innerVerbNode with adverbTokens[a] to produce a modified verb
-                        var innerAdverbNode = new ASTNode(ASTNodeType.DyadicOp);
-                        innerAdverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbTokens[a].Type));
-                        innerAdverbNode.Children.Add(innerVerbNode);
-                        innerVerbNode = innerAdverbNode;
-                    }
-                    
-                    // Create top-level adverb node with the structure expected by the evaluator
-                    var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
-                    
-                    if (leftNode != null && rightNode != null)
-                    {
-                        // Both operands: e.g., (1 2 3) ,/:\: (4 5 6)
-                        // Create a 3-child structure: (outerAdverb, modifiedVerb, leftArg, rightArg)
-                        adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
-                        adverbNode.Children.Add(innerVerbNode);
-                        adverbNode.Children.Add(leftNode);
-                        adverbNode.Children.Add(rightNode);
-                    }
-                    else if (rightNode != null)
-                    {
-                        adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
-                        adverbNode.Children.Add(innerVerbNode);
-                        adverbNode.Children.Add(rightNode);
-                    }
-                    else if (leftNode != null)
-                    {
-                        adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
-                        adverbNode.Children.Add(innerVerbNode);
-                        adverbNode.Children.Add(leftNode);
-                    }
-                    else
-                    {
-                        adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
-                        adverbNode.Children.Add(innerVerbNode);
-                        adverbNode.Children.Add(ASTNode.MakeLiteral(new NullValue()));
-                    }
-                    
-                    return adverbNode;
-                }
-            }
-            
+            // FIRST: Use R->L scan to find rightmost regular dyadic operator at depth 0
+            // This respects LRS principles and treats VERB ADVERB as atomic units
             var rightmostOpIndex = FindRightmostOperator(tokens);
-            if (rightmostOpIndex == -1) return null;
-
-            // Split at rightmost operator
-            var leftTokens = tokens.GetRange(0, rightmostOpIndex);
-            var rightTokens = tokens.GetRange(rightmostOpIndex + 1, tokens.Count - rightmostOpIndex - 1);
-            var opToken = tokens[rightmostOpIndex];
+            
+            if (rightmostOpIndex != -1)
+            {
+                // Found a regular operator - split expression here
+                return ParseRegularDyadicOperation(tokens, rightmostOpIndex);
+            }
+            
+            // SECOND: No regular operator found - look for adverb-modified verbs
+            // This handles expressions like `(y!x)?/:g` where `?` is part of a modified verb
+            return ParseAdverbModifiedOperation(tokens);
+        }
+        
+        /// <summary>
+        /// Parse a regular dyadic operation after finding the operator position
+        /// </summary>
+        private ASTNode? ParseRegularDyadicOperation(List<Token> tokens, int opIndex)
+        {
+            var leftTokens = tokens.GetRange(0, opIndex);
+            var rightTokens = tokens.GetRange(opIndex + 1, tokens.Count - opIndex - 1);
+            var opToken = tokens[opIndex];
 
             // Choose strategy based on parent parser mode
             if (parentParser?.BuildParseTree == true)
@@ -329,6 +261,102 @@ namespace K3CSharp.Parsing
                 // Create dyadic node when there are both operands
                 return CreateDyadicNode(opToken, leftNode, rightNode);
             }
+        }
+        
+        /// <summary>
+        /// Parse adverb-modified operation (e.g., verb/:) when no regular operator found
+        /// Scans L->R to find VERB ADVERB patterns at depth 0
+        /// </summary>
+        private ASTNode? ParseAdverbModifiedOperation(List<Token> tokens)
+        {
+            int adverbScanDepth = 0;
+            
+            for (int i = 0; i < tokens.Count - 1; i++)
+            {
+                if (tokens[i].Type == TokenType.LEFT_PAREN || tokens[i].Type == TokenType.LEFT_BRACKET || tokens[i].Type == TokenType.LEFT_BRACE)
+                    adverbScanDepth++;
+                else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
+                    adverbScanDepth--;
+                    
+                // Also handle VERB COLON ADVERB (disambiguating colon: e.g. +:/)
+                bool hasColonAdverb = adverbScanDepth == 0 &&
+                                      i + 2 < tokens.Count &&
+                                      IsDyadicOperatorDirect(tokens[i].Type) &&
+                                      tokens[i + 1].Type == TokenType.COLON &&
+                                      IsAdverbToken(tokens[i + 2].Type);
+                if (adverbScanDepth == 0 && IsDyadicOperatorDirect(tokens[i].Type) && (IsAdverbToken(tokens[i + 1].Type) || hasColonAdverb))
+                {
+                    // Skip if the token immediately before this verb is another verb at depth 0
+                    // This indicates a monadic verb chain, not a left argument for the adverb
+                    if (i > 0 && IsDyadicOperatorDirect(tokens[i - 1].Type) && 
+                        OperatorDetector.SupportsMonadic(tokens[i - 1].Type))
+                    {
+                        continue;
+                    }
+                    // Skip if the token immediately before this verb is a colon (assignment).
+                    if (i > 0 && (tokens[i - 1].Type == TokenType.COLON || 
+                                  tokens[i - 1].Type == TokenType.GLOBAL_ASSIGNMENT))
+                    {
+                        continue;
+                    }
+                    
+                    var verbToken = tokens[i];
+                    bool hasDisambiguatingColon = hasColonAdverb;
+                    int adverbStart = hasDisambiguatingColon ? i + 2 : i + 1;
+                    int adverbEnd = adverbStart;
+                    while (adverbEnd < tokens.Count && IsAdverbToken(tokens[adverbEnd].Type))
+                        adverbEnd++;
+                    
+                    var adverbTokens = tokens.GetRange(adverbStart, adverbEnd - adverbStart);
+                    if (adverbTokens.Count == 0) continue; // No adverbs found
+                    
+                    var adverbToken = adverbTokens[adverbTokens.Count - 1];
+                    var adverbLeftTokens = tokens.GetRange(0, i);
+                    var adverbRightTokens = tokens.GetRange(adverbEnd, tokens.Count - adverbEnd);
+                    
+                    var leftNode = adverbLeftTokens.Count > 0 ? BuildParseTreeFromTokens(adverbLeftTokens) : null;
+                    var rightNode = adverbRightTokens.Count > 0 ? BuildParseTreeFromTokens(adverbRightTokens) : null;
+                    
+                    ASTNode? verbNode;
+                    if (hasDisambiguatingColon)
+                    {
+                        string monadicVerbName = VerbRegistry.TokenTypeToVerbName(verbToken.Type) + ":";
+                        verbNode = new ASTNode(ASTNodeType.Literal, new SymbolValue(monadicVerbName));
+                    }
+                    else
+                    {
+                        verbNode = CreateNodeFromToken(verbToken);
+                    }
+                    if (verbNode == null)
+                    {
+                        throw new Exception($"Failed to create verb node from token: {verbToken.Type}({verbToken.Lexeme})");
+                    }
+                    
+                    // Build nested verb node for multiple adverbs (one-adverb-at-a-time per spec)
+                    ASTNode innerVerbNode = verbNode;
+                    for (int a = 0; a < adverbTokens.Count - 1; a++)
+                    {
+                        var innerAdverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                        innerAdverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbTokens[a].Type));
+                        innerAdverbNode.Children.Add(innerVerbNode);
+                        innerVerbNode = innerAdverbNode;
+                    }
+                    
+                    // Create top-level adverb node
+                    var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                    adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
+                    adverbNode.Children.Add(innerVerbNode);
+                    
+                    if (leftNode != null) adverbNode.Children.Add(leftNode);
+                    if (rightNode != null) adverbNode.Children.Add(rightNode);
+                    if (adverbNode.Children.Count == 1) // Only verb, no operands
+                        adverbNode.Children.Add(ASTNode.MakeLiteral(new NullValue()));
+                    
+                    return adverbNode;
+                }
+            }
+            
+            return null;
         }
         
         /// <summary>

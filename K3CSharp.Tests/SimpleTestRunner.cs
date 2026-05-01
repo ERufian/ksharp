@@ -15,7 +15,20 @@ namespace K3CSharp.Tests
 
     {
 
-        private readonly string testScriptsPath = Path.Combine(Directory.GetCurrentDirectory(), "TestScripts");
+        private static string FindTestScriptsDirectory()
+        {
+            var dir = Path.GetDirectoryName(typeof(SimpleTestRunner).Assembly.Location)!;
+            while (dir != null)
+            {
+                var candidate = Path.Combine(dir, "TestScripts");
+                if (Directory.Exists(candidate))
+                    return candidate;
+                dir = Path.GetDirectoryName(dir);
+            }
+            throw new DirectoryNotFoundException("Could not find TestScripts directory");
+        }
+
+        private readonly string testScriptsPath = FindTestScriptsDirectory();
 
         static SimpleTestRunner()
         {
@@ -62,7 +75,7 @@ namespace K3CSharp.Tests
 
         {
 
-            var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "results_table.txt");
+            var outputPath = Path.Combine(Path.GetDirectoryName(typeof(SimpleTestRunner).Assembly.Location)!, "results_table.txt");
 
             // Calculate the maximum filename length for auto-sizing
             var maxFileNameLength = testResults.Count > 0 ? Math.Max(25, testResults.Max(t => t.FileName.Length) + 2) : 25; // +2 for padding
@@ -173,7 +186,7 @@ namespace K3CSharp.Tests
 
             {
 
-                var scriptPath = Path.Combine(Directory.GetCurrentDirectory(), "TestScripts", fileName);
+                var scriptPath = Path.Combine(FindTestScriptsDirectory(), fileName);
 
                 var script = File.ReadAllText(scriptPath);
 
@@ -2873,7 +2886,7 @@ namespace K3CSharp.Tests
 
             var testResults = new List<TestResult>();
 
-            var testScriptsPath = Path.Combine(Directory.GetCurrentDirectory(), "TestScripts");
+            var testScriptsPath = FindTestScriptsDirectory();
 
 
 
