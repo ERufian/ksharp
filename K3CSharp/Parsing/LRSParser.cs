@@ -264,6 +264,7 @@ namespace K3CSharp.Parsing
                                 // For other verbs with 3+ args, create a FunctionCall node
                                 var funcNode = new ASTNode(ASTNodeType.FunctionCall);
                                 funcNode.Value = new SymbolValue(expressionTokens[0].Lexeme);
+                                funcNode.Children.Add(ASTNode.MakeVariable(expressionTokens[0].Lexeme));
                                 funcNode.Children.AddRange(argNodes.Where(n => n != null)!);
                                 return funcNode;
                             }

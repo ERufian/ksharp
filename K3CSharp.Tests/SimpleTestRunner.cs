@@ -2866,10 +2866,12 @@ namespace K3CSharp.Tests
                 // Self-referent lambda _f tests
                 ("test_f_rec.k", "120"),
                 ("test_f_var.k", "6"),
+
+                // SSR (string search and replace) tests
+                ("ssr_function_replacement.k", "\"Thiz iz a tezt for function ZZR\""),
             };
 
             // Filter tests if a pattern was provided
-
             var tests = filter != null
                 ? allTests.Where(t => t.Item1.Contains(filter, StringComparison.OrdinalIgnoreCase)).ToArray()
                 : allTests;

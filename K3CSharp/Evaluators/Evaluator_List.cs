@@ -895,7 +895,7 @@ namespace K3CSharp
                 CharacterValue charVal => charVal.Value,
                 SymbolValue symVal => symVal.Value,
                 VectorValue vecVal => ExtractStringFromVector(vecVal),
-                _ => throw new Exception("_ssr: first argument (text) must be character or symbol")
+                _ => throw new Exception("_ssr: first argument (text) must be character, symbol, or vector")
             };
             
             string patternStr = pattern switch
@@ -903,19 +903,47 @@ namespace K3CSharp
                 CharacterValue charVal => charVal.Value,
                 SymbolValue symVal => symVal.Value,
                 VectorValue vecVal => ExtractStringFromVector(vecVal),
-                _ => throw new Exception("_ssr: second argument (pattern) must be character or symbol")
+                _ => throw new Exception("_ssr: second argument (pattern) must be character, symbol, or vector")
             };
             
+            // Get replacement string if not a function (function replacement handled below)
             string replacementStr = replacement switch
             {
+                FunctionValue => null!, // Will be handled separately
                 CharacterValue charVal => charVal.Value,
                 SymbolValue symVal => symVal.Value,
                 VectorValue vecVal => ExtractStringFromVector(vecVal),
-                _ => throw new Exception("_ssr: third argument (replacement) must be character or symbol")
+                _ => throw new Exception("_ssr: third argument (replacement) must be character, symbol, vector, or function")
             };
             
             // Replace all occurrences of pattern with replacement
-            string resultStr = textStr.Replace(patternStr, replacementStr);
+            string resultStr;
+            if (replacement is FunctionValue func)
+            {
+                // Function replacement: for each match, call the function with the matched string
+                // Pattern is treated as a regex to enable character classes like [sS]
+                resultStr = System.Text.RegularExpressions.Regex.Replace(
+                    textStr,
+                    patternStr,
+                    match => {
+                        var matchedValue = new CharacterValue(match.Value);
+                        var funcResult = ExecuteFunction(func, new List<K3Value> { matchedValue });
+                        return funcResult switch
+                        {
+                            CharacterValue charVal => charVal.Value,
+                            SymbolValue symVal => symVal.Value,
+                            VectorValue vecVal => ExtractStringFromVector(vecVal),
+                            IntegerValue intVal => intVal.Value.ToString(),
+                            LongValue longVal => longVal.Value.ToString(),
+                            FloatValue floatVal => floatVal.Value.ToString(),
+                            _ => funcResult.ToString() ?? ""
+                        };
+                    });
+            }
+            else
+            {
+                resultStr = textStr.Replace(patternStr, replacementStr);
+            }
             
             // Return as character vector
             return new VectorValue(resultStr.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());

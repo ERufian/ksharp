@@ -1975,8 +1975,9 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_23_389_playing_order.k                      │ log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6] │ Error: Function...   │ 1 5 3 0 2 6 4 0      ║
 ║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
+║ ssr_function_replacement.k                         │ _ssr["This is a test for function SSR";"[sS]";{_ci 7+_ic x}] │ "Thiz iz a tezt...   │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1225/1317 tests passed (93.0%)                                                                             ║
+║ SUMMARY: 1226/1318 tests passed (93.0%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
