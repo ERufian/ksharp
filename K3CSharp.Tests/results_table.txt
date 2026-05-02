@@ -1573,7 +1573,7 @@ dp x │ 0 1 1 2 3 3 3 2...   │                      ║
 y:9
 y#x,y#*|x │ "quizzzzzz"          │                      ║
 ║ idioms_09_379_remove_leading_multiple_trailing.k   │ x:0 0 1 2 0 0 3 4 0 5 0 0 0; y:0; a:x=y; b:~a&1!a; a[0]_ x[&b] │ 1 2 0 3 4 0 5        │                      ║
-║ idioms_09_380_change_items_value.k                 │ x:"abcde"[15 _draw 5]; y:"d "; @[x;&x=*y;:;*|y] │ "bace ecccabcaeb"    │ "eecbe ae bee  b"    ║
+║ idioms_09_380_change_items_value.k                 │ x:"abcde"[4 4 2 1 4 3 0 4 3 1 4 4 3 3 1]; y:"d "; @[x;&x=*y;:;*|y] │ "eecbe ae bee  b"    │                      ║
 ║ idioms_09_382_insert_after_index.k                 │ x:1 2 3
 y:10*1+!7
 g:3
@@ -1982,7 +1982,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1231/1323 tests passed (93.0%)                                                                             ║
+║ SUMMARY: 1232/1323 tests passed (93.1%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2003,11 +2003,6 @@ Test: idioms_09_297_spread_marked_field_heads.k
 Input: x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y]
 Expected: "abbbee"
 Actual: Error: Unclosed parentheses - expected ')'
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_09_380_change_items_value.k
-Input: x:"abcde"[15 _draw 5]; y:"d "; @[x;&x=*y;:;*|y]
-Expected: "eecbe ae bee  b"
-Actual: "bace ecccabcaeb"
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_490_insert_spaces_in_text.k
 Input: x:"wider"; ,/(+,x),'" "
