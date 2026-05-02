@@ -297,7 +297,17 @@ namespace K3CSharp.Verbs
             
             if (astNode.Type == ASTNodeType.FunctionCall)
             {
-                return new SymbolValue($"Function: {astNode.Value?.ToString() ?? ""}");
+                // Get function name from Children[0] (function node)
+                string funcName = "";
+                if (astNode.Children.Count > 0 && astNode.Children[0].Value is SymbolValue funcSym)
+                {
+                    funcName = funcSym.Value;
+                }
+                else if (astNode.Children.Count > 0)
+                {
+                    funcName = astNode.Children[0].Value?.ToString() ?? "";
+                }
+                return new SymbolValue($"Function: {funcName}");
             }
             
             if (astNode.Type == ASTNodeType.DyadicOp)

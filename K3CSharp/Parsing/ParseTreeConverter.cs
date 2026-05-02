@@ -201,16 +201,27 @@ namespace K3CSharp.Parsing
         
         /// <summary>
         /// Convert function call to K list representation
+        /// Convention: FunctionCall.Children[0] = function node, Children[1+] = arguments
         /// </summary>
         private static K3Value ConvertFunctionCall(ASTNode node)
         {
-            var funcName = node.Value?.ToString() ?? "";
+            // Get function name from Children[0] (Variable node)
+            string funcName = "";
+            if (node.Children.Count > 0 && node.Children[0].Value is SymbolValue funcSym)
+            {
+                funcName = funcSym.Value;
+            }
+            else if (node.Children.Count > 0)
+            {
+                funcName = node.Children[0].Value?.ToString() ?? "";
+            }
+            
             var elements = new List<K3Value> { new SymbolValue(funcName) };
             
-            // Convert all arguments
-            foreach (var child in node.Children)
+            // Convert arguments (skip Children[0] which is the function node)
+            for (int i = 1; i < node.Children.Count; i++)
             {
-                elements.Add(ConvertAtomicValue(child));
+                elements.Add(ConvertAtomicValue(node.Children[i]));
             }
             
             return new VectorValue(elements);

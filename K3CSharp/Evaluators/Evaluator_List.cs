@@ -21,8 +21,13 @@ namespace K3CSharp
             }
             else
             {
-                // For non-character vectors, use standard ToString
-                return string.Concat(vecVal.Elements.Select(e => e.ToString()));
+                // Get information about what types are present for a helpful error message
+                var typeNames = vecVal.Elements
+                    .Select(e => e.GetType().Name.Replace("Value", "").ToLower())
+                    .Distinct()
+                    .ToList();
+                var typeList = string.Join(", ", typeNames);
+                throw new Exception($"Expected character vector (string), but received vector containing: {typeList}");
             }
         }
         
@@ -922,11 +927,35 @@ namespace K3CSharp
             {
                 // Function replacement: for each match, call the function with the matched string
                 // Pattern is treated as a regex to enable character classes like [sS]
+                // Get timeout from global variable .m.regex.timeout (default 1000ms)
+                int regexTimeoutMs = 1000; // Default 1 second
+                var timeoutValue = GetVariableValue(".m.regex.timeout");
+                if (timeoutValue is IntegerValue timeoutInt)
+                {
+                    regexTimeoutMs = timeoutInt.Value;
+                }
+                else if (timeoutValue is LongValue timeoutLong)
+                {
+                    regexTimeoutMs = (int)timeoutLong.Value;
+                }
+                
+                var regexTimeout = System.TimeSpan.FromMilliseconds(regexTimeoutMs);
+                
                 resultStr = System.Text.RegularExpressions.Regex.Replace(
                     textStr,
                     patternStr,
                     match => {
-                        var matchedValue = new CharacterValue(match.Value);
+                        // Create K value for matched text: CharacterValue for single char, VectorValue for multi-char
+                        K3Value matchedValue;
+                        if (match.Value.Length == 1)
+                        {
+                            matchedValue = new CharacterValue(match.Value);
+                        }
+                        else
+                        {
+                            // Multi-character match: create a character vector
+                            matchedValue = new VectorValue(match.Value.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());
+                        }
                         var funcResult = ExecuteFunction(func, new List<K3Value> { matchedValue });
                         return funcResult switch
                         {
@@ -938,7 +967,9 @@ namespace K3CSharp
                             FloatValue floatVal => floatVal.Value.ToString(),
                             _ => funcResult.ToString() ?? ""
                         };
-                    });
+                    },
+                    System.Text.RegularExpressions.RegexOptions.None,
+                    regexTimeout);
             }
             else
             {

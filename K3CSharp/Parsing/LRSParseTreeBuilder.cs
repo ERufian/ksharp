@@ -211,7 +211,7 @@ namespace K3CSharp.Parsing
                 ASTNodeType.DyadicOp => $"DyadicOp({node.Value})",
                 ASTNodeType.Vector => $"Vector({node.Children.Count} items)",
                 ASTNodeType.Function => $"Function({node.Value})",
-                ASTNodeType.FunctionCall => $"FunctionCall({node.Value})",
+                ASTNodeType.FunctionCall => $"FunctionCall({(node.Children.Count > 0 ? node.Children[0].Value : node.Value)})",
                 ASTNodeType.ProjectedFunction => $"ProjectedFunction({node.Value})",
                 _ => $"{node.Type}({node.Value})"
             };

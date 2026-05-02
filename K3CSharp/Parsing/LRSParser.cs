@@ -263,7 +263,8 @@ namespace K3CSharp.Parsing
                                 // (triadic/tetradic amend is handled there for . and @)
                                 // For other verbs with 3+ args, create a FunctionCall node
                                 var funcNode = new ASTNode(ASTNodeType.FunctionCall);
-                                funcNode.Value = new SymbolValue(expressionTokens[0].Lexeme);
+                                // Function name stored in Children[0] only (not in Value)
+                                // This follows the convention: FunctionCall.Children[0] = function node
                                 funcNode.Children.Add(ASTNode.MakeVariable(expressionTokens[0].Lexeme));
                                 funcNode.Children.AddRange(argNodes.Where(n => n != null)!);
                                 return funcNode;

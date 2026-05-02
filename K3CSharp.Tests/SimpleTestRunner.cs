@@ -2869,6 +2869,13 @@ namespace K3CSharp.Tests
 
                 // SSR (string search and replace) tests
                 ("ssr_function_replacement.k", "\"Thiz iz a tezt for function ZZR\""),
+                
+                // SSR multi-character regex match tests
+                ("ssr_function_multi_char_identity.k", "\"abc\""),
+                ("ssr_function_multi_char_replace.k", "\"heXXo\""),
+                ("ssr_function_multi_char_longer.k", "\"XYZc\""),
+                ("ssr_function_multi_char_shorter.k", "\"Xc\""),
+                ("ssr_function_single_char_class.k", "\"test\""),
             };
 
             // Filter tests if a pattern was provided
