@@ -1112,20 +1112,27 @@ namespace K3CSharp
 
                 if (data is VectorValue dataVec)
                 {
-                    // Take from vector
-                    var actualCount = Math.Max(0, intCount.Value);
+                    var takeCount = intCount.Value;
                     var result = new List<K3Value>();
                     
-                    if (dataVec.Elements.Count == 0)
+                    if (dataVec.Elements.Count == 0 || takeCount == 0)
                     {
-                        // Empty source vector - return empty result with same type
+                        // Empty source vector or zero count - return empty result with same type
                         return new VectorValue(result, GetVectorType(dataVec));
                     }
                     
-                    // Repeat the source vector periodically to fill the requested count
-                    for (int i = 0; i < actualCount; i++)
+                    int n = dataVec.Elements.Count;
+                    int absCount = Math.Abs(takeCount);
+                    
+                    // Calculate starting index: positive count starts at 0, negative starts from end
+                    int startIndex = takeCount > 0 
+                        ? 0 
+                        : (n - (absCount % n)) % n;
+                    
+                    // Collect elements cycling through the source vector
+                    for (int i = 0; i < absCount; i++)
                     {
-                        var sourceIndex = i % dataVec.Elements.Count;
+                        var sourceIndex = (startIndex + i) % n;
                         result.Add(dataVec.Elements[sourceIndex]);
                     }
                     
@@ -1135,10 +1142,10 @@ namespace K3CSharp
                 else
                 {
                     // Take from scalar - create vector with scalar repeated
-                    var actualCount = Math.Max(0, intCount.Value);
+                    var absCount = Math.Abs(intCount.Value);
                     var result = new List<K3Value>();
                     
-                    for (int i = 0; i < actualCount; i++)
+                    for (int i = 0; i < absCount; i++)
                     {
                         result.Add(data!);
                     }

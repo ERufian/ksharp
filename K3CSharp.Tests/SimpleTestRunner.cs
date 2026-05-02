@@ -1097,6 +1097,7 @@ namespace K3CSharp.Tests
 
                 ("take_operator_scalar.k", "42 42 42"),
 
+                ("take_operator_negative_scalar.k", "5 5 5"),
 
 
                 // Reshape operator tests (vector left arg to #)

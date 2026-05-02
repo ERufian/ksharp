@@ -287,7 +287,7 @@ cd K3CSharp.Comparison && dotnet run
 - **Search Functions**: `_in` (search), `_bin` (binary search), `_lin` (linear search)
 - **String Operations**: `_ss` (string search), `_ssr` (string search and replace), `_ci` (character from integer), `_ic` (integer from character)
 - **List Operations**: `_sv` (scalar from vector), `_vs` (vector from scalar), `_dv` (delete value) `_di` (delete item) 
-- **Pattern Matching**: Advanced regex-like pattern matching with `_sm` based on .NET regex
+- **Pattern Matching**: Advanced regex-like pattern matching with `_sm` based on .NET regex, with 1000 ms timeout, customizable via `.m.regex.timeout`
 
 ### **Modified Assignment Operators** 🆕
 ```k3

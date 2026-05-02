@@ -355,6 +355,7 @@ result[10] │ "d"                  │                      ║
 ║ take_operator_empty_symbol.k                       │ 0#``                 │ 0#`                  │                      ║
 ║ take_operator_overflow.k                           │ 10#1 2 3             │ 1 2 3 1 2 3 1 2...   │                      ║
 ║ take_operator_scalar.k                             │ 3#42                 │ 42 42 42             │                      ║
+║ take_operator_negative_scalar.k                    │ -3#5                 │ 5 5 5                │                      ║
 ║ reshape_basic.k                                    │ 3 4 # !12            │ (0 1 2 3;4 5 6 ...   │                      ║
 ║ division_float_4_2.0.k                             │ 4 % 2.0              │ 2.0                  │                      ║
 ║ division_float_5_2.5.k                             │ 5 % 2.5              │ 2.0                  │                      ║
@@ -1548,7 +1549,7 @@ nctb:{-+/&\|" "=x}
 rj:{(nctb x)!x}
 rj x │ " trailing blanks"   │                      ║
 ║ idioms_09_147_string_locations.k                   │ x:"**"; y:"*abcugj**jy***kmhix**12"; ss:{z[&y[z+\:!#x]~\:x]}; ss[x;y;&((1-#x)_ y)=*x] │ 7 11 12 19           │                      ║
-║ idioms_09_184_right_justify_fields.k               │ x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g] │ ()                   │ "   ab  cde fgh...   ║
+║ idioms_09_184_right_justify_fields.k               │ x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g] │ "   ab  cde fgh...   │                      ║
 ║ idioms_09_185_left_justify_fields.k                │ x:"abcdefghij"; y:2 3 4 1; g:5; lj:{[x;y;g],/g#/:((+\0,-1_ y)_ x),\:g#" "}; lj[x;y;g] │ "ab   cde  fghi...   │                      ║
 ║ idioms_09_217_index_last_nonblank.k                │ x:("love's not "; "time's fool "; "though rosy "); ln:{*|&~" "=x}; ln'x │ 9 10 10              │                      ║
 ║ idioms_09_248_center_text.k                        │ x:"1234567890"; y:16; ct:{(_ -0.5*y-#x)!y#x,y#" "}; ct[x;y] │ "   1234567890   "   │                      ║
@@ -1982,16 +1983,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1232/1323 tests passed (93.1%)                                                                             ║
+║ SUMMARY: 1234/1324 tests passed (93.2%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_09_184_right_justify_fields.k
-Input: x:"abcdefghij"; y:2 3 4 1; g:5; rj:{[x;y;g],/(-g)#/:(g#" "),/:(+\0,-1 _ y) _ x}; rj[x;y;g]
-Expected: "   ab  cde fghi    j"
-Actual: ()
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_259_remove_leading_trailing_blanks.k
 Input: x:"   abcd e  fg   "
 lt:{x[&(|\a)&||\|a:~x=" "]}
