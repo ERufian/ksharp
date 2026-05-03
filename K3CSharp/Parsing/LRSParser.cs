@@ -1573,51 +1573,9 @@ namespace K3CSharp.Parsing
                                 else if (openType == TokenType.LEFT_BRACE)
                                     return tempGroupingParser.ParseBraces(ref pos);
                             }
-                            // If first opening closes before the end, expression is NOT fully wrapped
-                            // Check for adjacent brackets - implicit apply
-                            // Note: this fixes the test associated with idiom 08_333 but 
-                            // I am not too happy with this because I don't understand 
-                            // why explicit `@` has precedence over implicit `@` 
-                            // (which is what adjacent grouping separators such as [][] should produce). 
-                            // The idiom does work but I think the right behavior should be 
-                            // a parse error that should be fixed with parentheses: 
-                            //   x:5 3 7 2
-                            //   y:8 5 2 6 1 9
-                            //   @[&1+|/x,y;y;:;1][x]   / should be equivalent to @[&1+|/x,y;y;:;1]@[x] 
-                            //                          / and an error according to LRS parsing
-                            //   (@[&1+|/x,y;y;:;1])[x] / unambiguously correct
-                            // This is not a genric fix, it's a hack that
-                            // I should revisit when/if I get a getter understanding
-                            // possibly even decide to diverge from k and not support it in ksharp
-                            if (openType == TokenType.LEFT_BRACKET && i < expressionTokens.Count - 1 &&
-                                expressionTokens[i + 1].Type == TokenType.LEFT_BRACKET)
-                            {
-                                // Adjacent brackets: first group is the function/value, remaining is the argument
-                                // Parse as implicit apply: (firstBracket)[remainingBracket]
-                                var firstGroupTokens = expressionTokens.Take(i + 1).ToList();
-                                var remainingTokens = expressionTokens.Skip(i + 1).ToList();
-
-                                // Parse the first bracket group
-                                var tempGroupingParser = new LRSGroupingParser(firstGroupTokens, BuildParseTree, this);
-                                int pos = 0;
-                                var leftNode = tempGroupingParser.ParseBrackets(ref pos);
-
-                                // Parse the remaining tokens (which start with [)
-                                var rightNode = EvaluateFromRight(remainingTokens);
-
-                                // Create implicit apply node using @ operator
-                                var applyNode = new ASTNode(ASTNodeType.DyadicOp);
-                                applyNode.Value = new SymbolValue("@");
-                                if (leftNode != null)
-                                    applyNode.Children.Add(leftNode);
-                                if (rightNode != null)
-                                    applyNode.Children.Add(rightNode);
-                                return applyNode;
-                            }
                             break;
                         }
                     }
-
                 }
                 // Period expressions (dictionaries) handled by DOT_APPLY/MAKE operators
                 // These will be caught by the dyadic/monadic parsing below

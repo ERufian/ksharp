@@ -320,6 +320,7 @@ _atan[y%x] │ 0.5235988            │                      ║
 ║ bracket_binding_chained.k                          │ f: {[x;y] x+y}
 f[3;][5] │ 8                    │                      ║
 ║ bracket_binding_apply_equiv.k                      │ (3 3 5 +) @ 2        │ 5 5 7                │                      ║
+║ triadic_projection.k                               │ {x+y+z}[1][2][3]     │ 6                    │                      ║
 ║ string_representation_int.k                        │ 5:42                 │ "42"                 │                      ║
 ║ string_representation_mixed.k                      │ 5:(1;2.5;"a")        │ "(1;2.5;\"a\")"      │                      ║
 ║ string_representation_symbol.k                     │ 5:`symbol            │ "`symbol"            │                      ║
@@ -1989,7 +1990,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1239/1329 tests passed (93.2%)                                                                             ║
+║ SUMMARY: 1240/1330 tests passed (93.2%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
