@@ -321,11 +321,15 @@ namespace K3CSharp.Verbs
                     if (IsCallableVerb(operatorSymbol))
                     {
                         // Evaluate all operands
+                        // K3 evaluates dyadic operations right-to-left, so we evaluate children in reverse order
+                        // This ensures inline assignments in the right argument happen before the left argument is evaluated
                         var arguments = new List<K3Value>();
-                        for (int i = 0; i < astNode.Children.Count; i++)
+                        for (int i = astNode.Children.Count - 1; i >= 0; i--)
                         {
                             arguments.Add(EvaluateAST(astNode.Children[i]));
                         }
+                        // Reverse back to original order for the verb call (left arg, right arg)
+                        arguments.Reverse();
                         
                         // Use the Verb Registry-based evaluation
                         return EvaluateCallableVerb(operatorSymbol, arguments.ToArray());

@@ -1576,7 +1576,7 @@ x[&y=+\x=*x] │ "abbb"               │                      ║
 ║ idioms_09_295_depth_of_parens.k                    │ x:"a(b((c)de)f)g(h)"
 dp:{+\("("=x)--1 _ 0,")"=x}
 dp x │ 0 1 1 2 3 3 3 2...   │                      ║
-║ idioms_09_297_spread_marked_field_heads.k          │ x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y] │ Error: Unclosed...   │ "abbbee"             ║
+║ idioms_09_297_spread_marked_field_heads.k          │ x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y] │ "abbbee"             │                      ║
 ║ idioms_09_377_fill_to_length.k                     │ x:"quiz"
 y:9
 y#x,y#*|x │ "quizzzzzz"          │                      ║
@@ -1843,7 +1843,7 @@ d:"0123456789 "
 .:'x │ (3 5;4 7)            │                      ║
 ║ idioms_14_101_sum_numbers_matrix.k                 │ x:$!5
 +/ .:' x       │ 10                   │                      ║
-║ idioms_14_106_leading_zeros.k                      │ x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z │ Error: Verb '$:...   │ ("037";"036";"0...   ║
+║ idioms_14_106_leading_zeros.k                      │ x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z │ Error: Cannot a...   │ ("037";"036";"0...   ║
 ║ idioms_14_452_number_of_positions.k                │ dp:{#$x};dp 1234     │ 4                    │                      ║
 ║ idioms_14_456_number_digits.k                      │ np:{1+_ log10 x+0=x}
 x:0 13 523 16008
@@ -1919,8 +1919,8 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_17_479_last_part_of_abbb.k                  │ x:1234 5678 9012 345 6789;x!1000 │ 234 678 12 345 789   │                      ║
 ║ idioms_17_475_increase_absolute_value.k            │ x:0 -1 2 -3 4 -5;y:10;sg:{(x>0)-(x<0)};(sg x)*y+_abs x │ 0 -11 12 -13 14...   │                      ║
 ║ idioms_17_477_square_retain_sign.k                 │ x:0 -1 2 -3 4;x*_abs x │ 0 -1 4 -9 16         │                      ║
-║ idioms_17_142_number_of_combinations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4] │ 1.0                  │ 210.0                ║
-║ idioms_17_135_number_of_permutations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3] │ 1.0                  │ 60.0                 ║
+║ idioms_17_142_number_of_combinations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4] │ 210.0                │                      ║
+║ idioms_17_135_number_of_permutations.k             │ fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3] │ 60.0                 │                      ║
 ║ idioms_17_136_pascals_triangle.k                   │ pt:{+':0,x,0};4 pt\1 │ Error: Unsuppor...   │ (1;(1 1);(1 2 1...   ║
 ║ idioms_18_133_degrees_from_radians.k               │ x:0.5;57.295779513082323*x │ 28.64789             │                      ║
 ║ idioms_18_134_radians_from_degrees.k               │ z:28.64789;0.017453292519943295*z │ 0.5                  │                      ║
@@ -1944,7 +1944,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_126_polynomial_fit.k                     │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: _lsq req...   │ 5 -1 3.999997 1...   ║
 ║ idioms_19_363_solve_quadratic.k                    │ qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15] │ 5.0 3.0              │ 5 3.0                ║
 ║ idioms_19_430_polynomial_derivative.k              │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
-║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 13                   │ 8.5                  ║
+║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 8.5                  │                      ║
 ║ idioms_19_281_taylor_series_value.k                │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
 ║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ ()                   │ (1 1 4 4;1 4 1 4)    ║
 ║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ 5 4 6 4 12 5 16...   │ ,14                  ║
@@ -1981,7 +1981,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_22_186_annuity_coefficient.k                │ x:10 15 20 25;y:8 9 10 15;ac:{(y%100)%/:+1-(1+y%100)^\:-x};ac[x;y] │ (0.1490295 0.13...   │ (0.1490295 0.15...   ║
 ║ idioms_22_286_fifo_stock.k                         │ x:5;y:1 2 3 4 5;ff:{-':0,0|(+\y)-x};ff[x;y] │ Error: Unsuppor...   │ 0 0 1 4 5            ║
 ║ idioms_23_389_playing_order.k                      │ log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6] │ Error: Function...   │ 1 5 3 0 2 6 4 0      ║
-║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 0                    │ 120                  ║
+║ test_f_rec.k                                       │ fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5] │ 120                  │                      ║
 ║ test_f_var.k                                       │ f:{[n]:n+1};g:f;g[5] │ 6                    │                      ║
 ║ ssr_function_replacement.k                         │ _ssr["This is a test for function SSR";"[sS]";{_ci 7+_ic x}] │ "Thiz iz a tezt...   │                      ║
 ║ ssr_function_multi_char_identity.k                 │ _ssr["abc";"ab";{x}] │ "abc"                │                      ║
@@ -1990,16 +1990,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1241/1330 tests passed (93.3%)                                                                             ║
+║ SUMMARY: 1246/1330 tests passed (93.7%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_09_297_spread_marked_field_heads.k
-Input: x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y]
-Expected: "abbbee"
-Actual: Error: Unclosed parentheses - expected ')'
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_490_insert_spaces_in_text.k
 Input: x:"wider"; ,/(+,x),'" "
 Expected: "w i d e r "
@@ -2260,7 +2255,7 @@ Actual: -
 Test: idioms_14_106_leading_zeros.k
 Input: x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z
 Expected: ("037";"036";"017";"038";"029";"004";"031";"012";"035";"025")
-Actual: Error: Verb '$:' is registered as monadic but not implemented in ApplyMonadicVerb
+Actual: Error: Cannot add Integer and Null
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_14_456_number_digits.k
 Input: np:{1+_ log10 x+0=x}
@@ -2349,16 +2344,6 @@ Input: ld:{_ x%1000};x:1319 8629 6581 6988 790 9045;ld x
 Expected: 1 8 6 6 0 9
 Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_142_number_of_combinations.k
-Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};bin[10;4]
-Expected: 210.0
-Actual: 1.0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_135_number_of_permutations.k
-Input: fac:{[n]:[n>1; n * _f[n-1];1]};bin:{[n;k]fac[n]%fac[n-k]*fac[k]};pn:{[n;k]fac[k]*bin[n;k]};pn[5;3]
-Expected: 60.0
-Actual: 1.0
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_136_pascals_triangle.k
 Input: pt:{+':0,x,0};4 pt\1
 Expected: (1;(1 1);(1 2 1);(1 3 3 1);(1 4 6 4 1))
@@ -2399,11 +2384,6 @@ Input: qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4
 Expected: 5 3.0
 Actual: 5.0 3.0
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_137_taylor_series.k
-Input: x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a]
-Expected: 8.5
-Actual: 13
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_48_saddle_point_indices.k
 Input: x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x
 Expected: (1 1 4 4;1 4 1 4)
@@ -2442,7 +2422,7 @@ Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
 Test: idioms_21_173_assign_to_classes.k
 Input: f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h]
 Expected: 0 2 4 2
-Actual: Error: Function execution error: Verb '#:' found in registry but not implemented in EvaluateDyadicOperatorWithRegistry
+Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_22_146_compound_interest.k
 Input: x:1 2 3 4;y:1 2 3 4;g:0.5 1 1.5 2;z:y*\:(1+g%100)^\:x;z[0;0;0]
@@ -2463,9 +2443,4 @@ Test: idioms_23_389_playing_order.k
 Input: log2:{_log[x]%_log[2]};tt:{2 _vs !_2^x};i:{1+2_sv'+|tt[-_-log2[x]]};j:{@[x;&x>y;:;0]};k:{j[i[x];x]};k[6]
 Expected: 1 5 3 0 2 6 4 0
 Actual: Error: Function execution error: Function execution error: Cannot add Null and Integer
-──────────────────────────────────────────────────────────────────────────
-Test: test_f_rec.k
-Input: fac:{[n]:[n=0;1;n*_f[n-1]]};fac[5]
-Expected: 120
-Actual: 0
 ──────────────────────────────────────────────────────────────────────────

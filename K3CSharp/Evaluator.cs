@@ -959,8 +959,9 @@ namespace K3CSharp
             if (op.Value.ToString() == "each" && node.Children.Count == 3)
             {
                 var verbNode3 = node.Children[0];
-                var leftArg3 = Evaluate(node.Children[1]);
+                // K evaluates right-to-left: evaluate right arg before left arg
                 var rightArg3 = Evaluate(node.Children[2]);
+                var leftArg3 = Evaluate(node.Children[1]);
                 
                 // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
                 // route to dyadic nested-adverb handler.
@@ -990,8 +991,9 @@ namespace K3CSharp
                     verbNodeTw.Children.Count == 1 && verbNodeTw.Value is SymbolValue;
                 if (isModifiedVerbTw)
                 {
-                    var leftTw = Evaluate(node.Children[1]);
+                    // K evaluates right-to-left: evaluate right arg before left arg
                     var rightTw = Evaluate(node.Children[2]);
+                    var leftTw = Evaluate(node.Children[1]);
                     return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNodeTw, leftTw, rightTw);
                 }
                 
@@ -1087,24 +1089,22 @@ namespace K3CSharp
                 if (verbWithAdverbs != null && verbWithAdverbs.Adverbs.Count > 0)
                 {
                     // This is a verb with adverbs - use enhanced evaluation
-                    // NOTE: left must be evaluated before right here because adverb evaluation
-                    // expects arguments in (left, right) order. For plain verbs (no adverbs),
-                    // we fall through to the right-before-left path below to preserve K's LRS semantics
-                    // and ensure inline assignments in the right subtree execute before the left is evaluated.
-                    var left = Evaluate(node.Children[0]);
+                    // Evaluate right before left to preserve K's LRS semantics
+                    // This ensures inline assignments in the right subtree execute before the left is evaluated
                     var right = Evaluate(node.Children[1]);
+                    var left = Evaluate(node.Children[0]);
                     
                     // Determine the effective arity and apply adverbs sequentially
                     var effectiveArity = verbWithAdverbs.GetEffectiveArity();
                     if (effectiveArity == 1)
                     {
                         // Monadic with adverbs
-                        return adverbAwareEvaluator.EvaluateVerbWithAdverbs(verbWithAdverbs, left);
+                        return adverbAwareEvaluator.EvaluateVerbWithAdverbs(verbWithAdverbs, left!);
                     }
                     else if (effectiveArity == 2)
                     {
                         // Dyadic with adverbs
-                        return adverbAwareEvaluator.EvaluateVerbWithAdverbs(verbWithAdverbs, left, right);
+                        return adverbAwareEvaluator.EvaluateVerbWithAdverbs(verbWithAdverbs, left!, right!);
                     }
                     else
                     {
@@ -1959,6 +1959,7 @@ namespace K3CSharp
             
             // Create a new evaluator scope for this function call
             var functionEvaluator = new Evaluator(this); // Pass parent to inherit currentFunctionValue
+            functionEvaluator.isInFunctionCall = true;
             
             // Copy local variables to function scope (for nested functions)
             foreach (var kvp in localVariables)
@@ -1966,16 +1967,10 @@ namespace K3CSharp
                 functionEvaluator.localVariables[kvp.Key] = kvp.Value;
             }
             
-            // Bind parameters to arguments (in local scope) — preliminary bind before kTree is set
+            // Bind parameters to arguments (in local scope)
             for (int i = 0; i < Math.Min(parameters.Count, arguments.Count); i++)
             {
                 functionEvaluator.SetVariable(parameters[i], arguments[i]);
-            }
-            
-            // Copy local variables to function scope (for nested functions)
-            foreach (var kvp in localVariables)
-            {
-                functionEvaluator.localVariables[kvp.Key] = kvp.Value;
             }
             
             // Set the associated K tree for anonymous functions

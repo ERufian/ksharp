@@ -30,7 +30,7 @@ namespace K3CSharp.Parsing
         {
             if (position >= tokens.Count || tokens[position].Type != TokenType.LEFT_PAREN)
                 throw new Exception("Expected '('");
-                
+            
             position++; // Consume '('
 
             var elements = new List<ASTNode>();
@@ -67,7 +67,7 @@ namespace K3CSharp.Parsing
                     lastWasSeparator = true;
                 
                 // Parse the expression (commas are operators, so they're handled as part of expressions)
-                var expr = ParseExpressionInGrouping(ref position);
+                var expr = ParseExpressionInGrouping(ref position, TokenType.RIGHT_PAREN);
                 if (expr != null)
                 {
                     elements.Add(expr);
@@ -386,7 +386,9 @@ namespace K3CSharp.Parsing
         /// Parse expression within grouping constructs
         /// Collects all tokens including nested parentheses and delegates to LRS parser
         /// </summary>
-        private ASTNode? ParseExpressionInGrouping(ref int position)
+        /// <param name="position">Reference to current position in token stream</param>
+        /// <param name="expectedClosingDelimiter">Optional delimiter that ends this expression when at depth 1</param>
+        private ASTNode? ParseExpressionInGrouping(ref int position, TokenType? expectedClosingDelimiter = null)
         {
             if (position >= tokens.Count)
             {
@@ -406,6 +408,8 @@ namespace K3CSharp.Parsing
             // Collect all tokens for this expression, including nested parentheses
             // Track depth to know when we hit the end of this expression
             // We start at depth 0 (outside any grouping constructs)
+            // If expectedClosingDelimiter is set, start at depth 1 because the opening delimiter
+            // was already consumed by the caller
             var exprTokens = new List<Token>();
             int depth = 0;
             
@@ -552,6 +556,13 @@ namespace K3CSharp.Parsing
                 if (position < tokens.Count && (tokens[position].Type == TokenType.SEMICOLON || tokens[position].Type == TokenType.NEWLINE))
                 {
                     position++; // Consume separator
+                }
+                else if (position < tokens.Count && (tokens[position].Type == TokenType.RIGHT_PAREN || 
+                         tokens[position].Type == TokenType.RIGHT_BRACKET || 
+                         tokens[position].Type == TokenType.RIGHT_BRACE))
+                {
+                    // Closing delimiter - end of function body
+                    break;
                 }
                 else
                 {

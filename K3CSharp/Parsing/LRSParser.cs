@@ -2731,7 +2731,11 @@ namespace K3CSharp.Parsing
                 
                 // Pattern with left argument: left_arg + verb + colon + adverb
                 // Pattern: 1 +:/x (e.g., 1 +:/x for conditional transpose)
+                // Skip if position 0 is a grouping delimiter - those should be parsed as grouping constructs first
                 if (expressionTokens.Count >= 4 &&
+                    expressionTokens[0].Type != TokenType.LEFT_PAREN &&
+                    expressionTokens[0].Type != TokenType.LEFT_BRACKET &&
+                    expressionTokens[0].Type != TokenType.LEFT_BRACE &&
                     IsVerbToken(expressionTokens[1].Type) &&
                     expressionTokens[2].Type == TokenType.COLON &&
                     (expressionTokens[3].Type == TokenType.ADVERB_SLASH ||
@@ -2952,9 +2956,11 @@ namespace K3CSharp.Parsing
                 var argParser = new LRSExpressionProcessor(argTokens, BuildParseTree, this);
                 argNode = argParser.ProcessExpression(ref argPosition);
                 
-                // If we couldn't parse the arguments, try using the LRSParser directly
+                // If we couldn't parse the arguments, or ProcessExpression only parsed
+                // a partial expression (e.g., just 'a' from 'a _ x'), use the full LRSParser.
                 // This handles complex expressions like (1 2 3;4 5 6) with semicolons
-                if (argNode == null && argTokens.Count > 0)
+                // and dyadic operations that ProcessExpression doesn't handle.
+                if ((argNode == null || argPosition < argTokens.Count) && argTokens.Count > 0)
                 {
                     argNode = BuildParseTreeFromTokens(argTokens);
                 }
