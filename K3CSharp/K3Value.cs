@@ -1004,16 +1004,33 @@ namespace K3CSharp
     {
         public string OperatorName { get; }
         public int RequiredArguments { get; }
+        /// <summary>
+        /// Bound arguments for bracket projections (e.g., +[3 3 5] binds left arg).
+        /// null entries represent unbound (missing) argument positions.
+        /// null list means no bound arguments (simple projection like (+)).
+        /// </summary>
+        public List<K3Value?>? BoundArguments { get; }
 
-        public ProjectedFunctionValue(string operatorName, int requiredArguments)
+        public ProjectedFunctionValue(string operatorName, int requiredArguments, List<K3Value?>? boundArguments = null)
         {
             Type = ValueType.Function; // Treat as a function type
             OperatorName = operatorName;
             RequiredArguments = requiredArguments;
+            BoundArguments = boundArguments;
         }
 
         public override string ToString()
         {
+            // If there are bound arguments, display in bracket notation like k.exe
+            if (BoundArguments != null && BoundArguments.Count > 0)
+            {
+                var parts = new List<string>();
+                foreach (var arg in BoundArguments)
+                {
+                    parts.Add(arg?.ToString() ?? "");
+                }
+                return OperatorName + "[" + string.Join(";", parts) + "]";
+            }
             // Monadic projections (arity 1) should be displayed with a colon
             // Dyadic projections (arity 2) are displayed without colon
             return RequiredArguments == 1 ? OperatorName + ":" : OperatorName;

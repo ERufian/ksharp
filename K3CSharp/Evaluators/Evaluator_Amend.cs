@@ -631,6 +631,34 @@ namespace K3CSharp
         
         private K3Value CallProjectedFunction(ProjectedFunctionValue projected, List<K3Value> arguments)
         {
+            // If the projection has bound arguments, merge them with the provided arguments
+            // Bound args have null for unbound positions; fill those with provided arguments
+            if (projected.BoundArguments != null && projected.BoundArguments.Count > 0)
+            {
+                var mergedArgs = new List<K3Value>();
+                int argIdx = 0;
+                foreach (var boundArg in projected.BoundArguments)
+                {
+                    if (boundArg == null)
+                    {
+                        // Unbound position — fill from provided arguments
+                        if (argIdx < arguments.Count)
+                            mergedArgs.Add(arguments[argIdx++]);
+                        else
+                            mergedArgs.Add(new NullValue());
+                    }
+                    else
+                    {
+                        mergedArgs.Add(boundArg);
+                    }
+                }
+                // If there are extra provided arguments beyond the unbound slots, append them
+                while (argIdx < arguments.Count)
+                    mergedArgs.Add(arguments[argIdx++]);
+                
+                return CallVariableFunction(projected.OperatorName, mergedArgs);
+            }
+            
             // Call a projected function like +/, over, etc.
             return CallVariableFunction(projected.OperatorName, arguments);
         }

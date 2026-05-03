@@ -393,19 +393,25 @@ namespace K3CSharp.Parsing
                             // Check if prefix contains dyadic operators at depth 0
                             // If so, skip bracket function call handling to preserve LRS semantics
                             // e.g., y,x[&~x _lin y] should be y joined with x[...], not (y,x)[...]
+                            // Exception: a single verb token as the entire prefix is NOT a dyadic
+                            // operator — it's a function being applied via bracket notation
+                            // e.g., +[3 3 5][2] — the + is the function, not a dyadic op
                             bool prefixHasDyadicOperator = false;
-                            int prefixDepth = 0;
-                            for (int i = 0; i < prefixTokens.Count; i++)
+                            if (prefixTokens.Count > 1)
                             {
-                                var tok = prefixTokens[i];
-                                if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE)
-                                    prefixDepth++;
-                                else if (tok.Type == TokenType.RIGHT_PAREN || tok.Type == TokenType.RIGHT_BRACKET || tok.Type == TokenType.RIGHT_BRACE)
-                                    prefixDepth--;
-                                else if (prefixDepth == 0 && OperatorDetector.SupportsDyadic(tok.Type))
+                                int prefixDepth = 0;
+                                for (int i = 0; i < prefixTokens.Count; i++)
                                 {
-                                    prefixHasDyadicOperator = true;
-                                    break;
+                                    var tok = prefixTokens[i];
+                                    if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE)
+                                        prefixDepth++;
+                                    else if (tok.Type == TokenType.RIGHT_PAREN || tok.Type == TokenType.RIGHT_BRACKET || tok.Type == TokenType.RIGHT_BRACE)
+                                        prefixDepth--;
+                                    else if (prefixDepth == 0 && OperatorDetector.SupportsDyadic(tok.Type))
+                                    {
+                                        prefixHasDyadicOperator = true;
+                                        break;
+                                    }
                                 }
                             }
                             
@@ -449,6 +455,10 @@ namespace K3CSharp.Parsing
                             else
                                 currentNode = EvaluateFromRight(prefixTokens);
                             
+                            // Check if prefix is a single verb token — verb[args] creates
+                            // projections when fewer args than max arity are provided
+                            bool prefixIsSingleVerb = prefixTokens.Count == 1 && IsVerbToken(prefixTokens[0].Type);
+                            
                             if (currentNode != null)
                             {
                                 // Apply each bracket group left-to-right
@@ -466,6 +476,7 @@ namespace K3CSharp.Parsing
                                         // Split arguments by semicolons and parse each one
                                         var splitArgs = SplitBracketArguments(argTokens, int.MaxValue);
                                         var argNodes = new List<ASTNode>();
+                                        bool hasBlankSlot = splitArgs.Any(a => a.Count == 0);
                                         
                                         foreach (var splitArgTokens in splitArgs)
                                         {
@@ -487,10 +498,29 @@ namespace K3CSharp.Parsing
                                         
                                         if (argNodes.Count > 0)
                                         {
+                                            // When prefix is a single verb and bracket has fewer args 
+                                            // than the verb's max arity, create a projection node
+                                            // e.g., +[3 3 5] creates projection with left arg bound
+                                            if (prefixIsSingleVerb && !hasBlankSlot && splitArgs.Count == 1)
+                                            {
+                                                var opSymbol = VerbRegistry.GetDyadicOperatorSymbol(prefixTokens[0].Type);
+                                                var verb = VerbRegistry.GetVerb(opSymbol);
+                                                int maxArity = verb?.SupportedArities?.Max() ?? 2;
+                                                if (maxArity > 1)
+                                                {
+                                                    // Create projection: verb with first arg bound, second missing
+                                                    currentNode = CreateProjectionNode(prefixTokens[0], argNodes[0], null);
+                                                    prefixIsSingleVerb = false; // subsequent brackets are applications
+                                                    continue;
+                                                }
+                                            }
+                                            
                                             var argVector = argNodes.Count == 1 ? argNodes[0] : ASTNode.MakeVector(argNodes);
                                             currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argVector);
                                         }
                                     }
+                                    // After first bracket, subsequent brackets are applications, not projections
+                                    prefixIsSingleVerb = false;
                                 }
                                 return currentNode;
                             } // Close if (!prefixHasDyadicOperator) - bracket handling block
@@ -520,6 +550,12 @@ namespace K3CSharp.Parsing
             
             if (tokens.Count == 1)
                 return CreateNodeFromToken(tokens[0]);
+            
+            // Check for chained bracket application (e.g., f[1][2] or +[3 3 5][2])
+            // This must be done BEFORE other parsing to handle bracket binding correctly
+            var bracketAppResult = TryHandleChainedBrackets(tokens);
+            if (bracketAppResult != null)
+                return bracketAppResult;
             
             // Check for disambiguating colon pattern: left_arg + verb + colon + adverb
             // Pattern: 1 +:/x (e.g., 1 +:/x for conditional transpose)
@@ -969,6 +1005,163 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
+        /// Handle chained bracket application (e.g., f[1][2] or +[3 3 5][2])
+        /// Brackets bind to the item on their left with left-to-right associativity
+        /// </summary>
+        private ASTNode? TryHandleChainedBrackets(List<Token> tokens)
+        {
+            if (tokens.Count < 3)
+                return null;
+            
+            // Don't handle conditional statements (they start with specific keywords)
+            if (tokens.Count >= 2 && LRSStatementParser.CouldBeStatement(tokens[0].Type))
+                return null;
+            
+            // Find first bracket at top level
+            int firstBracket = -1;
+            {
+                var t0 = tokens[0].Type;
+                int scanDepth = (t0 == TokenType.LEFT_PAREN || t0 == TokenType.LEFT_BRACE) ? 1 : 0;
+                for (int i = 1; i < tokens.Count; i++)
+                {
+                    var tt = tokens[i].Type;
+                    if (tt == TokenType.LEFT_BRACKET && scanDepth == 0)
+                    {
+                        firstBracket = i;
+                        break;
+                    }
+                    if (tt == TokenType.LEFT_PAREN || tt == TokenType.LEFT_BRACE || tt == TokenType.LEFT_BRACKET) scanDepth++;
+                    else if (tt == TokenType.RIGHT_PAREN || tt == TokenType.RIGHT_BRACE || tt == TokenType.RIGHT_BRACKET) scanDepth--;
+                }
+            }
+            
+            if (firstBracket == -1)
+                return null;
+            
+            // Check if prefix contains dyadic operators (which would prevent bracket binding)
+            // Exception: a single verb token is the function being applied, not a dyadic op
+            var prefixTokens = tokens.GetRange(0, firstBracket);
+            bool prefixHasDyadicOperator = false;
+            if (prefixTokens.Count > 1)
+            {
+                int prefixDepth = 0;
+                for (int i = 0; i < prefixTokens.Count; i++)
+                {
+                    var tok = prefixTokens[i];
+                    if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE)
+                        prefixDepth++;
+                    else if (tok.Type == TokenType.RIGHT_PAREN || tok.Type == TokenType.RIGHT_BRACKET || tok.Type == TokenType.RIGHT_BRACE)
+                        prefixDepth--;
+                    else if (prefixDepth == 0 && OperatorDetector.SupportsDyadic(tok.Type))
+                    {
+                        prefixHasDyadicOperator = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (prefixHasDyadicOperator)
+                return null;
+            
+            // Verify all remaining tokens are bracket groups
+            bool allBrackets = true;
+            int pos = firstBracket;
+            var bracketGroups = new List<(int start, int end)>();
+            while (pos < tokens.Count)
+            {
+                if (tokens[pos].Type != TokenType.LEFT_BRACKET)
+                {
+                    allBrackets = false;
+                    break;
+                }
+                var groupEnd = FindMatchingBracket(tokens, pos);
+                if (groupEnd == -1)
+                {
+                    allBrackets = false;
+                    break;
+                }
+                bracketGroups.Add((pos, groupEnd));
+                pos = groupEnd + 1;
+            }
+            
+            if (!allBrackets || bracketGroups.Count == 0)
+                return null;
+            
+            // Check if prefix is a single verb token
+            bool prefixIsSingleVerb = prefixTokens.Count == 1 && IsVerbToken(prefixTokens[0].Type);
+            
+            // When prefix is a single verb, check the first bracket for blank slots.
+            // Blank slots mean projection (e.g. +[3;] or +[;5]) — let TryParseProjection handle those.
+            if (prefixIsSingleVerb && bracketGroups.Count >= 1)
+            {
+                var (fg, eg) = bracketGroups[0];
+                var firstArgTokens = tokens.GetRange(fg + 1, eg - fg - 1);
+                var firstSplit = SplitBracketArguments(firstArgTokens, int.MaxValue);
+                if (firstSplit.Any(a => a.Count == 0))
+                    return null;
+                
+                // verb[arg1][arg2] with exactly 2 single-arg brackets → dyadic op: verb(arg1, arg2)
+                if (bracketGroups.Count == 2 && firstSplit.Count == 1)
+                {
+                    var (sg, se) = bracketGroups[1];
+                    var secondArgTokens = tokens.GetRange(sg + 1, se - sg - 1);
+                    var secondSplit = SplitBracketArguments(secondArgTokens, int.MaxValue);
+                    if (secondSplit.Count == 1 && secondSplit[0].Count > 0 && !secondSplit.Any(a => a.Count == 0))
+                    {
+                        var leftArg = BuildParseTreeFromRight(firstSplit[0]);
+                        var rightArg = BuildParseTreeFromRight(secondSplit[0]);
+                        if (leftArg != null && rightArg != null)
+                            return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(prefixTokens[0].Lexeme), new List<ASTNode> { leftArg, rightArg });
+                    }
+                }
+            }
+            
+            // Parse the base (prefix before first bracket)
+            var currentNode = BuildParseTreeFromRight(prefixTokens);
+            if (currentNode == null)
+                return null;
+            
+            // Apply each bracket group left-to-right
+            foreach (var (groupStart, groupEnd) in bracketGroups)
+            {
+                var argTokens = tokens.GetRange(groupStart + 1, groupEnd - groupStart - 1);
+                
+                if (argTokens.Count == 0)
+                {
+                    // niladic call: f[]
+                    currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, ASTNode.MakeVector(new List<ASTNode>()));
+                }
+                else
+                {
+                    // Split arguments by semicolons and parse each one
+                    var splitArgs = SplitBracketArguments(argTokens, int.MaxValue);
+                    var argNodes = new List<ASTNode>();
+                    
+                    foreach (var splitArgTokens in splitArgs)
+                    {
+                        if (splitArgTokens.Count == 0)
+                        {
+                            // Blank slot (e.g. f[1;;3]) — preserve as NullValue sentinel for projection
+                            argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                            continue;
+                        }
+                        var argNode = BuildParseTreeFromRight(splitArgTokens);
+                        if (argNode != null)
+                            argNodes.Add(argNode);
+                    }
+                    
+                    if (argNodes.Count > 0)
+                    {
+                        var argVector = argNodes.Count == 1 ? argNodes[0] : ASTNode.MakeVector(argNodes);
+                        currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argVector);
+                    }
+                }
+            }
+            
+            return currentNode;
+        }
+        
+        /// <summary>
         /// Try to parse projection patterns
         /// 1. (+) - parenthesized operator alone
         /// 2. 1+ - postfix projection (left fixed, right missing)
@@ -985,14 +1178,33 @@ namespace K3CSharp.Parsing
                 return CreateProjectionNode(tokens[1], null, null);
             }
             
-            // Pattern 2: 1+ - postfix projection (left fixed, right missing)
-            // Last token is an operator that supports dyadic operations
-            if (tokens.Count == 2 &&
-                IsVerbToken(tokens[1].Type) &&
-                OperatorDetector.SupportsDyadic(tokens[1].Type))
+            // Pattern 2: expr+ - postfix projection (left fixed, right missing)
+            // Last token is an operator that supports dyadic operations,
+            // and the prefix (everything before it) has no top-level dyadic operators
+            // (so we don't misparse "a + b" where b happens to be a verb)
+            if (tokens.Count >= 2 &&
+                IsVerbToken(tokens[tokens.Count - 1].Type) &&
+                OperatorDetector.SupportsDyadic(tokens[tokens.Count - 1].Type))
             {
-                var leftOperand = CreateNodeFromToken(tokens[0]);
-                return CreateProjectionNode(tokens[1], leftOperand, null);
+                var verbToken = tokens[tokens.Count - 1];
+                var leftTokens = tokens.GetRange(0, tokens.Count - 1);
+                // Only treat as postfix projection if the prefix has no top-level dyadic operators
+                bool prefixHasDyadic = false;
+                int pd = 0;
+                foreach (var lt in leftTokens)
+                {
+                    if (lt.Type == TokenType.LEFT_PAREN || lt.Type == TokenType.LEFT_BRACKET || lt.Type == TokenType.LEFT_BRACE) pd++;
+                    else if (lt.Type == TokenType.RIGHT_PAREN || lt.Type == TokenType.RIGHT_BRACKET || lt.Type == TokenType.RIGHT_BRACE) pd--;
+                    else if (pd == 0 && IsVerbToken(lt.Type)) { prefixHasDyadic = true; break; }
+                }
+                if (!prefixHasDyadic)
+                {
+                    var leftOperand = leftTokens.Count == 1
+                        ? CreateNodeFromToken(leftTokens[0])
+                        : BuildParseTreeFromRight(leftTokens);
+                    if (leftOperand != null)
+                        return CreateProjectionNode(verbToken, leftOperand, null);
+                }
             }
             
             // Pattern 3: +[;2] or +[1;] - bracket projection
@@ -1161,6 +1373,32 @@ namespace K3CSharp.Parsing
                 }
             }
 
+            // Postfix projection pattern: expr+ (last token is dyadic verb, prefix has no top-level verbs)
+            // e.g., (3 3 5 +) → left-bound projection of + with left=3 3 5
+            if (expressionTokens.Count >= 2 &&
+                IsVerbToken(expressionTokens[expressionTokens.Count - 1].Type) &&
+                OperatorDetector.SupportsDyadic(expressionTokens[expressionTokens.Count - 1].Type))
+            {
+                var lastVerbToken = expressionTokens[expressionTokens.Count - 1];
+                var prefixTokens2 = expressionTokens.GetRange(0, expressionTokens.Count - 1);
+                bool prefixHasDyadic2 = false;
+                int pd2 = 0;
+                foreach (var lt in prefixTokens2)
+                {
+                    if (lt.Type == TokenType.LEFT_PAREN || lt.Type == TokenType.LEFT_BRACKET || lt.Type == TokenType.LEFT_BRACE) pd2++;
+                    else if (lt.Type == TokenType.RIGHT_PAREN || lt.Type == TokenType.RIGHT_BRACKET || lt.Type == TokenType.RIGHT_BRACE) pd2--;
+                    else if (pd2 == 0 && IsVerbToken(lt.Type)) { prefixHasDyadic2 = true; break; }
+                }
+                if (!prefixHasDyadic2)
+                {
+                    ASTNode? leftOperand2 = prefixTokens2.Count == 1
+                        ? CreateNodeFromToken(prefixTokens2[0])
+                        : EvaluateFromRight(prefixTokens2);
+                    if (leftOperand2 != null)
+                        return CreateProjectionNode(lastVerbToken, leftOperand2, null);
+                }
+            }
+            
             // Check for function+adverb patterns FIRST
             // Pattern: {function}/vector or {function}\vector
             if (expressionTokens.Count >= 2 && expressionTokens[0].Type == TokenType.LEFT_BRACE)

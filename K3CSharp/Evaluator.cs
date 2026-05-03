@@ -3239,6 +3239,16 @@ namespace K3CSharp
                 return right ?? throw new ArgumentNullException(nameof(right));
             }
             
+            // @ operator for applying a projected function to arguments
+            // e.g., +[3 3 5] @ 2 or +[3 3 5][2] (parsed as APPLY(projection, 2))
+            if (left is ProjectedFunctionValue projLeft)
+            {
+                var arguments = right is VectorValue argVec2 
+                    ? new List<K3Value>(argVec2.Elements) 
+                    : new List<K3Value> { right ?? new NullValue() };
+                return CallProjectedFunction(projLeft, arguments);
+            }
+            
             // @ operator for function application: data @ function
             // When right is a function, apply it to the left operand
             if (right is FunctionValue funcVal)
@@ -5039,12 +5049,24 @@ namespace K3CSharp
                     regularArity = regularArityValue.Value;
                 }
                 
-                // Create a projected function value that can be completed later
-                // This represents a function that, when called with the remaining arguments,
-                // will apply the operator to all arguments together
+                // Capture bound arguments from children produced by CreateProjectionNode.
+                // Children layout: [arity, leftArg_or_::, rightArg_or_::] where "::" = unbound.
+                List<K3Value?>? boundArgs = null;
+                if (node.Children.Count >= 3)
+                {
+                    var leftChild = node.Children[1];
+                    var rightChild = node.Children[2];
+                    bool leftUnbound = leftChild.Value is SymbolValue lsv && lsv.Value == "::";
+                    bool rightUnbound = rightChild.Value is SymbolValue rsv && rsv.Value == "::";
+                    if (!leftUnbound || !rightUnbound)
+                    {
+                        K3Value? leftVal = leftUnbound ? null : Evaluate(leftChild);
+                        K3Value? rightVal = rightUnbound ? null : Evaluate(rightChild);
+                        boundArgs = new List<K3Value?> { leftVal, rightVal };
+                    }
+                }
                 
-                var projectedFunction = new ProjectedFunctionValue(operatorName, regularArity);
-                return projectedFunction;
+                return new ProjectedFunctionValue(operatorName, regularArity, boundArgs);
             }
             
             throw new Exception($"Invalid projected function node: {node.Value}");

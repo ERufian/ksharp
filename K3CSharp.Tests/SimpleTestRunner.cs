@@ -1005,7 +1005,18 @@ namespace K3CSharp.Tests
 
                 ("bracket_sysverb_atan.k", "0.5235988"),
 
-                
+                // Bracket binding and projection tests
+                ("bracket_binding_projection_basic.k", "5 5 7"),
+
+                ("bracket_binding_projection_left.k", "+[3;]"),
+
+                ("bracket_binding_projection_right.k", "+[;5]"),
+
+                ("bracket_binding_chained.k", "8"),
+
+                ("bracket_binding_apply_equiv.k", "5 5 7"),
+
+                ("triadic_projection.k", "6"),
 
                 // String representation tests
 

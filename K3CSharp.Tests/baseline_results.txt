@@ -1,0 +1,12 @@
+Test File Validation:
+  Expected tests: 1324
+  Actual .k files: 1329
+  Γ¥î MISSING FROM RUNNER (5):
+    - bracket_binding_apply_equiv.k
+    - bracket_binding_chained.k
+    - bracket_binding_projection_basic.k
+    - bracket_binding_projection_left.k
+    - bracket_binding_projection_right.k
+
+ERROR: Test files exist but are not included in test runner!
+Please add missing test cases to the test runner or remove duplicate files.
