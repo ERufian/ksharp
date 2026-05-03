@@ -1428,33 +1428,70 @@ namespace K3CSharp
         private K3Value Transpose(K3Value a)
         {
             // Flip/transpose operation: +(`a`b`c;1 2 3) -> ((`a;1);(`b;2);(`c;3))
-            if (a is VectorValue vec && vec.Elements.Count == 2)
+            // +((`a`b`c);(1 2 3)) -> same as above
+            // +("abc") -> "abc" (atom/vector identity)
+            // +(,"abcde") -> (,"a";,"b";,"c";,"d";,"e")  // 1-element vector of 5-char string -> 5-element vector of 1-char strings
+            // +1 2 3 -> 1 2 3 (vector of atoms is identity)
+            
+            if (a is not VectorValue vec || vec.Elements.Count == 0)
+                return a; // Atoms and empty vectors are identity
+            
+            // Check if all elements are atoms (not vectors) - if so, return as identity
+            // Per K spec: "If all items of x are atoms then +x is identical to x"
+            bool allAtoms = true;
+            foreach (var elem in vec.Elements)
             {
-                var first = vec.Elements[0];
-                var second = vec.Elements[1];
-                
-                if (first is VectorValue firstVec && second is VectorValue secondVec)
+                if (elem is VectorValue)
                 {
-                    // Check if both vectors have the same length
-                    if (firstVec.Elements.Count != secondVec.Elements.Count)
-                    {
-                        throw new Exception("Flip requires vectors of equal length");
-                    }
-                    
-                    // Create the flipped structure: ((first[i];second[i]);...)
-                    var result = new List<K3Value>();
-                    for (int i = 0; i < firstVec.Elements.Count; i++)
-                    {
-                        var pair = new List<K3Value> { firstVec.Elements[i], secondVec.Elements[i] };
-                        result.Add(new VectorValue(pair));
-                    }
-                    
-                    return new VectorValue(result);
+                    allAtoms = false;
+                    break;
+                }
+            }
+            if (allAtoms)
+                return a;
+            
+            // Check if all elements are vectors (or atoms that can be treated as 1-element vectors)
+            var rows = new List<VectorValue>();
+            int innerLength = -1;
+            foreach (var elem in vec.Elements)
+            {
+                if (elem is VectorValue v)
+                {
+                    if (innerLength == -1)
+                        innerLength = v.Elements.Count;
+                    else if (v.Elements.Count != innerLength)
+                        throw new Exception($"Flip length error: vector has {v.Elements.Count} items, expected {innerLength}");
+                    rows.Add(v);
+                }
+                else
+                {
+                    // Atom element: treat as 1-element vector
+                    if (innerLength == -1)
+                        innerLength = 1;
+                    else if (innerLength != 1)
+                        throw new Exception($"Flip length error: atom treated as 1-element vector, expected {innerLength}");
+                    rows.Add(new VectorValue(new List<K3Value> { elem }));
                 }
             }
             
-            // For other cases, return as-is (matrix transpose not implemented)
-            return a;
+            if (innerLength <= 0)
+                return a;
+            
+            int outerLength = rows.Count;
+            
+            // Transpose: create innerLength new rows, each with outerLength elements
+            var result = new List<K3Value>();
+            for (int col = 0; col < innerLength; col++)
+            {
+                var newRow = new List<K3Value>();
+                for (int row = 0; row < outerLength; row++)
+                {
+                    newRow.Add(rows[row].Elements[col]);
+                }
+                result.Add(new VectorValue(newRow));
+            }
+            
+            return new VectorValue(result);
         }
 
         private K3Value First(K3Value a)

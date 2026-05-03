@@ -2753,7 +2753,7 @@ namespace K3CSharp.Tests
                 ("idioms_14_456_number_digits.k", "1 2 3 5"),
 
                 // Chapter 15 idioms: Numeric base conversions
-                ("idioms_15_46_transposed_formatted_integers.k", "(,\"1\";,\"2\";,\"3\";,\"4\";,\"5\")"),
+                ("idioms_15_46_transposed_formatted_integers.k", ",\"12345\""),
                 ("idioms_15_49_hex_from_decimal.k", "\"ff\""),
                 ("idioms_15_52_truth_table.k", "(0 0 0 0 1 1 1 1;0 0 1 1 0 0 1 1;0 1 0 1 0 1 0 1)"),
                 ("idioms_15_53_decimal_digits.k", "1 2 3 4"),
