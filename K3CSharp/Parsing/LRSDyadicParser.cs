@@ -135,6 +135,14 @@ namespace K3CSharp.Parsing
                     // meaning it is not yet a simple value.
                     return false;
                 }
+                else if (depth == 0 && token.Type == TokenType.COLON &&
+                         i > 0 && tokens[i - 1].Type == TokenType.IDENTIFIER)
+                {
+                    // Assignment prefix (IDENTIFIER COLON) at depth 0: by LRS the colon
+                    // captures everything to its right, so operators to the right of this
+                    // colon are part of the assignment RHS, not peer dyadic operators.
+                    return false;
+                }
             }
             
             return true;

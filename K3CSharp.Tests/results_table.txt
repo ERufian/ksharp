@@ -1562,7 +1562,7 @@ rj x │ " trailing blanks"   │                      ║
 ║ idioms_09_248_center_text.k                        │ x:"1234567890"; y:16; ct:{(_ -0.5*y-#x)!y#x,y#" "}; ct[x;y] │ "   1234567890   "   │                      ║
 ║ idioms_09_259_remove_leading_trailing_blanks.k     │ x:"   abcd e  fg   "
 lt:{x[&(|\a)&||\|a:~x=" "]}
-lt x │ Error: Function...   │ "abcd e  fg"         ║
+lt x │ "abcd e  fg"         │                      ║
 ║ idioms_09_264_insert_blanks_after.k                │ x:3 2 1; y:"abcdefg"; g:2 4 6; ib:{[x;y;g],/((0,g)_ y),'(x,0)#\:" "}; ib[x;y;g] │ "ab   cd  ef g"      │                      ║
 ║ idioms_09_266_remove_trailing_blanks.k             │ x:"  phrase 266   "
 x[&||\|~x=" "] │ "  phrase 266"       │                      ║
@@ -1990,18 +1990,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1240/1330 tests passed (93.2%)                                                                             ║
+║ SUMMARY: 1241/1330 tests passed (93.3%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_09_259_remove_leading_trailing_blanks.k
-Input: x:"   abcd e  fg   "
-lt:{x[&(|\a)&||\|a:~x=" "]}
-lt x
-Expected: "abcd e  fg"
-Actual: Error: Function execution error: Undefined variable: a
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_09_297_spread_marked_field_heads.k
 Input: x:"abcdef"; y:1 1 0 0 1 0; sh:{x[,/(#:'a _ x)#'a:&y]}; sh[x;y]
 Expected: "abbbee"

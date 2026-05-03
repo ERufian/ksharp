@@ -1084,9 +1084,13 @@ namespace K3CSharp
                 
                 // For other dyadic operators, check for adverbs first
                 var verbWithAdverbs = VerbAdverbParser.ParseVerbWithAdverbs(node);
-                if (verbWithAdverbs != null)
+                if (verbWithAdverbs != null && verbWithAdverbs.Adverbs.Count > 0)
                 {
                     // This is a verb with adverbs - use enhanced evaluation
+                    // NOTE: left must be evaluated before right here because adverb evaluation
+                    // expects arguments in (left, right) order. For plain verbs (no adverbs),
+                    // we fall through to the right-before-left path below to preserve K's LRS semantics
+                    // and ensure inline assignments in the right subtree execute before the left is evaluated.
                     var left = Evaluate(node.Children[0]);
                     var right = Evaluate(node.Children[1]);
                     
