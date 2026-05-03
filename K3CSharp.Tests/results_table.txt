@@ -1616,7 +1616,7 @@ y:+3 4#"afmc"
 x?/:y │ 0 5 8 2              │                      ║
 ║ idioms_10_209_remove_trailing_blank_columns.k      │ x:3 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; +rtr[+x] │ ("abc de";"abc ...   │                      ║
 ║ idioms_10_210_remove_leading_blank_columns.k       │ x:3 9#"   ed cba"; rtr:{x[&||\|~x~\:(#+x)#" "]}; +|rtr[|+x] │ ("ed cba";"ed c...   │                      ║
-║ idioms_10_211_remove_leading_blank_rows.k          │ x:|+3 9#"abc de "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x] │ ("b e";"acd";" ...   │ ("eee";"ddd";" ...   ║
+║ idioms_10_211_remove_leading_blank_rows.k          │ x:|+3 9#"abc de   "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x] │ ("eee";"ddd";" ...   │                      ║
 ║ idioms_10_216_rows_starting_with_y.k               │ x:("sit";"sat";"sin";"tin"); y:"si"; rb:{x[&&/'y _lin/:x]}; rb[x;y] │ ("sit";"sin")        │                      ║
 ║ idioms_10_218_single_blank_row.k                   │ x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x] │ "aaa"                │ ("aaa";"   ";"b...   ║
 ║ idioms_10_220_remove_duplicate_blank_columns.k     │ x:3 9#"a  b c  d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; +rs[+x] │ "aaa"                │ ("a b c d";"a b...   ║
@@ -1990,16 +1990,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1256/1330 tests passed (94.4%)                                                                             ║
+║ SUMMARY: 1257/1330 tests passed (94.5%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_10_211_remove_leading_blank_rows.k
-Input: x:|+3 9#"abc de "; rtr:{x[&||\|~x~\:(#+x)#" "]}; |rtr[|x]
-Expected: ("eee";"ddd";" ";"ccc";"bbb";"aaa")
-Actual: ("b e";"acd";" b ";"eac";"d b";" ea";"cd ";"b e";"acd")
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_10_218_single_blank_row.k
 Input: x:+3 10#"a  b c   d"; rs:{x[{&(~x)|xf[x]}x~\:(#+x)#" "]}; rs[x]
 Expected: ("aaa";"   ";"bbb";"   ";"ccc";"   ";"ddd")

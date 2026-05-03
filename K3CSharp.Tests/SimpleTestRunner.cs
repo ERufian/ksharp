@@ -2622,7 +2622,7 @@ namespace K3CSharp.Tests
                 ("idioms_10_207_indices_of_rows.k", "0 5 8 2"),
                 ("idioms_10_209_remove_trailing_blank_columns.k", "(\"abc de\";\"abc de\";\"abc de\")"),
                 ("idioms_10_210_remove_leading_blank_columns.k", "(\"ed cba\";\"ed cba\";\"ed cba\")"),
-                ("idioms_10_211_remove_leading_blank_rows.k", "(\"eee\";\"ddd\";\" \";\"ccc\";\"bbb\";\"aaa\")"),
+                ("idioms_10_211_remove_leading_blank_rows.k", "(\"eee\";\"ddd\";\"   \";\"ccc\";\"bbb\";\"aaa\")"),
                 ("idioms_10_216_rows_starting_with_y.k", "(\"sit\";\"sin\")"),
                 ("idioms_10_218_single_blank_row.k", "(\"aaa\";\"   \";\"bbb\";\"   \";\"ccc\";\"   \";\"ddd\")"),
                 ("idioms_10_220_remove_duplicate_blank_columns.k", "(\"a b c d\";\"a b c d\";\"a b c d\")"),
