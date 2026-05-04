@@ -1006,18 +1006,11 @@ namespace K3CSharp
             }
             else if (left is VectorValue leftVec && right is IntegerValue rightIntVal)
             {
-                // Vector mod: remainder for each element
+                // Vector mod: remainder for each element (recursively handles nested vectors)
                 var result = new List<K3Value>();
                 foreach (var element in leftVec.Elements)
                 {
-                    if (element is IntegerValue intVal)
-                    {
-                        result.Add(new IntegerValue(intVal.Value % rightIntVal.Value));
-                    }
-                    else
-                    {
-                        throw new Exception("Vector mod requires all elements to be integers");
-                    }
+                    result.Add(ModRotate(element, rightIntVal));
                 }
                 // Preserve input vector type, use GetVectorType to handle null case
                 int vectorType = GetVectorType(leftVec);

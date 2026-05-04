@@ -1685,7 +1685,7 @@ y:1 2 3 4 5 6 7 8 9 10
 y[|>+\x] │ 2 1 5 4 3 9 8 7...   │                      ║
 ║ idioms_11_202_indices_infixes_length.k             │ x:4+!5; y:3; x+\:!y  │ (4 5 6;5 6 7;6 ...   │                      ║
 ║ idioms_11_213_maxima_infixes_boolean.k             │ x:-17 7 30 12 5 2 -5 6 -3 -19; y:10#1 1 0; |/x[&y] │ 12                   │                      ║
-║ idioms_11_254_running_parity_infixes.k             │ x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y] │ Error: Function...   │ 1 1 1 0 1 1 1 1...   ║
+║ idioms_11_254_running_parity_infixes.k             │ x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y] │ 1 1 1 0 1 1 1 1...   │                      ║
 ║ idioms_11_256_groups_of_ones_pointed.k             │ y:0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1; x:0 0 0 1 0 0 0 0 1 0 0 1 0 0 0 1; y&a=|\x*a:+\>':0,y │ 0 0 0 1 1 1 1 1...   │                      ║
 ║ idioms_11_257_sums_of_infixes.k                    │ x:1+!10
 y:2 3 2 3
@@ -1895,9 +1895,9 @@ lp:((0=y!4)&~(0=y!100))|(0=y!400)
 ii[3.0]   │ 1                    │                      ║
 ║ idioms_17_62_fractional_part.k                     │ x:3.7
 x-_ x          │ 0.7                  │                      ║
-║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Vector m...   │ 0 0 0 0.4 0.4 0.9    ║
+║ idioms_17_478_fractional_part.k                    │ x:0 1 -2 3.4 -5.6 -6.1;x!1 │ Error: Modulus ...   │ 0 0 0 0.4 0.4 0.9    ║
 ║ idioms_17_465_magnitude_fractional_part.k          │ x:6.13 -6.13;_abs[x]!1 │ 6.13 6.13            │ 0.13 0.13            ║
-║ idioms_17_476_fractional_part_with_sign.k          │ x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ Error: Vector m...   │ 0.2 0.3 -0.2 -0...   ║
+║ idioms_17_476_fractional_part_with_sign.k          │ x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ Error: Modulus ...   │ 0.2 0.3 -0.2 -0...   ║
 ║ idioms_17_453_round_nearest_even.k                 │ x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ Error: Function...   │ 0 2 2 4 0 -2         ║
 ║ idioms_17_454_rounding_nearest_even_half.k         │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ Error: Function...   │ 24 40 3 -14 4 4      ║
 ║ idioms_17_460_round_to_decimals.k                  │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
@@ -1990,16 +1990,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1269/1330 tests passed (95.4%)                                                                             ║
+║ SUMMARY: 1270/1330 tests passed (95.5%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_11_254_running_parity_infixes.k
-Input: x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y]
-Expected: 1 1 1 0 1 1 1 1 0 0 1 0 0 0
-Actual: Error: Function execution error: Vector mod requires all elements to be integers
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_539_zeros_at_x.k
 Input: x:2 3 4 8
 y:10
@@ -2180,7 +2175,7 @@ Actual: Error: Function execution error: Cannot floor Vector
 Test: idioms_17_478_fractional_part.k
 Input: x:0 1 -2 3.4 -5.6 -6.1;x!1
 Expected: 0 0 0 0.4 0.4 0.9
-Actual: Error: Vector mod requires all elements to be integers
+Actual: Error: Modulus operator requires integer arguments or vector+integer combinations
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_465_magnitude_fractional_part.k
 Input: x:6.13 -6.13;_abs[x]!1
@@ -2190,17 +2185,17 @@ Actual: 6.13 6.13
 Test: idioms_17_476_fractional_part_with_sign.k
 Input: x:0.2 2.3 -0.2 -1.8 0 5 -7;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
 Expected: 0.2 0.3 -0.2 -0.8 0 0 -0
-Actual: Error: Vector mod requires all elements to be integers
+Actual: Error: Modulus operator requires integer arguments or vector+integer combinations
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_453_round_nearest_even.k
 Input: x:0.9 1 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x
 Expected: 0 2 2 4 0 -2
-Actual: Error: Function execution error: Vector mod requires all elements to be integers
+Actual: Error: Function execution error: Modulus operator requires integer arguments or vector+integer combinations
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_454_rounding_nearest_even_half.k
 Input: x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x
 Expected: 24 40 3 -14 4 4
-Actual: Error: Function execution error: Vector mod requires all elements to be integers
+Actual: Error: Function execution error: Modulus operator requires integer arguments or vector+integer combinations
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_460_round_to_decimals.k
 Input: y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y]
