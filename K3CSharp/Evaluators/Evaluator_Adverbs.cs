@@ -105,6 +105,14 @@ namespace K3CSharp
                         ".:" => MakeFunction(operand),  // Monadic make/execute
                         "~" => Negate(operand),
                         "~:" => Negate(operand),  // Monadic negate
+                        "<" => GradeUp(operand),
+                        "<:" => GradeUp(operand),  // Monadic grade up
+                        ">" => GradeDown(operand),
+                        ">:" => GradeDown(operand),  // Monadic grade down
+                        "$" => Format(operand),
+                        "$:" => Format(operand),  // Monadic format
+                        "@" => Atom(operand),
+                        "@:" => Atom(operand),  // Monadic atom
                         _ => throw new Exception($"Verb '{verbName}' is registered as monadic but not implemented in ApplyMonadicVerb")
                     };
                 }

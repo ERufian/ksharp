@@ -1672,10 +1672,10 @@ y:3 4 8 2 5 6 9 4 5 4
 |/'(&x)_ y │ 3 8 6 9 4            │                      ║
 ║ idioms_11_7_subvector_grade_up.k                   │ x:1 0 0 1 0 0 1 0
 y:14 12 18 16 13 15 11 17
-{,/x+'<:'x _ y}[&x;y] │ Error: Function...   │ 1 0 2 4 5 3 6 7      ║
+{,/x+'<:'x _ y}[&x;y] │ 1 0 2 4 5 3 6 7      │                      ║
 ║ idioms_11_15_subvector_grade_down.k                │ x:1 0 0 1 0 0 1 0
 y:14 12 18 15 13 16 11 17
-{,/x+'>:'x _ y}[&x;y] │ Error: Function...   │ 2 0 1 5 3 4 7 6      ║
+{,/x+'>:'x _ y}[&x;y] │ 2 0 1 5 3 4 7 6      │                      ║
 ║ idioms_11_21_rotate_infixes_left.k                 │ y:"abcdefghij"
 x:1 0 1 0 0 1 1 0 0 0
 y[<x++\x] │ "badecfhijg"         │                      ║
@@ -1990,25 +1990,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1267/1330 tests passed (95.3%)                                                                             ║
+║ SUMMARY: 1269/1330 tests passed (95.4%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_11_7_subvector_grade_up.k
-Input: x:1 0 0 1 0 0 1 0
-y:14 12 18 16 13 15 11 17
-{,/x+'<:'x _ y}[&x;y]
-Expected: 1 0 2 4 5 3 6 7
-Actual: Error: Function execution error: Verb '<:' is registered as monadic but not implemented in ApplyMonadicVerb
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_11_15_subvector_grade_down.k
-Input: x:1 0 0 1 0 0 1 0
-y:14 12 18 15 13 16 11 17
-{,/x+'>:'x _ y}[&x;y]
-Expected: 2 0 1 5 3 4 7 6
-Actual: Error: Function execution error: Verb '>:' is registered as monadic but not implemented in ApplyMonadicVerb
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_11_254_running_parity_infixes.k
 Input: x:1 0 0 0 0 1 0 0 0 0 1 0 0 0; y:1 0 0 1 1 1 0 0 1 0 1 1 0 0; rp:{,/(+\'(&x)_ y)!2}; rp[x;y]
 Expected: 1 1 1 0 1 1 1 1 0 0 1 0 0 0
