@@ -66,6 +66,7 @@ description: Expert software developer, Interpreters and compilers, C#, K, APL a
 - Use the k.exe MCP to determine reference behavior. 
 - Prefer scripts to commands when using k.exe MCP because commands often need additional excaping.
 - Use K language primitives and the k.exe MCP to assist in your analysis, e.g. valence \(`_val`\) type \(`4:`\) shape \(`^`\). 
+- Prefer reviewing "@working changes (ksharp)" instead of using git stash
 - Use codemaps and fast context to search for functionality
 - Use debugger for debugging
 - Use Postmortems to learn from previous mistakes [text](../vibe-docs/ksharp/Postmortems/*.md)
