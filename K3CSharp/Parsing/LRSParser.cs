@@ -721,6 +721,16 @@ namespace K3CSharp.Parsing
                         }
                     }
                 }
+                else if (functionEnd > 0 && functionEnd + 1 < tokens.Count)
+                {
+                    // Empty braces {} form specifier: let dyadic parser handle {} op expr
+                    if (functionEnd == 1)
+                    {
+                        var dyadicResult = dyadicParser.ParseDyadicOperation(tokens);
+                        if (dyadicResult != null)
+                            return dyadicResult;
+                    }
+                }
             }
             
             // Check for projection patterns BEFORE dyadic parsing
@@ -1453,6 +1463,36 @@ namespace K3CSharp.Parsing
                         else
                         {
                             // Function parsing failed
+                        }
+                    }
+                    else
+                    {
+                        var nextToken = expressionTokens[functionEnd + 1];
+                        
+                        // Empty braces {} form specifier: let dyadic parser handle {} op expr
+                        // The dyadic parser recognizes {} as FormSpecifier in ParseSubExpression
+                        if (functionEnd == 1)
+                        {
+                            var dyadicResult = dyadicParser.ParseDyadicOperation(expressionTokens);
+                            if (dyadicResult != null)
+                                return dyadicResult;
+                        }
+                        
+                        // Direct lambda application: only if next token is not a dyadic operator
+                        // (dyadic operators should bind to the lambda as left operand, not as function application)
+                        if (!OperatorDetector.SupportsDyadic(nextToken.Type))
+                        {
+                            var functionTokens = expressionTokens.GetRange(0, functionEnd + 1);
+                            var functionNode = groupingParser.ParseBraces(functionTokens);
+                            if (functionNode != null)
+                            {
+                                var remainingTokens = expressionTokens.Skip(functionEnd + 1).ToList();
+                                var argNode = EvaluateFromRight(remainingTokens);
+                                if (argNode != null)
+                                {
+                                    return ASTNode.MakeFunctionCall(functionNode, new System.Collections.Generic.List<ASTNode> { argNode });
+                                }
+                            }
                         }
                     }
                 }

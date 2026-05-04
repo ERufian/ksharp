@@ -35,10 +35,33 @@ namespace K3CSharp.Parsing
             // Lambda expressions need legacy parser (LRS doesn't have lambda parsing yet)
             if (funcToken.Type == TokenType.LEFT_BRACE)
             {
-                var result = DelegateToLegacyParser(tokens);
-                if (result == null)
+                var sourceText = string.Join(" ", tokens.Select(t => t.Lexeme));
+                var context = new ParseContext(tokens, sourceText);
+                var parser = new FunctionParser();
+                var lambdaNode = parser.Parse(context);
+                if (lambdaNode == null)
                     throw new Exception("Failed to parse lambda expression");
-                return result;
+                
+                // Check if there are remaining tokens after the lambda (e.g. {lambda}arg)
+                if (context.Current < tokens.Count)
+                {
+                    var remainingTokens = tokens.GetRange(context.Current, tokens.Count - context.Current);
+                    
+                    // Direct lambda application: only if next token is not a dyadic operator
+                    // (dyadic operators should bind to the lambda as left operand, not as function application)
+                    if (remainingTokens.Count > 0 && !OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
+                    {
+                        var argNode = ParseArgumentWithLRS(remainingTokens);
+                        if (argNode != null)
+                        {
+                            var funcCall = new ASTNode(ASTNodeType.FunctionCall);
+                            funcCall.Children.Add(lambdaNode);
+                            funcCall.Children.Add(argNode);
+                            return funcCall;
+                        }
+                    }
+                }
+                return lambdaNode;
             }
             
             // Check if this is a special function (_parse, _eval, etc.)
@@ -253,20 +276,6 @@ namespace K3CSharp.Parsing
         private ASTNode CreateNodeFromToken(Token token)
         {
             return LRSAtomicParser.ParseAtomicToken(token);
-        }
-        
-        /// <summary>
-        /// Delegate to legacy parser for lambda expressions
-        /// LRS doesn't have lambda parsing yet, so we use the legacy FunctionParser
-        /// </summary>
-        private ASTNode? DelegateToLegacyParser(List<Token> tokens)
-        {
-            // Create a parse context for the legacy parser
-            // We need to reconstruct the source text from tokens for ParseContext
-            var sourceText = string.Join(" ", tokens.Select(t => t.Lexeme));
-            var context = new ParseContext(tokens, sourceText);
-            var parser = new FunctionParser();
-            return parser.Parse(context);
         }
         
         /// <summary>
