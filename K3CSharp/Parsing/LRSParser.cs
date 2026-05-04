@@ -658,8 +658,8 @@ namespace K3CSharp.Parsing
                 }
                 else if (isVerb && isAdverb && isTwoGlyphAdverb)
                 {
-                    // Delegate two-glyph adverb patterns to EvaluateFromRight which handles them correctly
-                    var adverbResult = EvaluateFromRight(tokens);
+                    // Delegate two-glyph adverb patterns to dyadic parser which handles them correctly
+                    var adverbResult = dyadicParser.ParseDyadicOperation(tokens);
                     if (adverbResult != null)
                         return adverbResult;
                 }
@@ -1270,7 +1270,7 @@ namespace K3CSharp.Parsing
         /// <summary>
         /// Create a ProjectedFunction AST node
         /// </summary>
-        private ASTNode CreateProjectionNode(Token operatorToken, ASTNode? leftArg, ASTNode? rightArg)
+        internal ASTNode CreateProjectionNode(Token operatorToken, ASTNode? leftArg, ASTNode? rightArg)
         {
             var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
             
@@ -3037,44 +3037,48 @@ namespace K3CSharp.Parsing
             // Create verb node
             var verbNode = new ASTNode(ASTNodeType.Literal, new SymbolValue(GetVerbName(verbToken.Type)));
             
-            // Parse arguments after the adverb
+            // Parse arguments after the adverb as a single expression
+            // e.g., for >':0,1 2 3 4, parse "0,1 2 3 4" as a single expression
             var arguments = new List<ASTNode>();
-            for (int i = 2; i < expressionTokens.Count; i++)
+            
+            if (expressionTokens.Count > 2)
             {
-                var arg = LRSAtomicParser.ParseAtomicToken(expressionTokens[i], this);
-                if (arg != null)
+                var remainingTokens = expressionTokens.GetRange(2, expressionTokens.Count - 2);
+                var argNode = BuildParseTreeFromRight(remainingTokens);
+                if (argNode != null)
                 {
-                    arguments.Add(arg);
+                    arguments.Add(argNode);
                 }
             }
             
-            // Create adverb node: ADVERB(verb, 0, args)
+            // Create adverb node: ADVERB(verb, left, right)
             var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
             adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
             adverbNode.Children.Add(verbNode);
-            adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left argument (dummy)
             
-            // Add all arguments as the right argument (as a vector)
-            if (arguments.Count > 0)
+            // Handle arguments: 0 args = projection, 1 arg = right only
+            if (arguments.Count == 0)
             {
-                if (arguments.Count == 1)
-                {
-                    adverbNode.Children.Add(arguments[0]);
-                }
-                else
-                {
-                    var vectorNode = new ASTNode(ASTNodeType.Vector);
-                    foreach (var arg in arguments)
-                    {
-                        vectorNode.Children.Add(arg);
-                    }
-                    adverbNode.Children.Add(vectorNode);
-                }
+                // No arguments - projection
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // right (dummy)
+            }
+            else if (arguments.Count == 1)
+            {
+                // One argument - right operand only
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
+                adverbNode.Children.Add(arguments[0]); // right
             }
             else
             {
-                // No arguments, add dummy
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue()));
+                // More than 1 argument - shouldn't happen with single-expression parsing
+                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
+                var vectorNode = new ASTNode(ASTNodeType.Vector);
+                foreach (var arg in arguments)
+                {
+                    vectorNode.Children.Add(arg);
+                }
+                adverbNode.Children.Add(vectorNode);
             }
             
             return adverbNode;

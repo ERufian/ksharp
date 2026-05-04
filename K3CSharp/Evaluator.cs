@@ -156,7 +156,7 @@ namespace K3CSharp
                     {
                         var assignName = node.Value is SymbolValue assignmentSym ? assignmentSym.Value : node.Value?.ToString() ?? "";
                         var value = Evaluate(node.Children[0]);
-                        SetVariable(assignName, value); // Use local variables for regular assignments
+                        SetVariable(assignName, value!); // Use local variables for regular assignments
                         
                         // LRS behavior: Return value for inline assignments, null for terminal (pure) assignments
                         // Terminal assignment: no verbs to the left between assignment and separator
@@ -1000,12 +1000,18 @@ namespace K3CSharp
                 // Get the verb (first child)
                 var verbValue = Evaluate(verbNodeTw);
                 
-                // Get the dummy left argument (second child)
+                // Get the left argument (second child)
                 var leftArg = Evaluate(node.Children[1]);
                 
-                // Get the arguments vector (third child)
+                // Get the right argument (third child)
                 var argsVector = Evaluate(node.Children[2]);
                 
+                // Check for projection: if right arg is null and left arg is present, create projected function
+                if (argsVector is NullValue && leftArg is not NullValue && verbNodeTw.Value is SymbolValue verbSymbol)
+                {
+                    string adverbName = op.Value.ToString();
+                    return new AdverbProjectedFunctionValue(adverbName, verbSymbol.Value, 2, leftArg);
+                }
                                 
                 // Handle the adverb based on its type
                 if (verbValue == null)
@@ -1206,6 +1212,18 @@ namespace K3CSharp
                 var leftArg = Evaluate(node.Children[1]);
                 var rightArg = Evaluate(node.Children[2]);
                 
+                // Ensure non-null values for adverb evaluation
+                K3Value safeLeft = leftArg ?? new NullValue();
+                K3Value safeRight = rightArg ?? new NullValue();
+                
+                // Check for projection first (left arg provided, right arg is null)
+                // This must be checked before other paths to ensure projections are captured
+                if (safeRight is NullValue && safeLeft is not NullValue && verbNode.Value is SymbolValue verbSymbol)
+                {
+                    string adverbName = op.Value.ToString();
+                    return new AdverbProjectedFunctionValue(adverbName, verbSymbol.Value, 2, safeLeft);
+                }
+                
                 // One-adverb-at-a-time: if verbNode is a modified verb (1-child adverb node),
                 // only consume the outermost adverb here and leave the inner modified verb intact.
                 // For each element of the iteration, build a temp 3-child node with the inner
@@ -1214,7 +1232,7 @@ namespace K3CSharp
                     verbNode.Children.Count == 1 && verbNode.Value is SymbolValue;
                 if (isModifiedVerb)
                 {
-                    return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNode, leftArg, rightArg);
+                    return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNode, safeLeft!, safeRight!);
                 }
                 
                 // Parse the verb with adverbs
@@ -1226,7 +1244,7 @@ namespace K3CSharp
                     var enhancedVerbWithAdverbs = new VerbWithAdverbs(verbWithAdverbs.BaseVerb, adverbs, verbNode.StartPosition);
                     
                     // Evaluate using adverb-aware evaluator
-                    return adverbAwareEvaluator.EvaluateVerbWithAdverbs(enhancedVerbWithAdverbs, leftArg, rightArg);
+                    return adverbAwareEvaluator.EvaluateVerbWithAdverbs(enhancedVerbWithAdverbs, safeLeft!, safeRight!);
                 }
                 else
                 {
@@ -1234,12 +1252,12 @@ namespace K3CSharp
                     var verbValue = Evaluate(verbNode);
                     return op.Value.ToString() switch
                     {
-                        "over" => ApplyAdverbSlash(verbValue, leftArg, rightArg),
-                        "scan" => ApplyAdverbBackslash(verbValue, leftArg, rightArg),
-                        "each" => HandleAdverbTick(verbValue, leftArg, rightArg),
-                        "each-right" => ApplyAdverbSlashColon(verbValue, leftArg, rightArg),
-                        "each-left" => ApplyAdverbBackslashColon(verbValue, leftArg, rightArg),
-                        "each-prior" => ApplyAdverbTickColon(verbValue, leftArg, rightArg),
+                        "over" => ApplyAdverbSlash(verbValue, safeLeft!, safeRight!),
+                        "scan" => ApplyAdverbBackslash(verbValue, safeLeft!, safeRight!),
+                        "each" => HandleAdverbTick(verbValue, safeLeft!, safeRight!),
+                        "each-right" => ApplyAdverbSlashColon(verbValue, safeLeft!, safeRight!),
+                        "each-left" => ApplyAdverbBackslashColon(verbValue, safeLeft!, safeRight!),
+                        "each-prior" => ApplyAdverbTickColon(verbValue, safeLeft!, safeRight!),
                         _ => throw new Exception($"Unknown adverb: {op.Value}")
                     };
                 }
@@ -1729,6 +1747,7 @@ namespace K3CSharp
 
             var functionNode = node.Children[0];
             var fnName = functionNode.Value is SymbolValue fs ? fs.Value : functionNode.Value?.ToString() ?? "";
+            
             var arguments = new List<K3Value>();
             
             for (int i = 1; i < node.Children.Count; i++)
@@ -2716,6 +2735,11 @@ namespace K3CSharp
                 tempFunctionNode.Value = userFunction;
                 return CallDirectFunction(tempFunctionNode, arguments);
             }
+            else if (functionValue is AdverbProjectedFunctionValue apfv)
+            {
+                // Handle AdverbProjectedFunctionValue (e.g., xf:>':0, then xf[x])
+                return CallAdverbProjectedFunction(apfv, arguments);
+            }
             else if (functionValue is VectorValue vectorValue && arguments.Count == 1)
             {
                 // This is vector indexing using square bracket syntax: vector[index]
@@ -3303,7 +3327,7 @@ namespace K3CSharp
                         {
                             var tempNode = new ASTNode(ASTNodeType.Function);
                             tempNode.Value = func;
-                            var args = new List<K3Value> { index };
+                            var args = new List<K3Value> { index! };
                             return CallDirectFunction(tempNode, args);
                         }
                         return currentFunctionValue;
@@ -3314,7 +3338,7 @@ namespace K3CSharp
                 // call it as a function with the index as a single argument
                 if (VerbRegistry.GetVerb(sym.Value) != null)
                 {
-                    var args = new List<K3Value> { index };
+                    var args = new List<K3Value> { index! };
                     return CallVariableFunction(sym.Value, args);
                 }
                 
@@ -3334,7 +3358,7 @@ namespace K3CSharp
                     dict.Entries.ContainsKey(new SymbolValue("fullname")) ||
                     dict.Entries.ContainsKey(new SymbolValue("namespace")))
                 {
-                    return MethodInvocation.Index(dict, index, this);
+                    return MethodInvocation.Index(dict, index!, this);
                 }
                 
                 // Handle _n (null) or empty-vector index — return all values: d[] or d[_n]
@@ -3534,6 +3558,27 @@ namespace K3CSharp
                 
                 // Call the function
                 return CallFunction(function, args);
+            }
+            
+            // Handle adverb projected function calls via bracket notation: xf[x] where xf is >':0,
+            if (data is AdverbProjectedFunctionValue apfv)
+            {
+                // Convert index to function arguments
+                List<K3Value> args;
+                if (index is VectorValue indexVec)
+                {
+                    args = indexVec.Elements;
+                }
+                else if (index is SymbolValue)
+                {
+                    args = new List<K3Value> { index ?? throw new ArgumentNullException(nameof(index)) };
+                }
+                else
+                {
+                    args = new List<K3Value> { index ?? throw new ArgumentNullException(nameof(index)) };
+                }
+                
+                return CallAdverbProjectedFunction(apfv, args);
             }
             
             // Scalar indexed with empty args: x[] returns x (atom identity)
@@ -3867,6 +3912,11 @@ namespace K3CSharp
                 // Boolean NOT for numeric types
                 return LogicalNegate(operand);
             }
+            else if (operand is CharacterValue charVal)
+            {
+                // Logical negation for characters: 1 if null character (0), 0 otherwise
+                return new IntegerValue(charVal.Value == "\0" ? 1 : 0);
+            }
             else if (operand is SymbolValue symbol)
             {
                 // Attribute handle: adds period suffix
@@ -3887,6 +3937,18 @@ namespace K3CSharp
                             throw new Exception("Attribute handle can only be applied to symbols or vectors of symbols");
                     }
                     return new VectorValue(result, -4); // Symbol vector
+                }
+                // For character vectors (including matrices represented as nested vectors),
+                // apply logical negation element-wise: 1 for null char, 0 otherwise
+                if (vec.Elements.Count > 0 && (vec.Elements[0] is CharacterValue ||
+                    (vec.Elements[0] is VectorValue innerVec && innerVec.Elements.Count > 0 && innerVec.Elements[0] is CharacterValue)))
+                {
+                    var result = new List<K3Value>();
+                    foreach (var element in vec.Elements)
+                    {
+                        result.Add(Negate(element));
+                    }
+                    return new VectorValue(result);
                 }
                 // For all other vectors (including numeric), use LogicalNegate which handles them recursively
                 return LogicalNegate(operand);

@@ -665,7 +665,7 @@ namespace K3CSharp
         
         private K3Value CallAdverbProjectedFunction(AdverbProjectedFunctionValue adverbProjected, List<K3Value> arguments)
         {
-            // Call an adverb projected function like +/ (over with verb +)
+            // Call an adverb projected function like +/ (over with verb +) or >':0, (each-prior with verb > and left arg 0)
             var verb = new SymbolValue(adverbProjected.Verb);
             
             // Handle arguments: if we have a single vector argument, pass it as is
@@ -681,12 +681,16 @@ namespace K3CSharp
                 dataArg = new VectorValue(arguments);
             }
             
+            // Use bound left argument if available, otherwise use default (0 as sentinel)
+            K3Value leftArg = adverbProjected.BoundLeftArgument ?? new IntegerValue(0);
+            
             // Call the appropriate adverb function based on the adverb name
             return adverbProjected.AdverbName switch
             {
-                "over" => Over(verb, new IntegerValue(0), dataArg),
-                "scan" => Scan(verb, new IntegerValue(0), dataArg),
-                "each" => Each(verb, new IntegerValue(0), dataArg),
+                "over" => Over(verb, leftArg, dataArg),
+                "scan" => Scan(verb, leftArg, dataArg),
+                "each" => Each(verb, leftArg, dataArg),
+                "each-prior" => EachPrior(verb, leftArg, dataArg),
                 _ => throw new Exception($"Unknown adverb projected function: {adverbProjected.AdverbName}")
             };
         }

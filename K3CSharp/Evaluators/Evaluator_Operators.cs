@@ -1392,6 +1392,8 @@ namespace K3CSharp
                 return new IntegerValue(longA.Value == 0 ? 1 : 0);
             if (a is FloatValue floatA)
                 return new IntegerValue(floatA.Value == 0 ? 1 : 0);
+            if (a is CharacterValue charA)
+                return new IntegerValue(charA.Value == "\0" ? 1 : 0);
             
             if (a is VectorValue vec)
             {

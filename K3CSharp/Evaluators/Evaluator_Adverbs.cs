@@ -630,6 +630,19 @@ namespace K3CSharp
         
         private K3Value ApplyAdverbTickColon(K3Value verb, K3Value left, K3Value right)
         {
+            // Tacit composition: when right is a ProjectedFunctionValue, create a composition function
+            // e.g., >':0, means "prepend 0, then apply each-prior greater-than"
+            if (right is ProjectedFunctionValue projectedRight && left is NullValue)
+            {
+                string verbStr = verb is SymbolValue vs ? vs.Value : verb.ToString();
+                string? leftArgStr = projectedRight.BoundArguments?[0]?.ToString();
+                if (leftArgStr != null)
+                {
+                    string bodyText = $"{verbStr}':{leftArgStr},x";
+                    string originalSourceText = $"{verbStr}':{leftArgStr},";
+                    return new FunctionValue(bodyText, new List<string> { "x" }, originalSourceText: originalSourceText);
+                }
+            }
             // Natural nested evaluation: call EachPrior with the verb and arguments
             return EachPrior(verb, left, right);
         }
@@ -1156,27 +1169,37 @@ namespace K3CSharp
         private K3Value EachPrior(K3Value verb, K3Value left, K3Value right)
         {
             // Each-Prior (':): Apply verb to each element with previous element
+            // y f': x returns: y as first element, then x[i] f x[i-1] for i >= 1
             if (verb is SymbolValue verbSymbol)
             {
                 if (right is VectorValue rightVec)
                 {
                     var result = new List<K3Value>();
-                    for (int i = 0; i < rightVec.Elements.Count; i++)
+                    
+                    // Check if left is a real argument (not a dummy null for monadic form)
+                    bool hasLeftArg = left is not NullValue;
+                    
+                    // If left argument is provided, include it as the first element
+                    if (hasLeftArg)
+                    {
+                        result.Add(left);
+                    }
+                    
+                    // For each element at index i >= 1, compute x[i] f x[i-1]
+                    for (int i = 1; i < rightVec.Elements.Count; i++)
                     {
                         var current = rightVec.Elements[i];
-                        var prior = i > 0 ? rightVec.Elements[i - 1] : left;
-                        // Only add to result if i > 0 (skip first element)
-                        if (i > 0)
-                        {
-                            result.Add(ApplySymbolVerb(verbSymbol.Value, current, prior));
-                        }
+                        var prior = rightVec.Elements[i - 1];
+                        result.Add(ApplySymbolVerb(verbSymbol.Value, current, prior));
                     }
+                    
                     int vectorType = DetermineVectorType(result);
                     return new VectorValue(result, vectorType);
                 }
                 else if (IsScalar(right))
                 {
-                    return ApplySymbolVerb(verbSymbol.Value, right, left);
+                    // Scalar right: return the seed (left argument) as the result
+                    return left is not NullValue ? left : right;
                 }
             }
             

@@ -418,6 +418,32 @@ namespace K3CSharp.Parsing
                 projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
                 return projectedNode;
             }
+            
+            // Postfix projection: expr+ - left fixed, right missing (e.g., 0,)
+            if (tokens.Count >= 2)
+            {
+                var lastToken = tokens[tokens.Count - 1];
+                if (IsDyadicOperatorDirect(lastToken.Type))
+                {
+                    var leftTokens = tokens.GetRange(0, tokens.Count - 1);
+                    bool prefixHasDyadic = false;
+                    int pd = 0;
+                    foreach (var lt in leftTokens)
+                    {
+                        if (lt.Type == TokenType.LEFT_PAREN || lt.Type == TokenType.LEFT_BRACKET || lt.Type == TokenType.LEFT_BRACE) pd++;
+                        else if (lt.Type == TokenType.RIGHT_PAREN || lt.Type == TokenType.RIGHT_BRACKET || lt.Type == TokenType.RIGHT_BRACE) pd--;
+                        else if (pd == 0 && IsDyadicOperatorDirect(lt.Type)) { prefixHasDyadic = true; break; }
+                    }
+                    if (!prefixHasDyadic && leftTokens.Count > 0 && parentParser != null)
+                    {
+                        var leftNode = leftTokens.Count == 1
+                            ? CreateNodeFromToken(leftTokens[0])
+                            : BuildParseTreeFromTokens(leftTokens);
+                        if (leftNode != null)
+                            return parentParser.CreateProjectionNode(lastToken, leftNode, null);
+                    }
+                }
+            }
 
             // Check for monadic system function application (e.g., _ci 97+!24)
             // The system function should consume the entire remaining expression as its argument

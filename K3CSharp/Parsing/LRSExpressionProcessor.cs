@@ -209,6 +209,11 @@ namespace K3CSharp.Parsing
             // Fallback to atomic parsing if only operator
             if (monadicTokens.Count == 1)
             {
+                // Handle operator tokens (verbs) that can't be parsed as atomic tokens
+                if (VerbRegistry.IsVerbToken(monadicTokens[0].Type) || OperatorDetector.IsDyadicOperator(monadicTokens[0].Type))
+                {
+                    return LRSAtomicParser.CreateOperatorNode(monadicTokens[0].Type);
+                }
                 return LRSAtomicParser.ParseAtomicToken(monadicTokens[0], parentParser);
             }
             

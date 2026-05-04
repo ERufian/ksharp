@@ -1054,13 +1054,15 @@ namespace K3CSharp
         public string AdverbName { get; }
         public string Verb { get; }
         public int RequiredArguments { get; }
+        public K3Value? BoundLeftArgument { get; }
 
-        public AdverbProjectedFunctionValue(string adverbName, string verb, int requiredArguments)
+        public AdverbProjectedFunctionValue(string adverbName, string verb, int requiredArguments, K3Value? boundLeftArgument = null)
         {
             Type = ValueType.Function; // Treat as a function type
             AdverbName = adverbName;
             Verb = verb;
             RequiredArguments = requiredArguments;
+            BoundLeftArgument = boundLeftArgument;
         }
 
         public override string ToString()
@@ -1071,13 +1073,14 @@ namespace K3CSharp
         public override bool Equals(object? obj)
         {
             if (obj is AdverbProjectedFunctionValue other)
-                return AdverbName == other.AdverbName && Verb == other.Verb && RequiredArguments == other.RequiredArguments;
+                return AdverbName == other.AdverbName && Verb == other.Verb && RequiredArguments == other.RequiredArguments &&
+                       (BoundLeftArgument == null ? other.BoundLeftArgument == null : BoundLeftArgument.Equals(other.BoundLeftArgument));
             return false;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(AdverbName, Verb, RequiredArguments);
+            return HashCode.Combine(AdverbName, Verb, RequiredArguments, BoundLeftArgument);
         }
     }
 
