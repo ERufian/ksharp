@@ -51,7 +51,7 @@ description: Expert software developer, Interpreters and compilers, C#, K, APL a
 ## Tools
 
 - Run test suite
-    * Always run from Tests folder: 
+    * Always run from the K3CSharp.Tests folder: 
         - cd [text](K3CSharp.Tests) 
     * dotnet run
     * If [text](K3CSharp.Tests/results_table.txt) is not updated, check for errors in dotnet run
@@ -63,7 +63,11 @@ description: Expert software developer, Interpreters and compilers, C#, K, APL a
     * dotnet build 
 - Always use [text](K3CSharp.Tests) for testing. Other projects \(e.g., [text](K3CSharp.Tests) have different purposes, they are not for testing.\)
 - If [text](K3CSharp.Tests) build is failing then fixing it has top priority. 
-- Use the k.exe MCP to determine reference behavior
+- Use the k.exe MCP to determine reference behavior. 
+- Prefer scripts to commands when using k.exe MCP because commands often need additional excaping.
+- Use K language primitives and the k.exe MCP to assist in your analysis, e.g. valence \(`_val`\) type \(`4:`\) shape \(`^`\). 
 - Use codemaps and fast context to search for functionality
 - Use debugger for debugging
-
+- Use Postmortems to learn from previous mistakes [text](../vibe-docs/ksharp/Postmortems/*.md)
+- If reading status or results from the terminal fails, redirect terminal and error output to a file and read the file.
+- Clean up temporary files when they have been read and are no longer needed
