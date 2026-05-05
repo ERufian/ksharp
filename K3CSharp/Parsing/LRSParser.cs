@@ -508,8 +508,17 @@ namespace K3CSharp.Parsing
                                                 }
                                             }
                                             
-                                            var argVector = argNodes.Count == 1 ? argNodes[0] : ASTNode.MakeVector(argNodes);
-                                            currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argVector);
+                                            if (argNodes.Count == 1)
+                                            {
+                                                // Single argument: use APPLY
+                                                currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argNodes[0]);
+                                            }
+                                            else
+                                            {
+                                                // Multi-argument: use DOT_APPLY with ExpressionList for indexing at depth
+                                                var indexList = new ASTNode(ASTNodeType.ExpressionList, null, argNodes);
+                                                currentNode = ASTNode.MakeDyadicOp(TokenType.DOT_APPLY, currentNode, indexList);
+                                            }
                                         }
                                     }
                                     // After first bracket, subsequent brackets are applications, not projections
@@ -1155,8 +1164,17 @@ namespace K3CSharp.Parsing
                     
                     if (argNodes.Count > 0)
                     {
-                        var argVector = argNodes.Count == 1 ? argNodes[0] : ASTNode.MakeVector(argNodes);
-                        currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argVector);
+                        if (argNodes.Count == 1)
+                        {
+                            // Single argument: use APPLY
+                            currentNode = ASTNode.MakeDyadicOp(TokenType.APPLY, currentNode, argNodes[0]);
+                        }
+                        else
+                        {
+                            // Multi-argument: use DOT_APPLY with ExpressionList for indexing at depth
+                            var indexList = new ASTNode(ASTNodeType.ExpressionList, null, argNodes);
+                            currentNode = ASTNode.MakeDyadicOp(TokenType.DOT_APPLY, currentNode, indexList);
+                        }
                     }
                 }
             }
@@ -1919,7 +1937,7 @@ namespace K3CSharp.Parsing
                     }
                     else
                     {
-                        // Multi-argument bracket indexing: x[a;b;c] - use APPLY with Block
+                        // Multi-argument bracket indexing: x[a;b;c] - use DOT_APPLY with ExpressionList
                         // This handles matrix indexing where semicolons separate dimensions
                         var argNodes = new List<ASTNode>();
                         foreach (var argTokens in splitArgs)
@@ -1930,7 +1948,7 @@ namespace K3CSharp.Parsing
                         // Create an ExpressionList with all index arguments for multi-dimensional indexing
                         // ExpressionList evaluates all children and returns them as a VectorValue
                         var indexList = new ASTNode(ASTNodeType.ExpressionList, null, argNodes);
-                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexList);
+                        return ASTNode.MakeDyadicOp(TokenType.DOT_APPLY, identifierNode, indexList);
                     }
                 }
             }
@@ -2130,16 +2148,16 @@ namespace K3CSharp.Parsing
                     }
                     else
                     {
-                        // Multi-dimensional indexing: x[a;b;c] - use APPLY with Block
+                        // Multi-dimensional indexing: x[a;b;c] - use DOT_APPLY with ExpressionList
                         var argNodes = new List<ASTNode>();
                         foreach (var argTokens in splitArgs)
                         {
                             var argNode = argTokens.Count > 0 ? EvaluateFromRight(argTokens) : ASTNode.MakeLiteral(new NullValue());
                             argNodes.Add(argNode ?? ASTNode.MakeLiteral(new NullValue()));
                         }
-                        var indexBlock = new ASTNode(ASTNodeType.Block, null, argNodes);
+                        var indexList = new ASTNode(ASTNodeType.ExpressionList, null, argNodes);
                         position = tokens.Count;
-                        return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexBlock);
+                        return ASTNode.MakeDyadicOp(TokenType.DOT_APPLY, identifierNode, indexList);
                     }
                 }
             }
