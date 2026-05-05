@@ -2679,6 +2679,7 @@ namespace K3CSharp.Tests
                 ("idioms_11_492_and_reduce_infixes.k", "0 1 0"),
                 ("idioms_11_529_markers_at_y.k", "0 0 0 1 0 0 0 1 0 1 0 0 0 0"),
                 ("idioms_11_539_zeros_at_x.k", "1 1 0 0 0 1 1 1 0 1"),
+                ("idioms_11_539_method_a.k", "1 1 0 0 0 1 1 1 0 1"),
                 ("idioms_11_540_markers_at_y_indices.k", "0 1 0 1 0 0 0 1 0 0"),
 
                 // Chapter 12 idioms: Matrices and Tensors
