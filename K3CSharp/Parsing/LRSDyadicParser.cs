@@ -192,19 +192,19 @@ namespace K3CSharp.Parsing
         {
             if (tokens.Count < 3) return null; // Need at least: left op right
             
-            // FIRST: Use R->L scan to find rightmost regular dyadic operator at depth 0
-            // This respects LRS principles and treats VERB ADVERB as atomic units
             var rightmostOpIndex = FindRightmostOperator(tokens);
             
+            ASTNode? result;
             if (rightmostOpIndex != -1)
             {
-                // Found a regular operator - split expression here
-                return ParseRegularDyadicOperation(tokens, rightmostOpIndex);
+                result = ParseRegularDyadicOperation(tokens, rightmostOpIndex);
+            }
+            else
+            {
+                result = ParseAdverbModifiedOperation(tokens);
             }
             
-            // SECOND: No regular operator found - look for adverb-modified verbs
-            // This handles expressions like `(y!x)?/:g` where `?` is part of a modified verb
-            return ParseAdverbModifiedOperation(tokens);
+            return result;
         }
         
         /// <summary>

@@ -2651,7 +2651,7 @@ namespace K3CSharp
                     if (arguments.Count >= 2) return GreaterThan(arguments[0], arguments[1]);
                     throw new Exception("> operator requires 2 arguments");
                 case "=":
-                    if (arguments.Count >= 2) return Match(arguments[0], arguments[1]);
+                    if (arguments.Count >= 2) return Equal(arguments[0], arguments[1]);
                     if (arguments.Count == 1) return Group(arguments[0]);
                     throw new Exception("= operator requires 1 or 2 arguments");
                 case ",":
@@ -3290,19 +3290,17 @@ namespace K3CSharp
             }
             
             // Function application with multiple arguments: f[x;y;z] where left is FunctionValue and right is VectorValue
-            if (left is FunctionValue funcLeft && right is VectorValue argVec)
+            if (left is FunctionValue funcLeft)
             {
-                var parameters = funcLeft.Parameters.Count > 0 ? funcLeft.Parameters : 
-                    new List<string> { "x", "y", "z" }.Take(Math.Min(argVec.Elements.Count, 3)).ToList();
-                
-                // Only unpack if function has > 1 parameter or unpacking won't exceed parameter count
-                if (parameters.Count > 1 || argVec.Elements.Count <= parameters.Count)
+                var argVec = right as VectorValue;
+                if (argVec != null && argVec.Elements.Count > 1 && (funcLeft.Parameters.Count > 1 || funcLeft.Parameters.Count == 0))
                 {
+                    // Multi-parameter function or unknown arity with multiple args: unpack vector
                     var funcNode = new ASTNode(ASTNodeType.Function);
                     funcNode.Value = funcLeft;
                     return CallDirectFunction(funcNode, argVec.Elements.ToList());
                 }
-                // Single-param function with vector argument - pass as single arg (the vector itself)
+                // Single parameter or explicit single arg: pass as-is
                 var singleFuncNode = new ASTNode(ASTNodeType.Function);
                 singleFuncNode.Value = funcLeft;
                 return CallDirectFunction(singleFuncNode, new List<K3Value> { right });

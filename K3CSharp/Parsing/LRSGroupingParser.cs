@@ -264,6 +264,12 @@ namespace K3CSharp.Parsing
                 // evaluator can distinguish blank args (f[1;;3]) from provided args.
                 var projectionElements = new List<ASTNode>();
                 
+                // Include elements parsed before the first semicolon
+                foreach (var elem in elements)
+                {
+                    projectionElements.Add(elem);
+                }
+                
                 foreach (var slot in projectionSlots)
                 {
                     projectionElements.Add(slot ?? ASTNode.MakeLiteral(new NullValue()));
@@ -457,20 +463,11 @@ namespace K3CSharp.Parsing
             // Parent parser will handle nested parentheses recursively
             ASTNode? result = null;
             
-            if (parentParser != null)
-            {
-                if (buildParseTree)
-                    result = parentParser.BuildParseTreeFromRight(exprTokens);
-                else
-                    result = parentParser.EvaluateFromRight(exprTokens);
-            }
-            else
-            {
-                // Fallback: create new parser instance (should not happen in normal flow)
-                var lrsParser = new LRSParser(exprTokens, buildParseTree);
-                int pos = 0;
-                result = lrsParser.ParseExpression(ref pos);
-            }
+            // Use LRSParser.ParseExpression for correct VERB[args] handling
+            // EvaluateFromRight/BuildParseTreeFromRight do not fully handle bracket function calls
+            var lrsParser = new LRSParser(exprTokens, buildParseTree);
+            int pos = 0;
+            result = lrsParser.ParseExpression(ref pos);
             
             // Phase 2.1: Ensure we return K NullValue instead of C# null
             if (result == null)

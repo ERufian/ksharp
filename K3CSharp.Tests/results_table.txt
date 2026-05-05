@@ -1763,11 +1763,11 @@ y:"efgh"
 ║ idioms_12_50_connectivity_list.k                   │ m:(1 0 1;1 0 1)
 (^m)_vs &,/m │ (0 0 1 1;0 2 0 2)    │                      ║
 ║ idioms_12_71_connectivity_matrix_from_list.k       │ y:(0 1;0 2;1 0;1 2;2 2); x:3; (x,x)#(!x*x)_lin x _sv/:y │ (0 1 1;1 0 1;0 ...   │                      ║
-║ idioms_12_148_node_matrix_from_connection.k        │ x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x] │ Error: Function...   │ (0 0 2 1 1;2 1 ...   ║
-║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ 0 0 0 0              │ (1 1 0 0 0;0 -1...   ║
+║ idioms_12_148_node_matrix_from_connection.k        │ x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x] │ (0 0 2 1 1;2 1 ...   │                      ║
+║ idioms_12_157_connection_matrix_from_node.k        │ x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x │ (1 1 0 0 0;0 -1...   │                      ║
 ║ idioms_12_51_indices.k                             │ ix:{(^x)_vs!*/^x}; x:2 3#!6; ix[x] │ (0 0 0 1 1 1;0 ...   │                      ║
 ║ idioms_12_81_raveled_index.k                       │ x:2 3 4#_ci 97+!24; 2 3 4 _sv 1 1 3 │ 19                   │                      ║
-║ idioms_12_58_pair_each_element.k                   │ x:"abcd"; y:"efgh"; x,/:\:y │ (("ae";"af";"ag...   │ ("ae";"af";"ag"...   ║
+║ idioms_12_58_pair_each_element.k                   │ x:"abcd"; y:"efgh"; x,/:\:y │ (("ae";"af";"ag...   │                      ║
 ║ idioms_12_55_indices_containing.k                  │ x:"abcdef"; y:"ace"; &/y _lin/:x │ 0 0 0                │ 1 0 1 0 1 0          ║
 ║ idioms_12_100_indexing_arbitrary_rank.k            │ x:2 3 4#_ci 97+!24; x[;1;] │ ("efgh";"qrst")      │                      ║
 ║ idioms_12_161_is_upper_triangular.k                │ y:(2 3 1 1;0 1 2 3;0 0 4 1;0 0 0 5); &/(^y)=!^y │ Error: Cannot e...   │ 1                    ║
@@ -1777,7 +1777,7 @@ x ./: 2#'!#x │ 1 6 11               │                      ║
 ║ idioms_12_429_matrix_with_diagonal.k               │ x:5 9 6 7 2
 (2##x)#,/x,'(2##x)#0 │ (5 0 0 0 0;0 9 ...   │                      ║
 ║ idioms_12_197_identity_matrix.k                    │ id:{(!x)=\:!x}
-id 4  │ 0 0 0 0              │ (1 0 0 0;0 1 0 ...   ║
+id 4  │ (1 0 0 0;0 1 0 ...   │                      ║
 ║ idioms_12_163_polynomial_product.k                 │ x:2 3 4; y:1 2 3; +/y*/:x^/:!#y │ 7 26 63              │ 26                   ║
 ║ idioms_12_195_upper_triangular.k                   │ ut:{{~x>\:x}[!x]}
 ut 4 │ (1 1 1 1;0 1 1 ...   │                      ║
@@ -1817,9 +1817,9 @@ y:6 9 1 1 6 7 1 4 1 5
 x,'-x       │ (1 -1;-3 3;5 -5)     │                      ║
 ║ idioms_12_590_matrix_and_vector.k                  │ x:(1 2 3;4 5 6); y:7 8; x,\:y │ (1 2 3 7 8;4 5 ...   │                      ║
 ║ idioms_12_612_rank_of_array.k                      │ #^(1 2 3;4 5 6)      │ 2                    │                      ║
-║ idioms_13_166_bar_chart_down.k                     │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ Error: Function...   │ ("    X  ";"   ...   ║
+║ idioms_13_166_bar_chart_down.k                     │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ ("    X  ";"   ...   │                      ║
 ║ idioms_13_170_bar_chart_horizontal_normalized.k    │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Function...   │ ("X    ";"XXXX ...   ║
-║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ Error: Function...   │ ("XX        ";"...   ║
+║ idioms_13_171_bar_chart_horizontal.k               │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ ("XX        ";"...   │                      ║
 ║ idioms_13_144_histogram.k                          │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ Error: Vector i...   │ ("            "...   ║
 ║ idioms_13_464_framing_matrix.k                     │ x:4 4#"abcdefghijklmnop"
 +"-",'(+"|",'x,'"|"),'"-" │ ("------";"|abc...   │                      ║
@@ -1944,13 +1944,13 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_47_polynomial_with_roots.k               │ x:1 2 3;{(x,0)-y*0,x}/1,x │ 1 -6 11 -6           │                      ║
 ║ idioms_19_67_extrapolated_value.k                  │ x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x │ Error: _sv: all...   │ 25.0                 ║
 ║ idioms_19_69_polynomial_value_at_points.k          │ x:-1 0 2;y:4 0 5 1;x _sv\:y │ -8 1 43              │                      ║
-║ idioms_19_126_polynomial_fit.k                     │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: _lsq req...   │ 5 -1 3.999997 1...   ║
+║ idioms_19_126_polynomial_fit.k                     │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: Undefine...   │ 5 -1 3.999997 1...   ║
 ║ idioms_19_363_solve_quadratic.k                    │ qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15] │ 5.0 3.0              │ 5 3.0                ║
 ║ idioms_19_430_polynomial_derivative.k              │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
-║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 8.5                  │                      ║
+║ idioms_19_137_taylor_series.k                      │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ Error: Each not...   │ 8.5                  ║
 ║ idioms_19_281_taylor_series_value.k                │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
-║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ ()                   │ (1 1 4 4;1 4 1 4)    ║
-║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ 5 4 6 4 12 5 16...   │ ,14                  ║
+║ idioms_19_48_saddle_point_indices.k                │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ (1 1 4 4;1 4 1 4)    │                      ║
+║ idioms_19_262_saddle_point_value.k                 │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ ,14                  │                      ║
 ║ idioms_20_159_is_range_of_x_1.k                    │ x:1 1 1 1 1;1=#?x    │ 1                    │                      ║
 ║ idioms_20_180_is_x_in_range.k                      │ hc:{1 0~/:~x<\:y};x:19 20 21 39 40 41;y:20 40;hc[x;y] │ 0 1 1 1 0 0          │                      ║
 ║ idioms_20_233_is_x_within_range.k                  │ x:9;y:(1 9;9 16;5 7;8 20;6 10);x(</<)/:y │                      │ 0 1 0 1 1            ║
@@ -1971,10 +1971,10 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_21_319_standard_deviation.k                 │ x:44 77 48 24 28 36 17 49 90 91;std:{((+/(x-(+/x)%#x)^2)%#x)^0.5};std[x] │ 25.48411             │                      ║
 ║ idioms_21_320_variance.k                           │ x:44 77 48 24 28 36 17 49 90 91.0;var:{(+/(x-(+/x)%#x)^2)%#x};var[x] │ 649.44               │                      ║
 ║ idioms_21_321_y_th_moment.k                        │ x:44 77 48 24 28 36 17 49;ym:{(+/(x-(+/x)%#x)^y)%#x};ym[x;2] │ 309.2344             │                      ║
-║ idioms_21_128_linear_fit_coefficients.k            │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z │ Error: _lsq req...   │ 4.587803 0.7927486   ║
-║ idioms_21_125_linear_fit_predicted.k               │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a) │ Error: _mul req...   │ 55.32371 60.080...   ║
-║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: _lsq req...   │ 35.2829 0.00817742   ║
-║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: _lsq req...   │ 56 60 66 70 78.0     ║
+║ idioms_21_128_linear_fit_coefficients.k            │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z │ Error: Undefine...   │ 4.587803 0.7927486   ║
+║ idioms_21_125_linear_fit_predicted.k               │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a) │ 55.32371 60.080...   │                      ║
+║ idioms_21_127_exponential_fit_coefficients.k       │ x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a │ Error: Undefine...   │ 35.2829 0.00817742   ║
+║ idioms_21_124_exponential_fit_predicted.k          │ x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]] │ Error: Undefine...   │ 56 60 66 70 78.0     ║
 ║ idioms_21_173_assign_to_classes.k                  │ f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h] │ Error: Function...   │ 0 2 4 2              ║
 ║ idioms_21_201_moving_index.k                       │ x:26 40 39 28 27 48;y:3;mi:{(!(#x)-y-1)+\:!y};x@mi[x;y] │ (26 40 39;40 39...   │                      ║
 ║ idioms_21_546_is_count_of_atoms_1.k                │ cs:{#,//x};co:{1=cs[x]};co[1 1 1#35] │ 1                    │                      ║
@@ -1993,26 +1993,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1274/1331 tests passed (95.7%)                                                                             ║
+║ SUMMARY: 1282/1331 tests passed (96.3%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_12_148_node_matrix_from_connection.k
-Input: x:(1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1); nc:{_mul[1 -1=\:x;!#x]}; nc[x]
-Expected: (0 0 2 1 1;2 1 3 2 3)
-Actual: Error: Function execution error: _mul requires matrices represented as nested vectors
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_157_connection_matrix_from_node.k
-Input: x:(0 0 2 1 1;2 1 3 2 3); -/'x=/:!#?,/x
-Expected: (1 1 0 0 0;0 -1 0 1 1;-1 0 1 -1 0;0 0 -1 0 -1)
-Actual: 0 0 0 0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_58_pair_each_element.k
-Input: x:"abcd"; y:"efgh"; x,/:\:y
-Expected: ("ae";"af";"ag";"ah");("be";"bf";"bg";"bh");("ce";"cf";"cg";"ch");("de";"df";"dg";"dh")
-Actual: (("ae";"af";"ag";"ah");("be";"bf";"bg";"bh");("ce";"cf";"cg";"ch");("de";"df";"dg";"dh"))
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_55_indices_containing.k
 Input: x:"abcdef"; y:"ace"; &/y _lin/:x
 Expected: 1 0 1 0 1 0
@@ -2027,12 +2012,6 @@ Test: idioms_12_162_is_lower_triangular.k
 Input: x:(1 0 0 0;1 1 0 0;1 1 1 0;1 1 1 1); &/0=^x _vs/:!^x
 Expected: 1
 Actual: Error: Cannot enumerate Vector
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_197_identity_matrix.k
-Input: id:{(!x)=\:!x}
-id 4
-Expected: (1 0 0 0;0 1 0 0;0 0 1 0;0 0 0 1)
-Actual: 0 0 0 0
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_163_polynomial_product.k
 Input: x:2 3 4; y:1 2 3; +/y*/:x^/:!#y
@@ -2079,20 +2058,10 @@ Input: x:1 2 3; y:4 5 6; x _cross y
 Expected: -3 6 -3
 Actual: Error: Undefined variable: cross
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_166_bar_chart_down.k
-Input: x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x]
-Expected: ("    X  ";"    X  ";"  X X  ";"  X X X";" XX X X";" XXXX X";" XXXXXX";"XXXXXXX";"XXXXXXX")
-Actual: Error: Function execution error: Function execution error: Cannot subtract Integer and Character
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_170_bar_chart_horizontal_normalized.k
 Input: x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]]
 Expected: ("X    ";"XXXX ";"XX   ";"XXX  ";"X    ";"     ";"XXX  ";"XXX  ";"XXXXX";"XX   ")
-Actual: Error: Function execution error: Cannot subtract Integer and Character
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_171_bar_chart_horizontal.k
-Input: x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]]
-Expected: ("XX        ";"XXXXXXXX  ";"XXXXX     ";"XXXXXX    ";"XXX       ";"X         ";"XXXXXXX   ";"XXXXXXX   ";"XXXXXXXXXX";"XXXX      ")
-Actual: Error: Function execution error: Cannot enumerate Vector
+Actual: Error: Function execution error: Cannot floor Vector
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_144_histogram.k
 Input: x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d]
@@ -2240,22 +2209,17 @@ Actual: Error: _sv: all elements must be integers
 Test: idioms_19_126_polynomial_fit.k
 Input: x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1]
 Expected: 5 -1 3.999997 182.0001
-Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
+Actual: Error: Undefined variable: _lsq
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_363_solve_quadratic.k
 Input: qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15]
 Expected: 5 3.0
 Actual: 5.0 3.0
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_48_saddle_point_indices.k
-Input: x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x
-Expected: (1 1 4 4;1 4 1 4)
-Actual: ()
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_262_saddle_point_value.k
-Input: x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]]
-Expected: ,14
-Actual: 5 4 6 4 12 5 16 2 4 5 16 18 8 18 7 12 16 11 20 17 16 14 16 20 16 8 12 9 17 13
+Test: idioms_19_137_taylor_series.k
+Input: x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a]
+Expected: 8.5
+Actual: Error: Each not implemented for types: Function, Integer, Integer
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_20_233_is_x_within_range.k
 Input: x:9;y:(1 9;9 16;5 7;8 20;6 10);x(</<)/:y
@@ -2265,22 +2229,17 @@ Actual:
 Test: idioms_21_128_linear_fit_coefficients.k
 Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z
 Expected: 4.587803 0.7927486
-Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_21_125_linear_fit_predicted.k
-Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:x^/:0 1;(+a) _mul (y _lsq a)
-Expected: 55.32371 60.08021 65.62945 69.59319 77.52068 89.41191 103.6814 117.9509 135.3913 154.4173
-Actual: Error: _mul requires matrices represented as nested vectors
+Actual: Error: Undefined variable: _lsq
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_127_exponential_fit_coefficients.k
 Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;a:_lsq[_log[y];x^/:0 1];a[0]:_exp[a[0]];a
 Expected: 35.2829 0.00817742
-Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
+Actual: Error: Undefined variable: _lsq
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_124_exponential_fit_predicted.k
 Input: x:64 70 77 82 92;y:56 60 66 70 78;a:x^/:0 1;_exp[_mul[+a;_lsq[_log[y];a]]]
 Expected: 56 60 66 70 78.0
-Actual: Error: _lsq requires x to be a vector and y to be a list of vectors
+Actual: Error: Undefined variable: _lsq
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_173_assign_to_classes.k
 Input: f:{[x;y;g;h]-1+#:'y#=(1+!y),-_-(x-g)%h};x:72 32 56 36 48 36 24 28 44 52 32;y:4;h:10;g:10;f[x;y;g;h]

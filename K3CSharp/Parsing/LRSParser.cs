@@ -1350,6 +1350,11 @@ namespace K3CSharp.Parsing
                 return CreateNodeFromToken(expressionTokens[0]);
             }
 
+            // Check for chained bracket application (e.g., f[1][2] or +[3 3 5][2])
+            var bracketAppResult = TryHandleChainedBrackets(expressionTokens);
+            if (bracketAppResult != null)
+                return bracketAppResult;
+
             // 2-token special cases (mirrors BuildParseTreeFromRight)
             if (expressionTokens.Count == 2)
             {

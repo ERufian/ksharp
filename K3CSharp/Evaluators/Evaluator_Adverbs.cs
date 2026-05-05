@@ -37,7 +37,7 @@ namespace K3CSharp
                 '|' => Max(left, right),
                 '<' => Less(left, right),
                 '>' => More(left, right),
-                '=' => Match(left, right),
+                '=' => Equal(left, right),
                 '^' => Power(left, right),
                 '!' => ModRotate(left, right),
                 ',' => Join(left, right),
