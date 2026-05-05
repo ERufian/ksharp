@@ -1121,55 +1121,6 @@ namespace K3CSharp
         };
 
         /// <summary>
-        /// Get string symbol for dyadic operator token
-        /// </summary>
-        public static string GetDyadicOperatorSymbol(TokenType tokenType)
-        {
-            return tokenType switch
-            {
-                TokenType.PLUS => "+",
-                TokenType.MINUS => "-",
-                TokenType.MULTIPLY => "*",
-                TokenType.DIVIDE => "%",
-                TokenType.DOT_PRODUCT => "_dot",
-                TokenType.MUL => ".*",
-                TokenType.MIN => "&",
-                TokenType.MAX => "|",
-                TokenType.LESS => "<",
-                TokenType.GREATER => ">",
-                TokenType.EQUAL => "=",
-                TokenType.IN => "in",
-                TokenType.POWER => "^",
-                TokenType.MODULUS => "!",
-                TokenType.JOIN => ",",
-                TokenType.COLON => ":",
-                TokenType.HASH => "#",
-                TokenType.UNDERSCORE => "_",
-                TokenType.QUESTION => "?",
-                TokenType.MATCH => "~",
-                TokenType.NEGATE => "~",
-                TokenType.DOLLAR => "$",
-                TokenType.LSQ => "_lsq",
-                TokenType.AND => "&",
-                TokenType.OR => "|",
-                TokenType.XOR => "^",
-                TokenType.ROT => "rot",
-                TokenType.SHIFT => "shift",
-                TokenType.APPLY => "@",
-                TokenType.DOT_APPLY => ".",
-                TokenType.PARSE => "_parse",
-                TokenType.EVAL => "_eval",
-                TokenType.ADVERB_SLASH => "/",
-                TokenType.ADVERB_BACKSLASH => "\\",
-                TokenType.ADVERB_TICK => "'",
-                TokenType.ADVERB_SLASH_COLON => "/:",
-                TokenType.ADVERB_BACKSLASH_COLON => "\\:",
-                TokenType.ADVERB_TICK_COLON => "':",
-                _ => tokenType.ToString()
-            };
-        }
-
-        /// <summary>
         /// Check if token type is a dyadic operator (comprehensive)
         /// </summary>
         public static bool IsDyadicOperator(TokenType tokenType)

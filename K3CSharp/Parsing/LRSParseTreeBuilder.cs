@@ -150,7 +150,7 @@ namespace K3CSharp.Parsing
             {
                 ["precedence"] = "monadic",
                 ["associativity"] = "right",
-                ["operator"] = VerbRegistry.GetDyadicOperatorSymbol(opToken.Type)
+                ["operator"] = VerbRegistry.TokenTypeToVerbName(opToken.Type)
             };
             
             // Store precedence info in node value

@@ -176,7 +176,7 @@ namespace K3CSharp.Parsing
                 if (VerbRegistry.IsVerbToken(expressionTokens[0].Type))
                 {
                     var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
-                    var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(expressionTokens[0].Type);
+                    var operatorSymbol = VerbRegistry.TokenTypeToVerbName(expressionTokens[0].Type);
                     projectedNode.Value = new SymbolValue(operatorSymbol);
                     
                     var verb = VerbRegistry.GetVerb(operatorSymbol);
@@ -194,7 +194,7 @@ namespace K3CSharp.Parsing
                 expressionTokens[1].Type == TokenType.COLON)
             {
                 var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
-                var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(expressionTokens[0].Type);
+                var operatorSymbol = VerbRegistry.TokenTypeToVerbName(expressionTokens[0].Type);
                 projectedNode.Value = new SymbolValue(operatorSymbol);
                 
                 // Monadic projection has arity 1
@@ -496,7 +496,7 @@ namespace K3CSharp.Parsing
                                             // e.g., +[3 3 5] creates projection with left arg bound
                                             if (prefixIsSingleVerb && !hasBlankSlot && splitArgs.Count == 1)
                                             {
-                                                var opSymbol = VerbRegistry.GetDyadicOperatorSymbol(prefixTokens[0].Type);
+                                                var opSymbol = VerbRegistry.TokenTypeToVerbName(prefixTokens[0].Type);
                                                 var verb = VerbRegistry.GetVerb(opSymbol);
                                                 int maxArity = verb?.SupportedArities?.Max() ?? 2;
                                                 if (maxArity > 1)
@@ -846,7 +846,7 @@ namespace K3CSharp.Parsing
                 if (IsVerbToken(tokens[0].Type) && tokens[1].Type == TokenType.COLON)
                 {
                     var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
-                    var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(tokens[0].Type);
+                    var operatorSymbol = VerbRegistry.TokenTypeToVerbName(tokens[0].Type);
                     projectedNode.Value = new SymbolValue(operatorSymbol);
                     projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
                     return projectedNode;
@@ -1278,7 +1278,7 @@ namespace K3CSharp.Parsing
             var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
             
             // Get operator symbol
-            var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(operatorToken.Type);
+            var operatorSymbol = VerbRegistry.TokenTypeToVerbName(operatorToken.Type);
             projectedNode.Value = new SymbolValue(operatorSymbol);
             
             // Determine arity (default to 2 for dyadic operators)
@@ -3353,7 +3353,7 @@ namespace K3CSharp.Parsing
                     currentArgTokens[1].Type == TokenType.COLON)
                 {
                     // Represent as a monadic verb symbol — evaluator dispatches via CallFunction(SymbolValue)
-                    var verbSymbol = VerbRegistry.GetDyadicOperatorSymbol(currentArgTokens[0].Type);
+                    var verbSymbol = VerbRegistry.TokenTypeToVerbName(currentArgTokens[0].Type);
                     children.Add(ASTNode.MakeLiteral(new SymbolValue(verbSymbol)));
                 }
                 else

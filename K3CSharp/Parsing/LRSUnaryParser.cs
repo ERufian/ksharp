@@ -103,7 +103,7 @@ namespace K3CSharp.Parsing
             var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
             
             // Convert token type to operator symbol using VerbRegistry
-            var operatorSymbol = VerbRegistry.GetDyadicOperatorSymbol(operatorToken.Type);
+            var operatorSymbol = VerbRegistry.TokenTypeToVerbName(operatorToken.Type);
             
             projectedNode.Value = new SymbolValue(operatorSymbol);
             

@@ -170,7 +170,7 @@ namespace K3CSharp.Parsing
                 // Reconstruct as apply-and-assign: operator is leftTokens[1]
                 var applyAndAssignNode = new ASTNode(ASTNodeType.ApplyAndAssign);
                 applyAndAssignNode.Value = new SymbolValue(leftTokens[0].Lexeme);
-                var opSymbol = VerbRegistry.GetDyadicOperatorSymbol(leftTokens[1].Type);
+                var opSymbol = VerbRegistry.TokenTypeToVerbName(leftTokens[1].Type);
                 applyAndAssignNode.Children.Add(ASTNode.MakeLiteral(new SymbolValue(opSymbol)));
                 
                 // Parse right side expression (may be null for monadic case)
@@ -212,7 +212,7 @@ namespace K3CSharp.Parsing
                     var varName = leftTokens[0].Lexeme;
                     var indexTokens = leftTokens.GetRange(2, rightBracket - 2);
                     var verbToken = leftTokens[rightBracket + 1];
-                    var opSymbol = VerbRegistry.GetDyadicOperatorSymbol(verbToken.Type);
+                    var opSymbol = VerbRegistry.TokenTypeToVerbName(verbToken.Type);
                     
                     // Split index tokens by semicolons to support multi-level paths like a[1;0 2]
                     var indexParts = SplitByTopLevelSemicolons(indexTokens);
