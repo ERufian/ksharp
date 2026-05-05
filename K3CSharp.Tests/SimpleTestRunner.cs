@@ -1313,6 +1313,14 @@ namespace K3CSharp.Tests
 
                 ("variable_scoping_nested_functions.k", "140"),
 
+                // Variable scoping evaluation order tests
+                // Parentheses share scope - expressions evaluated left-to-right
+                ("variable_scoping_parentheses.k", "11 12"),
+                // Function calls share scope with caller - arguments evaluated left-to-right
+                ("variable_scoping_function_call.k", "11 12"),
+                // Function bodies have isolated scope - local vars don't affect outer scope
+                ("variable_scoping_function_local.k", "7 0 28"),
+
                 ("variable_usage.k", "30"),
 
                 ("dot_execute.k", "4"),

@@ -464,6 +464,9 @@ inner: {[y] globalVar + x + y}
 inner . x}
 result4: outer . 20
 result4 │ 140                  │                      ║
+║ variable_scoping_parentheses.k                     │ a:7;b:0;(a+:4;b:a+1);(a;b) │ 11 12                │                      ║
+║ variable_scoping_function_call.k                   │ a:7;b:0;sum:{x+y};sum[a+:4;b:a+1];(a;b) │ 11 12                │                      ║
+║ variable_scoping_function_local.k                  │ a:7;b:0;c:{a:11;b:8;x+a+b}[9];(a;b;c) │ 7 0 28               │                      ║
 ║ variable_usage.k                                   │ x:10
 y:20
 z:x+y
@@ -1993,7 +1996,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1286/1331 tests passed (96.6%)                                                                             ║
+║ SUMMARY: 1289/1334 tests passed (96.6%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
