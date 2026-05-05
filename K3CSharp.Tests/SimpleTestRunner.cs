@@ -2698,7 +2698,7 @@ namespace K3CSharp.Tests
                 ("idioms_12_51_indices.k", "(0 0 0 1 1 1;0 1 2 0 1 2)"),
                 ("idioms_12_81_raveled_index.k", "19"),
                 ("idioms_12_58_pair_each_element.k", "((\"ae\";\"af\";\"ag\";\"ah\");(\"be\";\"bf\";\"bg\";\"bh\");(\"ce\";\"cf\";\"cg\";\"ch\");(\"de\";\"df\";\"dg\";\"dh\"))"),
-                ("idioms_12_55_indices_containing.k", "1 0 1 0 1 0"),
+                ("idioms_12_55_indices_containing.k", "(0 0 1 1;0 2 0 2)"),
                 ("idioms_12_100_indexing_arbitrary_rank.k", "(\"efgh\";\"qrst\")"),
                 ("idioms_12_161_is_upper_triangular.k", "1"),
                 ("idioms_12_162_is_lower_triangular.k", "1"),
