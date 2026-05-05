@@ -1659,114 +1659,58 @@ namespace K3CSharp
         {
             if (a is VectorValue vecA)
             {
-                // Check if this is a simple vector (no nested vectors)
-                var hasNestedVectors = vecA.Elements.Any(e => e is VectorValue);
-                
-                if (!hasNestedVectors)
-                {
-                    // Simple vector - return its length as a 1-element vector
-                    return new VectorValue(new List<K3Value> { new IntegerValue(vecA.Elements.Count) }, -1); // Integer vector
-                }
-                else
-                {
-                    // Matrix or tensor - compute dimensions
-                    var dimensions = new List<int>();
-                    var current = vecA;
-                    
-                    // First dimension is number of top-level elements
-                    dimensions.Add(current.Elements.Count);
-                    
-                    // Check if we have a regular matrix/tensor
-                    if (current.Elements.Count > 0 && current.Elements[0] is VectorValue)
-                    {
-                        var firstElement = (VectorValue)current.Elements[0];
-                        var isUniform = true;
-                        var uniformLength = firstElement.Elements.Count;
-                        
-                        // Check if all elements have the same structure
-                        foreach (var element in current.Elements)
-                        {
-                            if (element is VectorValue vec)
-                            {
-                                if (vec.Elements.Count != uniformLength)
-                                {
-                                    isUniform = false;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                isUniform = false;
-                                break;
-                            }
-                        }
-                        
-                        if (isUniform)
-                        {
-                            // Check if we have nested vectors (3D tensor) - only if uniformLength > 0
-                            if (uniformLength > 0 && firstElement.Elements[0] is VectorValue)
-                            {
-                                // 3D tensor - check uniformity of third dimension
-                                var thirdDimUniform = true;
-                                var thirdDimLength = ((VectorValue)firstElement.Elements[0]).Elements.Count;
-                                
-                                foreach (var element in current.Elements)
-                                {
-                                    var vec = (VectorValue)element;
-                                    foreach (var subElement in vec.Elements)
-                                    {
-                                        if (subElement is VectorValue subVec)
-                                        {
-                                            if (subVec.Elements.Count != thirdDimLength)
-                                            {
-                                                thirdDimUniform = false;
-                                                break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            thirdDimUniform = false;
-                                            break;
-                                        }
-                                    }
-                                    if (!thirdDimUniform) break;
-                                }
-                                
-                                if (thirdDimUniform)
-                                {
-                                    dimensions.Add(uniformLength);
-                                    dimensions.Add(thirdDimLength);
-                                }
-                                else
-                                {
-                                    // Jagged in third dimension - only add dimensions that are uniform
-                                    dimensions.Add(uniformLength);
-                                }
-                            }
-                            else
-                            {
-                                // 2D matrix - add second dimension
-                                dimensions.Add(uniformLength);
-                            }
-                        }
-                        else
-                        {
-                            // Jagged matrix - only add first dimension (rows)
-                            // According to spec: "shape will be a vector of the lengths of the dimensions that do have uniform length"
-                        }
-                    }
-                    
-                    return new VectorValue(dimensions.Select(d => (K3Value)new IntegerValue(d)).ToList(), -1); // Integer vector
-                }
+                var dimensions = ComputeShapeDimensions(vecA);
+                return new VectorValue(dimensions.Select(d => (K3Value)new IntegerValue(d)).ToList(), -1);
             }
-            else if (a is VectorValue list)
+
+            // Scalar - return empty integer vector
+            return new VectorValue(new List<K3Value>(), -1);
+        }
+
+        private List<int> ComputeShapeDimensions(VectorValue vec)
+        {
+            // Simple vector (no nested vectors) -> length is the only dimension
+            bool hasNestedVectors = vec.Elements.Any(e => e is VectorValue);
+            if (!hasNestedVectors)
             {
-                // Handle VectorValue (empty list) according to updated spec
-                // "If the input is an empty list result will be handled like a jagged list representing 1 dimension of length 0: ,0"
-                return new VectorValue(new List<K3Value> { new IntegerValue(0) }, -1); // Integer vector
+                return new List<int> { vec.Elements.Count };
             }
-            
-            return new VectorValue(new List<K3Value>(), -1); // Empty integer vector
+
+            // Jagged: not every element is a vector -> only first dimension is uniform
+            if (!vec.Elements.All(e => e is VectorValue))
+            {
+                return new List<int> { vec.Elements.Count };
+            }
+
+            // All elements are vectors - get shape of first element
+            var firstElement = (VectorValue)vec.Elements[0];
+            var subDimensions = ComputeShapeDimensions(firstElement);
+
+            // Check all other elements have the same shape
+            for (int i = 1; i < vec.Elements.Count; i++)
+            {
+                var element = (VectorValue)vec.Elements[i];
+                var elementSubDimensions = ComputeShapeDimensions(element);
+                if (!DimensionsEqual(subDimensions, elementSubDimensions))
+                {
+                    return new List<int> { vec.Elements.Count };
+                }
+            }
+
+            // All same shape - prepend our dimension
+            var result = new List<int> { vec.Elements.Count };
+            result.AddRange(subDimensions);
+            return result;
+        }
+
+        private bool DimensionsEqual(List<int> a, List<int> b)
+        {
+            if (a.Count != b.Count) return false;
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i] != b[i]) return false;
+            }
+            return true;
         }
 
         private K3Value Enumerate(K3Value a)
