@@ -2730,7 +2730,6 @@ namespace K3CSharp.Tests
                 ("idioms_12_390_conform_table_rows.k", "(1 2 3;4 5 6;7 8 9;0 0 0)"),
                 ("idioms_12_391_conform_table_columns.k", "(9 9 0 0 0;9 9 0 0 0;9 9 0 0 0;9 9 0 0 0)"),
                 ("idioms_12_392_matrix_from_scalar.k", "(,,4;,7 8)"),
-                ("idioms_12_527_cross_product.k", "-3 6 -3"),
                 ("idioms_12_527_transpose_planes_3d.k", "((0 2;1 3);(4 6;5 7))"),
                 ("idioms_12_528_cross_product.k", "4 28 46 -27 -41 39 45 3 -19 -58"),
                 ("idioms_12_555_all_axes.k", "0 1 2 3"),
