@@ -887,7 +887,7 @@ namespace K3CSharp
             if (aIsNumeric != bIsNumeric)
                 return new IntegerValue(0);
 
-            throw new Exception($"Cannot compare {a.Type} and {b.Type} with =");
+            throw new Exception($"Cannot compare {a.Type} and {b.Type} with ~");
         }
 
         /// <summary>

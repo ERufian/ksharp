@@ -670,72 +670,20 @@ namespace K3CSharp
         
         private K3Value MathMul(K3Value left, K3Value right)
         {
-            // Generic matrix multiplication for any size matrices
-            if (left is VectorValue leftVec2 && right is VectorValue rightVec2)
+            // _mul is equivalent to {x _dot\:y}
+            if (left is VectorValue leftVec)
             {
-                // Check if both are matrices (vectors of vectors)
-                bool leftIsMatrix = IsMatrix(leftVec2);
-                bool rightIsMatrix = IsMatrix(rightVec2);
-                
-                if (leftIsMatrix && rightIsMatrix)
+                var results = new List<K3Value>();
+                foreach (var element in leftVec.Elements)
                 {
-                    var leftMatrix = ExtractMatrix(leftVec2);
-                    var rightMatrix = ExtractMatrix(rightVec2);
-                    
-                    // Check dimensions: left columns must equal right rows
-                    if (leftMatrix[0].Length != rightMatrix.Length)
-                    {
-                        throw new Exception($"Matrix multiplication dimensions incompatible: {leftMatrix.Length}x{leftMatrix[0].Length} cannot be multiplied by {rightMatrix.Length}x{rightMatrix[0].Length}");
-                    }
-                    
-                    // Determine result type based on input types
-                    bool leftHasFloat = leftVec2.Elements.Any(e => e is FloatValue);
-                    bool rightHasFloat = rightVec2.Elements.Any(e => e is FloatValue);
-                    bool leftHasLong = leftVec2.Elements.Any(e => e is LongValue);
-                    bool rightHasLong = rightVec2.Elements.Any(e => e is LongValue);
-                    
-                    // Perform matrix multiplication: C = A * B
-                    var result = new double[leftMatrix.Length][];
-                    for (int i = 0; i < leftMatrix.Length; i++)
-                    {
-                        result[i] = new double[rightMatrix[0].Length];
-                        for (int j = 0; j < rightMatrix[0].Length; j++)
-                        {
-                            for (int k = 0; k < leftMatrix[0].Length; k++)
-                            {
-                                result[i][j] += leftMatrix[i][k] * rightMatrix[k][j];
-                            }
-                        }
-                    }
-                    
-                    // Convert result back to K3Sharp matrix format with proper type promotion
-                    var resultRows = new List<K3Value>();
-                    for (int i = 0; i < result.Length; i++)
-                    {
-                        var rowElements = new List<K3Value>();
-                        for (int j = 0; j < result[i].Length; j++)
-                        {
-                            if (leftHasFloat || rightHasFloat)
-                            {
-                                rowElements.Add(new FloatValue(result[i][j]));
-                            }
-                            else if (leftHasLong || rightHasLong)
-                            {
-                                rowElements.Add(new LongValue((long)result[i][j]));
-                            }
-                            else
-                            {
-                                rowElements.Add(new IntegerValue((int)result[i][j]));
-                            }
-                        }
-                        resultRows.Add(new VectorValue(rowElements, -64)); // Long vector type
-                    }
-                    
-                    return new VectorValue(resultRows);
+                    results.Add(MathDot(element, right));
                 }
+                return new VectorValue(results);
             }
-            
-            throw new Exception("_mul requires matrices represented as nested vectors");
+            else
+            {
+                return MathDot(left!, right!);
+            }
         }
         
         private bool IsMatrix(VectorValue vec)
