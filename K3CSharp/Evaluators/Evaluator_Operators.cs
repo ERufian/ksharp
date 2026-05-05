@@ -834,6 +834,14 @@ namespace K3CSharp
             if (a is NullValue || b is NullValue)
                 return new IntegerValue(0);
 
+            // A vector can never match an atom (and vice versa)
+            bool aIsVec = a is VectorValue;
+            bool bIsVec = b is VectorValue;
+            if (aIsVec && !bIsVec && b is not NullValue)
+                return new IntegerValue(0);
+            if (bIsVec && !aIsVec && a is not NullValue)
+                return new IntegerValue(0);
+
             // Handle vector comparison
             if (a is VectorValue vecAMatch && b is VectorValue vecBMatch)
             {

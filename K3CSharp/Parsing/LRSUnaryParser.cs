@@ -149,7 +149,7 @@ namespace K3CSharp.Parsing
                     var remainingTokens = tokens.GetRange(position, tokens.Count - position);
 
                     // Check if the first remaining token is an operator (dyadic)
-                    if (remainingTokens.Count > 0 && OperatorDetector.IsDyadicOperator(remainingTokens[0].Type))
+                    if (remainingTokens.Count > 0 && OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
                     {
                         // The first remaining token is the operator
                         var opToken = remainingTokens[0];
@@ -161,7 +161,7 @@ namespace K3CSharp.Parsing
 
                         // Create dyadic node: groupedResult OP rightNode
                         var dyadicNode = new ASTNode(ASTNodeType.DyadicOp);
-                        dyadicNode.Value = new SymbolValue(GetOperatorSymbol(opToken.Type));
+                        dyadicNode.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(opToken.Type));
                         if (groupedResult != null) dyadicNode.Children.Add(groupedResult);
                         if (rightNode != null) dyadicNode.Children.Add(rightNode);
                         return dyadicNode;
@@ -271,18 +271,9 @@ namespace K3CSharp.Parsing
         private ASTNode CreateMonadicNode(Token operatorToken, ASTNode operand)
         {
             var node = new ASTNode(ASTNodeType.MonadicOp);
-            node.Value = new SymbolValue(GetOperatorSymbol(operatorToken.Type));
+            node.Value = new SymbolValue(VerbRegistry.TokenTypeToVerbName(operatorToken.Type));
             node.Children.Add(operand);
             return node;
-        }
-        
-        /// <summary>
-        /// Get operator symbol for token type using VerbRegistry
-        /// </summary>
-        private string GetOperatorSymbol(TokenType tokenType)
-        {
-            // Use TokenTypeToVerbName to get the correct lowercase-with-underscore verb name
-            return VerbRegistry.TokenTypeToVerbName(tokenType);
         }
         
         /// <summary>

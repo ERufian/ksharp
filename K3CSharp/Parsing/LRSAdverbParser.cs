@@ -303,7 +303,7 @@ namespace K3CSharp.Parsing
         /// </summary>
         private bool IsDyadicOperator(TokenType tokenType)
         {
-            return VerbRegistry.IsDyadicOperatorToken(tokenType);
+            return OperatorDetector.SupportsDyadic(tokenType);
         }
         
         /// <summary>

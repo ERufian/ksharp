@@ -1069,6 +1069,7 @@ namespace K3CSharp
         /// <summary>
         /// Check if a token type is a dyadic operator
         /// </summary>
+        [Obsolete("Use OperatorDetector.SupportsDyadic instead. This method incorrectly looks up by TokenType.ToString() rather than the actual verb name.")]
         public static bool IsDyadicOperatorToken(TokenType tokenType)
         {
             var verb = GetVerb(tokenType.ToString());

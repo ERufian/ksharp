@@ -337,32 +337,25 @@ namespace K3CSharp.Parsing
                 if (firstBracket != -1)
                 {
                     // Check if this is a triadic/tetradic operation pattern
-                    // Format: .[arg1;arg2;arg3] or @[arg1;arg2;arg3;arg4]
-                    // These should NOT be treated as bracket function calls
+                    // Uses VerbRegistry to determine if verb supports triadic arity
                     var prefixToken = expressionTokens[0];
-                    if (prefixToken.Type == TokenType.DOT_APPLY || prefixToken.Type == TokenType.APPLY)
+                    var prefixVerbName = VerbRegistry.TokenTypeToVerbName(prefixToken.Type);
+                    var prefixVerb = VerbRegistry.GetVerb(prefixVerbName);
+                    bool prefixSupportsTriadic = prefixVerb != null && prefixVerb.SupportedArities.Any(a => a >= 3);
+                    
+                    if (prefixSupportsTriadic)
                     {
-                        // Count arguments inside the brackets
-                        int argCount = CountBracketArguments(expressionTokens, firstBracket);
-                        if (argCount >= 3)
+                        // Check for triadic/tetradic bracket call pattern
+                        var triadicNode = TryParseTriadicVerbPattern(expressionTokens, 0, firstBracket);
+                        if (triadicNode != null)
                         {
-                            // This is a triadic/tetradic operation - handle as special bracket function call
-                            var triadicNode = ParseTriadicFromBracketCall(prefixToken, 
-                                expressionTokens.GetRange(firstBracket + 1, expressionTokens.Count - firstBracket - 2), 
-                                argCount);
-                            if (triadicNode != null)
-                            {
-                                return triadicNode;
-                            }
+                            return triadicNode;
                         }
-                        else
-                        {
-                            // Fall through to bracket function call handling
-                        }
+                        // Fall through to normal LRS parsing for dyadic bracket notation (e.g., @[a;b])
                     }
                     else
                     {
-                        // Not a dot/apply operation, proceed with bracket function call handling
+                        // Not an amend operator — proceed with bracket function call handling
                         // Verify the token sequence from firstBracket to end is entirely consecutive bracket groups
                         // i.e., tokens[firstBracket..end] = [arg1][arg2]...[argN]
                         bool allBrackets = true;
@@ -523,11 +516,11 @@ namespace K3CSharp.Parsing
                                     prefixIsSingleVerb = false;
                                 }
                                 return currentNode;
-                            } // Close if (!prefixHasDyadicOperator) - bracket handling block
-                            } // Close else block for assignment special case
-                        }
-                    }
-                }
+                            } // Close if (currentNode != null)
+                            } // Close if (!prefixHasDyadicOperator)
+                        } // Close if (allBrackets && bracketGroups.Count > 0)
+                    } // Close else block
+                } // Close if (firstBracket != -1)
             }
                 
             // Step 2: Choose strategy based on mode
@@ -2040,7 +2033,11 @@ namespace K3CSharp.Parsing
         /// <returns>AST node representing parsed expression</returns>
         internal ASTNode? ParseSubExpressionForMonadic(List<Token> tokens, ref int position)
         {
-            if (tokens.Count == 0) return null;
+            if (tokens.Count == 0)
+            {
+                position = 0;
+                return null;
+            }
             if (tokens.Count == 1)
             {
                 position = 1; // Consume the single token
@@ -2061,7 +2058,7 @@ namespace K3CSharp.Parsing
                     var remainingTokens = tokens.GetRange(position, tokens.Count - position);
                     
                     // Check if the first remaining token is an operator
-                    if (remainingTokens.Count > 0 && OperatorDetector.IsDyadicOperator(remainingTokens[0].Type))
+                    if (remainingTokens.Count > 0 && OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
                     {
                         // The first remaining token is the operator
                         var opToken = remainingTokens[0];
@@ -2084,6 +2081,8 @@ namespace K3CSharp.Parsing
                     }
                 }
                 
+                // Position must reflect total consumption to prevent double-processing by caller
+                position = tokens.Count;
                 return groupedResult;
             }
             
@@ -2120,6 +2119,7 @@ namespace K3CSharp.Parsing
                         var indexNode = splitArgs[0].Count > 0
                             ? EvaluateFromRight(splitArgs[0])
                             : null;
+                        position = tokens.Count;
                         return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode,
                             indexNode ?? ASTNode.MakeLiteral(new NullValue()));
                     }
@@ -2133,6 +2133,7 @@ namespace K3CSharp.Parsing
                             argNodes.Add(argNode ?? ASTNode.MakeLiteral(new NullValue()));
                         }
                         var indexBlock = new ASTNode(ASTNodeType.Block, null, argNodes);
+                        position = tokens.Count;
                         return ASTNode.MakeDyadicOp(TokenType.APPLY, identifierNode, indexBlock);
                     }
                 }
@@ -2155,7 +2156,33 @@ namespace K3CSharp.Parsing
                 {
                     var adverbResult = EvaluateFromRight(tokens);
                     if (adverbResult != null)
+                    {
+                        position = tokens.Count;
                         return adverbResult;
+                    }
+                }
+            }
+            
+            // Handle triadic/tetradic amend patterns in sub-expression context
+            // e.g., @[a;b;c] or .[a;b;c;d] when used as an operand to another operator
+            if (tokens.Count >= 2 && 
+                (tokens[0].Type == TokenType.APPLY || tokens[0].Type == TokenType.DOT_APPLY) &&
+                tokens[1].Type == TokenType.LEFT_BRACKET)
+            {
+                int bracketEnd = FindMatchingBracket(tokens, 1);
+                if (bracketEnd != -1 && bracketEnd == tokens.Count - 1)
+                {
+                    int argCount = CountBracketArguments(tokens, 1);
+                    if (argCount >= 3)
+                    {
+                        var bracketContent = tokens.GetRange(2, bracketEnd - 2);
+                        var triadicNode = ParseTriadicFromBracketCall(tokens[0], bracketContent, argCount);
+                        if (triadicNode != null)
+                        {
+                            position = tokens.Count;
+                            return triadicNode;
+                        }
+                    }
                 }
             }
             
@@ -2165,11 +2192,53 @@ namespace K3CSharp.Parsing
                 // Parse as monadic operation
                 var monadicResult = monadicParser.ParseMonadicOperator(tokens);
                 if (monadicResult != null)
+                {
+                    position = tokens.Count;
                     return monadicResult;
+                }
             }
             
             // Try dyadic operation as fallback
-            return dyadicParser.ParseDyadicOperation(tokens);
+            var dyadicResult = dyadicParser.ParseDyadicOperation(tokens);
+            if (dyadicResult != null)
+            {
+                position = tokens.Count;
+                return dyadicResult;
+            }
+            return null;
+        }
+        
+        /// <summary>
+        /// Try to parse a triadic/tetradic verb bracket call like @[a;b;c] or .[a;b;c;d].
+        /// Uses VerbRegistry to determine if the verb supports triadic/tetradic arity
+        /// rather than hardcoding specific token types.
+        /// </summary>
+        /// <param name="tokens">Token list</param>
+        /// <param name="operatorPosition">Position of the operator token</param>
+        /// <param name="bracketPosition">Position of the LEFT_BRACKET token</param>
+        /// <returns>AST node if triadic/tetradic pattern detected, null otherwise</returns>
+        private ASTNode? TryParseTriadicVerbPattern(List<Token> tokens, int operatorPosition, int bracketPosition)
+        {
+            var verbName = VerbRegistry.TokenTypeToVerbName(tokens[operatorPosition].Type);
+            var verb = VerbRegistry.GetVerb(verbName);
+            
+            // Only consider verbs that support triadic or higher arity
+            if (verb == null || !verb.SupportedArities.Any(a => a >= 3))
+                return null;
+            
+            if (bracketPosition >= tokens.Count || tokens[bracketPosition].Type != TokenType.LEFT_BRACKET)
+                return null;
+            
+            int bracketEnd = FindMatchingBracket(tokens, bracketPosition);
+            if (bracketEnd == -1 || bracketEnd != tokens.Count - 1)
+                return null;
+            
+            int argCount = CountBracketArguments(tokens, bracketPosition);
+            if (argCount < 3)
+                return null;
+            
+            var bracketContent = tokens.GetRange(bracketPosition + 1, bracketEnd - bracketPosition - 1);
+            return ParseTriadicFromBracketCall(tokens[operatorPosition], bracketContent, argCount);
         }
         
         /// <summary>
@@ -2347,11 +2416,14 @@ namespace K3CSharp.Parsing
             if (bracketPos >= tokens.Count || tokens[bracketPos].Type != TokenType.LEFT_BRACKET)
                 return 0;
                 
-            int count = 0;
+            // Empty brackets [] have 0 arguments
+            if (bracketPos + 1 < tokens.Count && tokens[bracketPos + 1].Type == TokenType.RIGHT_BRACKET)
+                return 0;
+                
+            int semicolonCount = 0;
             int bracketDepth = 1;  // tracks [] depth (we start inside the outer bracket)
-            int nestedDepth = 0;   // tracks ()/{} nesting inside the current bracket level
+            int nestedDepth = 0;     // tracks ()/{} nesting inside current bracket level
             int i = bracketPos + 1;
-            bool inArgument = false;
             
             while (i < tokens.Count && bracketDepth > 0)
             {
@@ -2360,57 +2432,31 @@ namespace K3CSharp.Parsing
                 if (token.Type == TokenType.LEFT_BRACKET)
                 {
                     bracketDepth++;
-                    nestedDepth++;
-                    inArgument = true;
                 }
                 else if (token.Type == TokenType.RIGHT_BRACKET)
                 {
-                    if (nestedDepth > 0)
-                        nestedDepth--;
-                    else
-                    {
-                        bracketDepth--;
-                        if (bracketDepth >= 1 && inArgument)
-                        {
-                            count++;
-                            inArgument = false;
-                        }
-                    }
+                    bracketDepth--;
                 }
                 else if (token.Type == TokenType.LEFT_PAREN || token.Type == TokenType.LEFT_BRACE)
                 {
                     nestedDepth++;
-                    inArgument = true;
                 }
                 else if (token.Type == TokenType.RIGHT_PAREN || token.Type == TokenType.RIGHT_BRACE)
                 {
                     if (nestedDepth > 0)
                         nestedDepth--;
                 }
-                else if (bracketDepth == 1 && nestedDepth == 0)
+                else if (bracketDepth == 1 && nestedDepth == 0 && token.Type == TokenType.SEMICOLON)
                 {
-                    if (token.Type == TokenType.SEMICOLON)
-                    {
-                        if (inArgument)
-                        {
-                            count++;
-                            inArgument = false;
-                        }
-                    }
-                    else if (token.Type != TokenType.NEWLINE)
-                    {
-                        inArgument = true;
-                    }
+                    semicolonCount++;
                 }
                 
                 i++;
             }
             
-            // Count the last argument if we were in one
-            if (inArgument && bracketDepth == 0)
-                count++;
-                
-            return count;
+            // Number of arguments = semicolons + 1 (e.g., [a;b] has 1 semicolon, 2 args)
+            // This correctly counts empty slots: [a;;c] has 2 semicolons, 3 args
+            return semicolonCount + 1;
         }
         
         /// <summary>
