@@ -1136,9 +1136,9 @@ namespace K3CSharp
                         }
                         right = new VectorValue(indices);
                     }
-                    else if (op.Value.ToString() == "." && (node.Children[1].Type == ASTNodeType.ExpressionList || node.Children[1].Type == ASTNodeType.Block))
+                    else if (op.Value.ToString() == "." && node.Children[1].Type == ASTNodeType.ExpressionList)
                     {
-                        // For multi-dimensional indexing x[0;0;0] parsed as DOT_APPLY with ExpressionList/Block
+                        // For multi-dimensional indexing x[0;0;0] parsed as DOT_APPLY with ExpressionList
                         // Collect all indices from children
                         var exprList = node.Children[1];
                         var indices = new List<K3Value>();
