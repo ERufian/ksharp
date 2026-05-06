@@ -46,6 +46,11 @@ namespace K3CSharp
         public VerbType Type { get; set; }
         public bool IsSystemVariable { get; set; }
         public string? Description { get; set; }
+        
+        // Atomic function properties for implicit iteration
+        public bool IsAtomic { get; set; } = false;
+        public bool IsRightAtomic { get; set; } = false;
+        public bool IsStringAtomic { get; set; } = false;
     }
 
     /// <summary>
@@ -175,7 +180,7 @@ namespace K3CSharp
             // Note: All verb implementations are handled by the Evaluator
         }
 
-        public static void RegisterVerb(string name, VerbType type, int[] arities, Func<K3Value[], K3Value>?[]? implementations, bool isSystemVariable = false, string? description = null)
+        public static void RegisterVerb(string name, VerbType type, int[] arities, Func<K3Value[], K3Value>?[]? implementations, bool isSystemVariable = false, string? description = null, bool isAtomic = false, bool isRightAtomic = false, bool isStringAtomic = false)
         {
             verbs[name] = new VerbInfo
             {
@@ -184,7 +189,10 @@ namespace K3CSharp
                 Implementations = implementations,
                 Type = type,
                 IsSystemVariable = isSystemVariable,
-                Description = description
+                Description = description,
+                IsAtomic = isAtomic,
+                IsRightAtomic = isRightAtomic,
+                IsStringAtomic = isStringAtomic
             };
         }
 
@@ -536,40 +544,40 @@ namespace K3CSharp
             
             // Primitive verbs
             // + - * % | & ^ < > = ! # _ ~ $ ? @ . ,
-            RegisterVerb("+", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("PLUS", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("-", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MINUS", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("&", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MIN", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("^", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("POWER", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("<", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("LESS", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb(">", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("GREATER", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("=", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("EQUAL", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("+", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("PLUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("-", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("MINUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("&", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("MIN", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("^", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("POWER", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("<", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("LESS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb(">", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("GREATER", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("=", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("EQUAL", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("!", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("MODULUS", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("#", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("HASH", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("_", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("UNDERSCORE", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("~", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MATCH", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("_", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("UNDERSCORE", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("~", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("MATCH", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("?", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("QUESTION", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("@", VerbType.Operator, new[] { 1, 2, 3, 4 }, null);
-            RegisterVerb("APPLY", VerbType.Operator, new[] { 1, 2, 3, 4 }, null);
+            RegisterVerb("@", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);
+            RegisterVerb("APPLY", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);
             RegisterVerb(".", VerbType.Operator, new[] { 1, 2, 3, 4 }, null);
             RegisterVerb("DOT_APPLY", VerbType.Operator, new[] { 1, 2, 3, 4 }, null);
             RegisterVerb(",", VerbType.Operator, new[] { 1, 2 }, null);
@@ -621,58 +629,59 @@ namespace K3CSharp
             // _sin _cos _tan _asin _acos _atan _sinh _cosh _tanh
             // _div (integer) _and _or _xor _not _rot _shift (bitwise)
             // y _lsq A is least squares x for y~+/A*x (i.e. Ax=y)
-            RegisterVerb("_log", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("LOG", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_exp", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("EXP", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_abs", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("ABS", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_sqr", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("SQR", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_sqrt", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("SQRT", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_floor", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("FLOOR_MATH", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_ceil", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("CEIL", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_dot", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("DOT_MULTIPLY", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_mul", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("MUL", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_inv", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("INV", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_sin", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("SIN", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_cos", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("COS", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_tan", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("TAN", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_asin", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("ASIN", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_acos", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("ACOS", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_atan", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("ATAN", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_sinh", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("SINH", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_cosh", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("COSH", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_tanh", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("TANH", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_div", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("DIV", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_and", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("AND", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_or", VerbType.SystemFunction, new[] { 2 }, null);            
-            RegisterVerb("OR", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_xor", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("XOR", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_not", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("NOT", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_rot", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("ROT", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_shift", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("SHIFT", VerbType.SystemFunction, new[] { 2 }, null);
+            // All math functions are atomic
+            RegisterVerb("_log", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("LOG", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_exp", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("EXP", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_abs", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("ABS", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_sqr", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("SQR", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_sqrt", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("SQRT", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_floor", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("FLOOR_MATH", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_ceil", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("CEIL", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_dot", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("DOT_MULTIPLY", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_mul", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("MUL", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_inv", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("INV", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_sin", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("SIN", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_cos", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("COS", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_tan", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("TAN", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_asin", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("ASIN", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_acos", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("ACOS", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_atan", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("ATAN", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_sinh", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("SINH", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_cosh", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("COSH", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_tanh", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("TANH", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_div", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("DIV", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_and", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("AND", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_or", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);            
+            RegisterVerb("OR", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_xor", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("XOR", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_not", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("NOT", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_rot", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("ROT", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("_shift", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
+            RegisterVerb("SHIFT", VerbType.SystemFunction, new[] { 2 }, null, isAtomic: true);
             RegisterVerb("_lsq", VerbType.SystemFunction, new[] { 2 }, null);
             RegisterVerb("LSQ", VerbType.SystemFunction, new[] { 2 }, null);
 
@@ -727,14 +736,14 @@ namespace K3CSharp
             RegisterVerb("SV", VerbType.SystemFunction, new[] { 2 }, null);
             RegisterVerb("_vs", VerbType.SystemFunction, new[] { 2 }, null);
             RegisterVerb("VS", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_ci", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("CI", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_ic", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("IC", VerbType.SystemFunction, new[] { 1 }, null);
-            RegisterVerb("_sm", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("SM", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("_ss", VerbType.SystemFunction, new[] { 2 }, null);
-            RegisterVerb("SS", VerbType.SystemFunction, new[] { 2 }, null);
+            RegisterVerb("_ci", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("CI", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_ic", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("IC", VerbType.SystemFunction, new[] { 1 }, null, isAtomic: true);
+            RegisterVerb("_sm", VerbType.SystemFunction, new[] { 2 }, null, isStringAtomic: true);
+            RegisterVerb("SM", VerbType.SystemFunction, new[] { 2 }, null, isStringAtomic: true);
+            RegisterVerb("_ss", VerbType.SystemFunction, new[] { 2 }, null, isStringAtomic: true);
+            RegisterVerb("SS", VerbType.SystemFunction, new[] { 2 }, null, isStringAtomic: true);
             RegisterVerb("_ssr", VerbType.SystemFunction, new[] { 3 }, null);
             RegisterVerb("SSR", VerbType.SystemFunction, new[] { 3 }, null);
 
@@ -1047,6 +1056,42 @@ namespace K3CSharp
         {
             return tokenType == TokenType.ADVERB_SLASH || tokenType == TokenType.ADVERB_BACKSLASH || tokenType == TokenType.ADVERB_TICK ||
                    tokenType == TokenType.ADVERB_SLASH_COLON || tokenType == TokenType.ADVERB_BACKSLASH_COLON || tokenType == TokenType.ADVERB_TICK_COLON;
+        }
+
+        /// <summary>
+        /// Check if a verb by name is atomic (applies independently to every atom in a list argument)
+        /// </summary>
+        public static bool IsAtomicVerb(string verbName)
+        {
+            var verb = GetVerb(verbName);
+            return verb != null && verb.IsAtomic;
+        }
+
+        /// <summary>
+        /// Check if a verb by name is right-atomic (atomic in its right argument)
+        /// </summary>
+        public static bool IsRightAtomicVerb(string verbName)
+        {
+            var verb = GetVerb(verbName);
+            return verb != null && verb.IsRightAtomic;
+        }
+
+        /// <summary>
+        /// Check if a verb by name is string-atomic (recursion stops at character vectors)
+        /// </summary>
+        public static bool IsStringAtomicVerb(string verbName)
+        {
+            var verb = GetVerb(verbName);
+            return verb != null && verb.IsStringAtomic;
+        }
+
+        /// <summary>
+        /// Check if a token type represents an atomic verb
+        /// </summary>
+        public static bool IsAtomicVerbToken(TokenType tokenType)
+        {
+            var verbName = TokenTypeToVerbName(tokenType);
+            return !string.IsNullOrEmpty(verbName) && IsAtomicVerb(verbName);
         }
 
         /// <summary>
