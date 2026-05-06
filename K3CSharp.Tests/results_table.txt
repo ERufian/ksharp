@@ -257,6 +257,7 @@ foo - 12 │ 20                   │                      ║
 ║ dyadic_power_vector_vector.k                       │ 2 3 4 ^ 3 2 1        │ 8 9 4                │                      ║
 ║ dyadic_power_atom_vector.k                         │ 2 ^ 1 2 3            │ 2 4 8                │                      ║
 ║ dyadic_power_vector_atom.k                         │ 2 3 4 ^ 2            │ 4 9 16               │                      ║
+║ monadic_disambiguator_adverb.k                     │ %:''1 2 3            │ Error: Unexpect...   │ 1.0 0.5 0.3333333    ║
 ║ shape_operator_jagged_3d.k                         │ ^ (((1 2); (3 4 5)); ((6 7); (8 9 10))) │ 2 2                  │                      ║
 ║ shape_operator_jagged_matrix.k                     │ ^ ((1 2 3); (4 5); (6 7 8 9)) │ ,3                   │                      ║
 ║ shape_operator_matrix.k                            │ ^ ((1 2 3); (4 5 6); (7 8 9)) │ 3 3                  │                      ║
@@ -1995,11 +1996,16 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1291/1333 tests passed (96.8%)                                                                             ║
+║ SUMMARY: 1291/1334 tests passed (96.8%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
+Test: monadic_disambiguator_adverb.k
+Input: %:''1 2 3
+Expected: 1.0 0.5 0.3333333
+Actual: Error: Unexpected token in expression: ADVERB_TICK(')
+──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_198_hilbert_matrix.k
 Input: hm:{%1+(!x)+/:!x};hm 5
 Expected: (1.0 0.5 0.333 0.25 0.2;0.5 0.333 0.25 0.2 0.167;0.333 0.25 0.2 0.167 0.143;0.25 0.2 0.167 0.143 0.125;0.2 0.167 0.143 0.125 0.111)

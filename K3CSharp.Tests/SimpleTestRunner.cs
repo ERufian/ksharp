@@ -900,6 +900,8 @@ namespace K3CSharp.Tests
 
                 ("dyadic_power_vector_atom.k", "4 9 16"),
 
+                ("monadic_disambiguator_adverb.k", "1.0 0.5 0.3333333"),
+
                 ("shape_operator_jagged_3d.k", "2 2"),
 
                 ("shape_operator_jagged_matrix.k", ",3"),
