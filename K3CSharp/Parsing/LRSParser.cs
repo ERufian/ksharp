@@ -630,28 +630,16 @@ namespace K3CSharp.Parsing
                 var potentialAdverb = tokens[1];
                 
                 // Check if first token is a verb and second token is an adverb
+                // Handle all adverbs uniformly regardless of glyph count (lexer responsibility)
                 bool isVerb = VerbRegistry.IsVerbToken(potentialVerb.Type);
                 bool isAdverb = VerbRegistry.IsAdverbToken(potentialAdverb.Type);
-                bool isSingleGlyphAdverb = potentialAdverb.Type == TokenType.ADVERB_TICK || 
-                                          potentialAdverb.Type == TokenType.ADVERB_SLASH || 
-                                          potentialAdverb.Type == TokenType.ADVERB_BACKSLASH;
-                bool isTwoGlyphAdverb = potentialAdverb.Type == TokenType.ADVERB_TICK_COLON ||
-                                       potentialAdverb.Type == TokenType.ADVERB_SLASH_COLON ||
-                                       potentialAdverb.Type == TokenType.ADVERB_BACKSLASH_COLON;
                 
-                if (isVerb && isAdverb && isSingleGlyphAdverb)
+                if (isVerb && isAdverb)
                 {
-                    // Use LRSAdverbParser to handle verb-immediate-left pattern
+                    // Use LRSAdverbParser to handle all adverb patterns uniformly
                     var adverbParser = new LRSAdverbParser(tokens, BuildParseTree);
                     int position = 1; // Start at adverb position
                     var adverbResult = adverbParser.ParseVerbImmediateLeftAdverb(ref position);
-                    if (adverbResult != null)
-                        return adverbResult;
-                }
-                else if (isVerb && isAdverb && isTwoGlyphAdverb)
-                {
-                    // Delegate two-glyph adverb patterns to dyadic parser which handles them correctly
-                    var adverbResult = dyadicParser.ParseDyadicOperation(tokens);
                     if (adverbResult != null)
                         return adverbResult;
                 }
@@ -2789,46 +2777,16 @@ namespace K3CSharp.Parsing
         {
             // CONSERVATIVE APPROACH: Only handle very specific, simple cases
             // Start with the most basic adverb patterns to avoid breaking the system
+            // All adverbs are handled uniformly regardless of glyph count (lexer responsibility)
             
-            // Case 1: Verb + two-glyph adverb patterns
-            // Pattern: verb/: arguments, verb\: arguments, etc.
-            if (expressionTokens.Count >= 3)
-            {
-                // Check for verb + two-glyph adverb at the beginning
-                if (IsVerbToken(expressionTokens[0].Type) &&
-                    (expressionTokens[1].Type == TokenType.ADVERB_SLASH_COLON ||
-                     expressionTokens[1].Type == TokenType.ADVERB_BACKSLASH_COLON ||
-                     expressionTokens[1].Type == TokenType.ADVERB_TICK_COLON))
-                {
-                    return ParseVerbTwoGlyphAdverb(expressionTokens);
-                }
-            }
-            
-            // Case 2: Simple two-glyph adverb with simple left and right sides
-            // Pattern: (vector) %\: number
-            if (expressionTokens.Count >= 4)
-            {
-                // Check for pattern: (1 2 3) %\: 2
-                if (expressionTokens[0].Type == TokenType.LEFT_PAREN &&
-                    expressionTokens[2].Type == TokenType.DIVIDE &&
-                    expressionTokens[3].Type == TokenType.ADVERB_BACKSLASH_COLON &&
-                    expressionTokens[4].Type == TokenType.INTEGER)
-                {
-                    return ParseSimpleTwoGlyphAdverb(expressionTokens);
-                }
-            }
-
-            
-            // Case 3a: Disambiguating colon pattern - verb + colon + adverb
+            // Case 1: Disambiguating colon pattern - verb + colon + adverb
             // Pattern: verb:' args (e.g., #:' (1 2;3 4) for count each)
             // MUST be checked BEFORE generic verb+adverb pattern
             if (expressionTokens.Count >= 3)
             {
                 if (IsVerbToken(expressionTokens[0].Type) &&
                     expressionTokens[1].Type == TokenType.COLON &&
-                    (expressionTokens[2].Type == TokenType.ADVERB_SLASH ||
-                     expressionTokens[2].Type == TokenType.ADVERB_BACKSLASH ||
-                     expressionTokens[2].Type == TokenType.ADVERB_TICK))
+                    VerbRegistry.IsAdverbToken(expressionTokens[2].Type))
                 {
                     return ParseGenericVerbAdverbWithColon(expressionTokens, 0);
                 }
@@ -2842,24 +2800,20 @@ namespace K3CSharp.Parsing
                     expressionTokens[0].Type != TokenType.LEFT_BRACE &&
                     IsVerbToken(expressionTokens[1].Type) &&
                     expressionTokens[2].Type == TokenType.COLON &&
-                    (expressionTokens[3].Type == TokenType.ADVERB_SLASH ||
-                     expressionTokens[3].Type == TokenType.ADVERB_BACKSLASH ||
-                     expressionTokens[3].Type == TokenType.ADVERB_TICK))
+                    VerbRegistry.IsAdverbToken(expressionTokens[3].Type))
                 {
                     return ParseGenericVerbAdverbWithColon(expressionTokens, 1);
                 }
             }
             
-            // Case 3: Generic verb + single-glyph adverb pattern
-            // Pattern: verb/ args, verb\ args, verb' args (e.g., -/ 10 2 3 1, +\ 1 2 3, #' (1 2;3 4))
+            // Case 2: Generic verb + adverb pattern (handles all adverbs uniformly)
+            // Pattern: verb/ args, verb\ args, verb' args, verb/: args, verb\: args, verb': args
             // Note: verb must be at position 0, adverb at position 1
             if (expressionTokens.Count >= 2)
             {
-                // Check for verb followed by single-glyph adverb at positions 0 and 1
+                // Check for verb followed by adverb at positions 0 and 1
                 if (IsVerbToken(expressionTokens[0].Type) &&
-                    (expressionTokens[1].Type == TokenType.ADVERB_SLASH ||
-                     expressionTokens[1].Type == TokenType.ADVERB_BACKSLASH ||
-                     expressionTokens[1].Type == TokenType.ADVERB_TICK))
+                    VerbRegistry.IsAdverbToken(expressionTokens[1].Type))
                 {
                     return ParseGenericVerbAdverb(expressionTokens);
                 }
@@ -3129,103 +3083,11 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
-        /// Parse verb + two-glyph adverb pattern
-        /// </summary>
-        /// <param name="expressionTokens">Tokens to parse</param>
-        /// <returns>AST node representing the adverb operation</returns>
-        private ASTNode ParseVerbTwoGlyphAdverb(List<Token> expressionTokens)
-        {
-            var verbToken = expressionTokens[0];
-            var adverbToken = expressionTokens[1];
-            
-            // Create verb node
-            var verbNode = new ASTNode(ASTNodeType.Literal, new SymbolValue(GetVerbName(verbToken.Type)));
-            
-            // Parse arguments after the adverb as a single expression
-            // e.g., for >':0,1 2 3 4, parse "0,1 2 3 4" as a single expression
-            var arguments = new List<ASTNode>();
-            
-            if (expressionTokens.Count > 2)
-            {
-                var remainingTokens = expressionTokens.GetRange(2, expressionTokens.Count - 2);
-                var argNode = BuildParseTreeFromRight(remainingTokens);
-                if (argNode != null)
-                {
-                    arguments.Add(argNode);
-                }
-            }
-            
-            // Create adverb node: ADVERB(verb, left, right)
-            var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
-            adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
-            adverbNode.Children.Add(verbNode);
-            
-            // Handle arguments: 0 args = projection, 1 arg = right only
-            if (arguments.Count == 0)
-            {
-                // No arguments - projection
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // right (dummy)
-            }
-            else if (arguments.Count == 1)
-            {
-                // One argument - right operand only
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
-                adverbNode.Children.Add(arguments[0]); // right
-            }
-            else
-            {
-                // More than 1 argument - shouldn't happen with single-expression parsing
-                adverbNode.Children.Add(new ASTNode(ASTNodeType.Literal, new NullValue())); // left (dummy)
-                var vectorNode = new ASTNode(ASTNodeType.Vector);
-                foreach (var arg in arguments)
-                {
-                    vectorNode.Children.Add(arg);
-                }
-                adverbNode.Children.Add(vectorNode);
-            }
-            
-            return adverbNode;
-        }
-        
-        /// <summary>
         /// Get verb name from token type
         /// </summary>
         private string GetVerbName(TokenType tokenType)
         {
             return VerbRegistry.TokenTypeToVerbName(tokenType);
-        }
-        
-        /// <summary>
-        /// Parse simple two-glyph adverb (conservative approach)
-        /// </summary>
-        /// <param name="expressionTokens">Tokens to parse</param>
-        /// <returns>AST node representing the adverb operation</returns>
-        private ASTNode ParseSimpleTwoGlyphAdverb(List<Token> expressionTokens)
-        {
-            // Create a simple placeholder node that represents %\: operation
-            // The actual evaluation will be handled by the existing evaluator
-            var children = new List<ASTNode>();
-            
-            // Left side: (1 2 3) - create a simple vector node
-            var vectorElements = new List<ASTNode>();
-            for (int i = 1; i < expressionTokens.Count - 2; i++)
-            {
-                if (expressionTokens[i].Type == TokenType.INTEGER)
-                {
-                    vectorElements.Add(ASTNode.MakeLiteral(new IntegerValue(int.Parse(expressionTokens[i].Lexeme))));
-                }
-            }
-            var leftNode = ASTNode.MakeVector(vectorElements);
-            
-            // Right side: 2
-            var rightNode = ASTNode.MakeLiteral(new IntegerValue(int.Parse(expressionTokens[4].Lexeme)));
-            
-            children.Add(leftNode);
-            children.Add(rightNode);
-            
-            // Create node with %\: symbol
-            return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue("%\\:"), children);
         }
         
         /// <summary>

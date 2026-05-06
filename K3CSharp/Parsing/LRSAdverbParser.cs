@@ -200,41 +200,9 @@ namespace K3CSharp.Parsing
         }
 
         /// <summary>
-        /// Parse simple two-glyph adverb operation
-        /// The verb must be immediately to the LEFT of the adverb (per K spec)
-        /// </summary>
-        /// <param name="position">Reference to current position, updated to end of adverb expression</param>
-        /// <returns>AST node representing two-glyph adverb operation</returns>
-        public ASTNode? ParseSimpleTwoGlyphAdverb(ref int position)
-        {
-            if (position >= tokens.Count)
-                return null;
-
-            var adverbToken = tokens[position];
-            
-            // Check if this is a simple two-glyph adverb
-            if (!IsSimpleTwoGlyphAdverb(adverbToken.Type))
-                return null;
-
-            // Per K spec: verb must be immediately to the LEFT of the adverb
-            var leftArg = ParseVerbBeforeAdverb(position);
-            if (leftArg == null)
-                throw new Exception($"Expected verb immediately before adverb {adverbToken.Lexeme}");
-
-            position++; // Consume adverb token
-
-            // Parse the right argument for the adverb
-            var rightArg = ParseAdverbArgument(ref position);
-            if (rightArg == null)
-                throw new Exception($"Expected expression after adverb {adverbToken.Lexeme}");
-
-            // Create two-glyph adverb node
-            return CreateTwoGlyphAdverbNode(adverbToken, leftArg, rightArg);
-        }
-        
-        /// <summary>
         /// Parse verb-immediate-left adverb pattern (verb on left side only)
         /// The verb must be immediately to the LEFT of the adverb (per K spec)
+        /// Handles all adverbs uniformly regardless of glyph count (lexer responsibility)
         /// </summary>
         /// <param name="position">Reference to current position, updated to end of adverb expression</param>
         /// <returns>AST node representing verb-immediate-left adverb operation</returns>
@@ -245,8 +213,8 @@ namespace K3CSharp.Parsing
 
             var adverbToken = tokens[position];
             
-            // Check if this is a single-glyph adverb that can have verb-immediate-left pattern
-            if (!IsVerbImmediateLeftAdverb(adverbToken.Type))
+            // Check if this is an adverb (handles all adverbs uniformly regardless of glyph count)
+            if (!VerbRegistry.IsAdverbToken(adverbToken.Type))
                 return null;
 
             // Per K spec: verb must be immediately to the LEFT of the adverb
@@ -261,28 +229,8 @@ namespace K3CSharp.Parsing
             if (rightArg == null)
                 throw new Exception($"Expected expression after adverb {adverbToken.Lexeme}");
 
-            // Create verb-immediate-left adverb node
-            return CreateVerbImmediateLeftAdverbNode(adverbToken, leftArg, rightArg);
-        }
-        
-        /// <summary>
-        /// Check if token type is a simple two-glyph adverb
-        /// </summary>
-        private bool IsSimpleTwoGlyphAdverb(TokenType tokenType)
-        {
-            return tokenType == TokenType.ADVERB_SLASH_COLON ||
-                   tokenType == TokenType.ADVERB_BACKSLASH_COLON ||
-                   tokenType == TokenType.ADVERB_TICK_COLON;
-        }
-        
-        /// <summary>
-        /// Check if token type supports verb-immediate-left pattern
-        /// </summary>
-        private bool IsVerbImmediateLeftAdverb(TokenType tokenType)
-        {
-            return tokenType == TokenType.ADVERB_SLASH ||
-                   tokenType == TokenType.ADVERB_BACKSLASH ||
-                   tokenType == TokenType.ADVERB_TICK;
+            // Create adverb node (handles all adverbs uniformly)
+            return CreateAdverbNode(adverbToken, leftArg, rightArg);
         }
         
         /// <summary>
@@ -312,32 +260,6 @@ namespace K3CSharp.Parsing
         private ASTNode CreateOperatorNode(Token token)
         {
             return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(token.Lexeme), new List<ASTNode>());
-        }
-        
-        /// <summary>
-        /// Create two-glyph adverb node with correct arity
-        /// </summary>
-        private ASTNode CreateTwoGlyphAdverbNode(Token adverbToken, ASTNode leftArg, ASTNode rightArg)
-        {
-            // Two-glyph adverbs (/: \: ':) are always dyadic per K spec
-            var children = new List<ASTNode> { leftArg, rightArg };
-            return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(adverbToken.Lexeme), children);
-        }
-        
-        /// <summary>
-        /// Create verb-immediate-left adverb node with correct arity
-        /// Note: Uses DyadicOp for all adverbs (K3CSharp convention), evaluator handles arity
-        /// Evaluator expects 3 children for adverb operations: verb, leftArg, rightArg
-        /// For monadic each (verb-immediate-left), leftArg is 0
-        /// </summary>
-        private ASTNode CreateVerbImmediateLeftAdverbNode(Token adverbToken, ASTNode leftArg, ASTNode rightArg)
-        {
-            // Note: K3CSharp uses DyadicOp for all operators regardless of arity
-            // The evaluator determines actual arity from the adverb type and verb characteristics
-            // Evaluator expects: children[0] = verb, children[1] = leftArg (0 for monadic), children[2] = rightArg
-            var zeroNode = ASTNode.MakeLiteral(new NullValue());
-            var children = new List<ASTNode> { leftArg, zeroNode, rightArg };
-            return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(GetAdverbSymbol(adverbToken.Type)), children);
         }
         
         /// <summary>
