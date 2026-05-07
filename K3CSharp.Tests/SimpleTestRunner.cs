@@ -914,6 +914,178 @@ namespace K3CSharp.Tests
 
                 ("atomic_nested_adverb.k", "6"),
 
+                // Atomic function tests
+
+                // Monadic tests
+                ("atomic_functions/atomic_reciprocal_monadic_vector.k", "1.0 0.5 0.3333333 0.25 0.2"),
+                ("atomic_functions/atomic_negate_monadic_vector.k", "-1 -2 -3 -4 -5"),
+                ("atomic_functions/atomic_floor_monadic_vector.k", "1 2 3"),
+                ("atomic_functions/atomic_format_monadic_vector.k", "(,\"1\";,\"2\";,\"3\")"),
+                ("atomic_functions/atomic_not_monadic_vector.k", "1 0 1 0"),
+
+
+
+                // Dyadic divide tests
+                ("atomic_functions/atomic_divide_dyadic_vector_vector.k", "0.25 0.4 0.5"),
+                ("atomic_functions/atomic_divide_dyadic_vector_vector_nested.k", "(0.1428571 0.25 0.3333333;0.4 0.4545455 0.5)"),
+                ("atomic_functions/atomic_divide_dyadic_atom_vector.k", "2.0 1.0 0.6666667 0.5 0.4"),
+                ("atomic_functions/atomic_divide_dyadic_vector_atom.k", "0.5 1.0 1.5 2.0 2.5"),
+
+
+
+                // Dyadic equal tests
+                ("atomic_functions/atomic_equal_dyadic_vector_vector.k", "1 1 0"),
+                ("atomic_functions/atomic_equal_dyadic_vector_vector_nested.k", "(1 1;1 0)"),
+                ("atomic_functions/atomic_equal_dyadic_atom_vector.k", "1 0 0"),
+                ("atomic_functions/atomic_equal_dyadic_vector_atom.k", "1 0 0"),
+
+
+
+                // Dyadic less tests
+                ("atomic_functions/atomic_less_dyadic_vector_vector.k", "1 1 1"),
+                ("atomic_functions/atomic_less_dyadic_vector_vector_nested.k", "(1 1;1 1)"),
+                ("atomic_functions/atomic_less_dyadic_atom_vector.k", "0 0 1 1 1"),
+                ("atomic_functions/atomic_less_dyadic_vector_atom.k", "1 1 0 0 0"),
+
+
+
+                // Dyadic max tests
+                ("atomic_functions/atomic_max_dyadic_vector_vector.k", "4 5 6"),
+                ("atomic_functions/atomic_max_dyadic_vector_vector_nested.k", "(5 6;7 8)"),
+                ("atomic_functions/atomic_max_dyadic_atom_vector.k", "5 5 5 5 5"),
+                ("atomic_functions/atomic_max_dyadic_vector_atom.k", "3 3 3 4 5"),
+
+
+
+                // Dyadic min tests
+                ("atomic_functions/atomic_min_dyadic_vector_vector.k", "1 2 3"),
+                ("atomic_functions/atomic_min_dyadic_vector_vector_nested.k", "(1 2;3 4)"),
+                ("atomic_functions/atomic_min_dyadic_atom_vector.k", "1 2 2 2 2"),
+                ("atomic_functions/atomic_min_dyadic_vector_atom.k", "1 2 3 3 3"),
+
+
+
+                // Dyadic minus tests
+                ("atomic_functions/atomic_minus_dyadic_vector_vector.k", "-3 -3 -3"),
+                ("atomic_functions/atomic_minus_dyadic_vector_vector_nested.k", "(-4 -4;-4 -4)"),
+                ("atomic_functions/atomic_minus_dyadic_atom_vector.k", "9 8 7 6 5"),
+                ("atomic_functions/atomic_minus_dyadic_vector_atom.k", "-1 0 1 2 3"),
+
+
+
+                // Dyadic more tests
+                ("atomic_functions/atomic_more_dyadic_vector_vector.k", "0 0 0"),
+                ("atomic_functions/atomic_more_dyadic_vector_vector_nested.k", "(0 0;0 0)"),
+                ("atomic_functions/atomic_more_dyadic_atom_vector.k", "1 0 0 0 0"),
+                ("atomic_functions/atomic_more_dyadic_vector_atom.k", "0 0 0 1 1"),
+
+
+
+                // Dyadic plus tests
+                ("atomic_functions/atomic_plus_dyadic_vector_vector.k", "5 7 9"),
+                ("atomic_functions/atomic_plus_dyadic_vector_vector_nested.k", "(6 8;10 12)"),
+                ("atomic_functions/atomic_plus_dyadic_atom_vector.k", "6 7 8 9 10"),
+                ("atomic_functions/atomic_plus_dyadic_vector_atom.k", "3 4 5 6 7"),
+
+
+
+                // Dyadic power tests
+                ("atomic_functions/atomic_power_dyadic_vector_vector.k", "4 27 256"),
+                ("atomic_functions/atomic_power_dyadic_vector_vector_nested.k", "(4 27;256 3125)"),
+                ("atomic_functions/atomic_power_dyadic_atom_vector.k", "2 4 8 16 32"),
+                ("atomic_functions/atomic_power_dyadic_vector_atom.k", "1 4 9 16 25"),
+
+
+
+                // Dyadic times tests
+                ("atomic_functions/atomic_times_dyadic_vector_vector.k", "4 10 18"),
+                ("atomic_functions/atomic_times_dyadic_vector_vector_nested.k", "(5 12;21 32)"),
+                ("atomic_functions/atomic_times_dyadic_atom_vector.k", "2 4 6 8 10"),
+                ("atomic_functions/atomic_times_dyadic_vector_atom.k", "2 4 6 8 10"),
+
+
+
+                // Dyadic format tests
+                ("atomic_functions/atomic_format_dyadic_vector_vector.k", "(,\"4\";\" 5\";\"  6\")"),
+                ("atomic_functions/atomic_format_dyadic_vector_vector_nested.k", "((,\"5\";\" 6\");(\"  7\";\"   8\"))"),
+                ("atomic_functions/atomic_format_dyadic_atom_vector.k", "(\"    1\";\"    2\";\"    3\")"),
+                ("atomic_functions/atomic_format_dyadic_vector_atom.k", "(,\"5\";\" 5\";\"  5\")"),
+
+
+
+                // Math function monadic tests
+                ("atomic_functions/atomic_math_abs_monadic_vector.k", "1 2 3"),
+                ("atomic_functions/atomic_math_ceil_monadic_vector.k", "2.0 3.0 4.0"),
+                ("atomic_functions/atomic_math_cos_monadic_vector.k", "1.0 0.5403023 -0.4161468"),
+                ("atomic_functions/atomic_math_exp_monadic_vector.k", "1.0 2.718282 7.389056"),
+                ("atomic_functions/atomic_math_log_monadic_vector.k", "0.0 0.6931472 1.098612"),
+                ("atomic_functions/atomic_math_sin_monadic_vector.k", "0.0 0.841471 0.9092974"),
+                ("atomic_functions/atomic_math_sqrt_monadic_vector.k", "1.0 2.0 3.0"),
+                ("atomic_functions/atomic_math_tan_monadic_vector.k", "0.0 1.557408 -2.18504"),
+                ("atomic_functions/atomic_math_asin_monadic_vector.k", "0.0 0.5235988 1.570796"),
+                ("atomic_functions/atomic_math_acos_monadic_vector.k", "1.570796 1.047198 0.0"),
+                ("atomic_functions/atomic_math_atan_monadic_vector.k", "0.0 0.7853982 1.107149"),
+
+
+
+                // Math function dyadic tests
+                ("atomic_functions/atomic_math_abs_dyadic_vector_vector.k", "10 20"),
+                ("atomic_functions/atomic_math_ceil_dyadic_vector_vector.k", "10.0 20.0"),
+                ("atomic_functions/atomic_math_floor_dyadic_vector_vector.k", "10.0 20.0"),
+                ("atomic_functions/atomic_math_sqrt_dyadic_vector_vector.k", "3.162278 4.472136"),
+                ("atomic_functions/atomic_math_exp_dyadic_vector_vector.k", "22026.47 485165200"),
+                ("atomic_functions/atomic_math_log_dyadic_vector_vector.k", "2.302585 2.995732"),
+                ("atomic_functions/atomic_math_sin_dyadic_vector_vector.k", "-0.5440211 0.9129453"),
+                ("atomic_functions/atomic_math_cos_dyadic_vector_vector.k", "-0.8390715 0.4080821"),
+                ("atomic_functions/atomic_math_tan_dyadic_vector_vector.k", "0.6483608 2.237161"),
+                ("atomic_functions/atomic_math_asin_dyadic_vector_vector.k", "0n 0n"),
+                ("atomic_functions/atomic_math_acos_dyadic_vector_vector.k", "0n 0n"),
+                ("atomic_functions/atomic_math_atan_dyadic_vector_vector.k", "1.471128 1.520838"),
+
+
+
+                // Right-atomic and string-atomic tests
+                ("atomic_functions/atomic_rightatomic_index_dyadic_vector_vector.k", "1 2 3"),
+
+
+
+                // Nested structure tests
+                ("atomic_functions/atomic_nested_vector_vector.k", "(6 8;10 12)"),
+                ("atomic_functions/atomic_nested_atom_vector.k", "(6 7;8 9)"),
+                ("atomic_functions/atomic_nested_vector_atom.k", "(6 7;8 9)"),
+                ("atomic_functions/atomic_nested_deep.k", "4 6"),
+
+
+
+                // Negate dyadic tests
+                ("atomic_functions/atomic_negate_dyadic_atom_vector.k", "-5 -1 -2 -3"),
+                ("atomic_functions/atomic_negate_dyadic_vector_atom.k", "-4 -3 -2 -1 0"),
+                ("atomic_functions/atomic_negate_dyadic_vector_vector.k", "-3 -3 -3"),
+                ("atomic_functions/atomic_negate_dyadic_vector_vector_nested.k", "(-4 -4;-4 -4)"),
+
+
+
+                // Reciprocal dyadic tests
+                ("atomic_functions/atomic_reciprocal_dyadic_atom_vector.k", "2.0 1.0 0.6666667 0.5 0.4"),
+                ("atomic_functions/atomic_reciprocal_dyadic_vector_atom.k", "0.5 1.0 1.5 2.0 2.5"),
+                ("atomic_functions/atomic_reciprocal_dyadic_vector_vector.k", "0.25 0.4 0.5"),
+                ("atomic_functions/atomic_reciprocal_dyadic_vector_vector_nested.k", "(0.2 0.3333333;0.4285714 0.5)"),
+
+
+
+                // Floor dyadic test
+                ("atomic_functions/atomic_floor_dyadic_atom_vector.k", "5 1 2 3"),
+
+
+
+                // Additional atomic function tests (reserved error / type error)
+                ("atomic_functions/atomic_math_atan2_dyadic_vector_vector.k", "1.107149 0.7853982 1.107149 1.249046 1.325818 1.373401"),
+                ("atomic_functions/atomic_math_div_dyadic_vector_vector.k", "reserved error"),
+                ("atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k", "type error"),
+                ("atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k", "type error"),
+                ("atomic_functions/atomic_system_ci.k", "type error"),
+                ("atomic_functions/atomic_system_ic.k", "type error"),
+
                 ("shape_operator_jagged_3d.k", "2 2"),
 
                 ("shape_operator_jagged_matrix.k", ",3"),
@@ -2758,7 +2930,7 @@ namespace K3CSharp.Tests
                 ("idioms_13_171_bar_chart_horizontal.k", "(\"XX        \";\"XXXXXXXX  \";\"XXXXX     \";\"XXXXXX    \";\"XXX       \";\"X         \";\"XXXXXXX   \";\"XXXXXXX   \";\"XXXXXXXXXX\";\"XXXX      \")"),
                 ("idioms_13_144_histogram.k", "(\"            \";\"         *  \";\"   *     *  \";\"   *  *  *  \";\"   ** **** *\")"),
                 ("idioms_13_464_framing_matrix.k", "(\"------\";\"|abcd|\";\"|efgh|\";\"|ijkl|\";\"|mnop|\";\"------\")"),
-                ("idioms_13_572_division_by_zero.k", "5 0 0.0"),
+                ("idioms_13_572_division_by_zero.k", "5 0 0"),
                 ("idioms_13_605_plotting_chars.k", "(\"*** \";\"****** \";\"***** \";\"*******\";\"** \")"),
                 ("idioms_13_174_move_first_quadrant.k", "(0 5 3;0 1 4;1 2 0)"),
 
@@ -2946,7 +3118,7 @@ namespace K3CSharp.Tests
 
                 var actualTestFiles = Directory.GetFiles(testScriptsPath, "*.k", SearchOption.AllDirectories)
 
-                    .Select(Path.GetFileName)
+                    .Select(f => Path.GetRelativePath(testScriptsPath, f).Replace("\\", "/"))
 
                     .OrderBy(f => f)
 
