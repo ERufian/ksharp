@@ -706,6 +706,35 @@ namespace K3CSharp
 
             if (dyadicOps.TryGetValue(opName, out var dyadicOp))
             {
+                // Check for atomic function - apply implicit iteration if applicable
+                var verbInfo = VerbRegistry.GetVerb(opName);
+                if (verbInfo != null && verbInfo.IsAtomic)
+                {
+                    K3Value? result = null;
+                    
+                    // Try implicit iteration based on atomic type
+                    if (verbInfo.IsRightAtomic)
+                    {
+                        result = ApplyImplicitIterationRight(left, right, dyadicOp);
+                    }
+                    else
+                    {
+                        // Try left-atomic first
+                        result = ApplyImplicitIterationLeft(left, right, dyadicOp);
+                        if (result == null)
+                        {
+                            // Try both-atomic
+                            result = ApplyImplicitIterationBoth(left, right, dyadicOp);
+                        }
+                    }
+                    
+                    // If implicit iteration succeeded, return it
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+                
                 return dyadicOp(left, right);
             }
 
@@ -5901,7 +5930,72 @@ namespace K3CSharp
                 };
             }
         }
-    }
+
+        #region Atomic Function Helpers - Implicit Iteration
+
+        /// <summary>
+        /// Apply verb with implicit iteration over left argument (left-atomic)
+        /// When left is a vector and right is a scalar, apply verb to each left element with right
+        /// </summary>
+        private K3Value? ApplyImplicitIterationLeft(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
+        {
+            if (left is VectorValue leftVector && right is not VectorValue)
+            {
+                // Iterate over left vector elements
+                var results = new List<K3Value>();
+                foreach (var element in leftVector.Elements)
+                {
+                    results.Add(verbFunc(element, right));
+                }
+                return new VectorValue(results);
+            }
+            return null; // No iteration needed
+        }
+
+        /// <summary>
+        /// Apply verb with implicit iteration over right argument (right-atomic)
+        /// When right is a vector and left is a scalar, apply verb to left with each right element
+        /// </summary>
+        private K3Value? ApplyImplicitIterationRight(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
+        {
+            if (right is VectorValue rightVector && left is not VectorValue)
+            {
+                // Iterate over right vector elements
+                var results = new List<K3Value>();
+                foreach (var element in rightVector.Elements)
+                {
+                    results.Add(verbFunc(left, element));
+                }
+                return new VectorValue(results);
+            }
+            return null; // No iteration needed
+        }
+
+        /// <summary>
+        /// Apply verb with implicit iteration over both arguments (both-atomic)
+        /// When both arguments are vectors of same length, apply verb element-wise
+        /// </summary>
+        private K3Value? ApplyImplicitIterationBoth(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
+        {
+            if (left is VectorValue leftVector && right is VectorValue rightVector)
+            {
+                // Check if vectors have same length
+                if (leftVector.Elements.Count == rightVector.Elements.Count)
+                {
+                    // Iterate element-wise
+                    var results = new List<K3Value>();
+                    for (int i = 0; i < leftVector.Elements.Count; i++)
+                    {
+                        results.Add(verbFunc(leftVector.Elements[i], rightVector.Elements[i]));
+                    }
+                    return new VectorValue(results);
+                }
+            }
+            return null; // No iteration needed
+        }
+
+        #endregion
+        }
 
     // Custom comparer for K3Value to use in HashSet operations
     public class K3ValueComparer : IEqualityComparer<K3Value>

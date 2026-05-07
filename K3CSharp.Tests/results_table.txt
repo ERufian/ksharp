@@ -259,6 +259,11 @@ foo - 12 │ 20                   │                      ║
 ║ dyadic_power_vector_atom.k                         │ 2 3 4 ^ 2            │ 4 9 16               │                      ║
 ║ monadic_disambiguator_adverb.k                     │ %:''1 2 3            │ 1.0 0.5 0.3333333    │                      ║
 ║ atomic_adverb_nested.k                             │ %:''1 2 3            │ 1.0 0.5 0.3333333    │                      ║
+║ atomic_left_add.k                                  │ 1 2 3 + 4            │ 5 6 7                │                      ║
+║ atomic_right_add.k                                 │ 4 + 1 2 3            │ 5 6 7                │                      ║
+║ atomic_both_add.k                                  │ 1 2 3 + 4 5 6        │ 5 7 9                │                      ║
+║ atomic_string_compare.k                            │ "abc" < "xyz"        │ 1 1 1                │                      ║
+║ atomic_nested_adverb.k                             │ +/1 2 3              │ 6                    │                      ║
 ║ shape_operator_jagged_3d.k                         │ ^ (((1 2); (3 4 5)); ((6 7); (8 9 10))) │ 2 2                  │                      ║
 ║ shape_operator_jagged_matrix.k                     │ ^ ((1 2 3); (4 5); (6 7 8 9)) │ ,3                   │                      ║
 ║ shape_operator_matrix.k                            │ ^ ((1 2 3); (4 5 6); (7 8 9)) │ 3 3                  │                      ║
@@ -1997,7 +2002,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1293/1335 tests passed (96.9%)                                                                             ║
+║ SUMMARY: 1298/1340 tests passed (96.9%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:

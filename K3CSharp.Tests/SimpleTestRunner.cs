@@ -904,6 +904,16 @@ namespace K3CSharp.Tests
 
                 ("atomic_adverb_nested.k", "1.0 0.5 0.3333333"),
 
+                ("atomic_left_add.k", "5 6 7"),
+
+                ("atomic_right_add.k", "5 6 7"),
+
+                ("atomic_both_add.k", "5 7 9"),
+
+                ("atomic_string_compare.k", "1 1 1"),
+
+                ("atomic_nested_adverb.k", "6"),
+
                 ("shape_operator_jagged_3d.k", "2 2"),
 
                 ("shape_operator_jagged_matrix.k", ",3"),
