@@ -1921,7 +1921,7 @@ x,'-x       │ (1 -1;-3 3;5 -5)     │                      ║
 ║ idioms_13_166_bar_chart_down.k                                   │ x:2 5 7 4 9 3 6;xl:{(x#1),&y-x};bd:{" X"[|+xl\:[x;|/x]]};bd[x] │ ("    X  ";"   ...   │                      ║
 ║ idioms_13_170_bar_chart_horizontal_normalized.k                  │ x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]] │ Error: Function...   │ ("X    ";"XXXX ...   ║
 ║ idioms_13_171_bar_chart_horizontal.k                             │ x:2 8 5 6 3 1 7 7 10 4;bh:{@[&y;!x;:;1]};" X"[bh\:[x;|/x]] │ ("XX        ";"...   │                      ║
-║ idioms_13_144_histogram.k                                        │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ Error: Vector i...   │ ("            "...   ║
+║ idioms_13_144_histogram.k                                        │ x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d] │ ("            "...   │                      ║
 ║ idioms_13_464_framing_matrix.k                                   │ x:4 4#"abcdefghijklmnop"
 +"-",'(+"|",'x,'"|"),'"-" │ ("------";"|abc...   │                      ║
 ║ idioms_13_572_division_by_zero.k                                 │ dz:{(~0=x)*y%x+x=0}
@@ -2094,7 +2094,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1391/1432 tests passed (97.1%)                                                                                           ║
+║ SUMMARY: 1392/1432 tests passed (97.2%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2148,11 +2148,6 @@ Test: idioms_13_170_bar_chart_horizontal_normalized.k
 Input: x:2 8 5 6 3 1 7 7 10 4;y:5;z:10;ad:{_ x*y%z};xl:{(x#1),&y-x};" X"[xl\:[ad[x;y;z];y]]
 Expected: ("X    ";"XXXX ";"XX   ";"XXX  ";"X    ";"     ";"XXX  ";"XXX  ";"XXXXX";"XX   ")
 Actual: Error: Function execution error: Cannot floor Vector
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_144_histogram.k
-Input: x:8 3 11 9 9 4 6 6 3 3 9 7 9;h:{@[&1+|/x;x;+;1]};b:h[x];c:(1+|/b)-b;d:|+(b#\:1),'(c#\:0);" *"[d]
-Expected: ("            ";"         *  ";"   *     *  ";"   *  *  *  ";"   ** **** *")
-Actual: Error: Vector indices must be integers, got Vector
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_13_605_plotting_chars.k
 Input: x:~3 6 5 7 2<\:1+!7
@@ -2247,7 +2242,7 @@ Actual: 0.0001 0.0 0.0 0.0
 Test: idioms_17_149_number_of_decimals_max.k
 Input: nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y]
 Expected: 3 2 0
-Actual: Error: Function execution error: Cannot find maximum of Symbol and Integer
+Actual: Error: Function execution error: Modulus operator requires integer arguments or vector+integer combinations
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_260_figurate_numbers.k
 Input: a:10#1;2(+\)/a

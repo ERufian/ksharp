@@ -2094,6 +2094,19 @@ namespace K3CSharp.Parsing
                     // Check if the first remaining token is an operator
                     if (remainingTokens.Count > 0 && OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
                     {
+                        // If the operator is followed by an adverb, this is a modified verb pattern
+                        // (e.g., (b#\:1),'(c#\:0) where ,' is join-each, not plain join)
+                        // Delegate to EvaluateFromRight which handles adverb-modified verbs correctly
+                        if (remainingTokens.Count >= 2 && VerbRegistry.IsAdverbToken(remainingTokens[1].Type))
+                        {
+                            var fullResult = EvaluateFromRight(tokens);
+                            if (fullResult != null)
+                            {
+                                position = tokens.Count;
+                                return fullResult;
+                            }
+                        }
+                        
                         // The first remaining token is the operator
                         var opToken = remainingTokens[0];
                         var rightTokens = remainingTokens.GetRange(1, remainingTokens.Count - 1);
