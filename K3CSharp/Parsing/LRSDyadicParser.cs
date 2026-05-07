@@ -191,7 +191,6 @@ namespace K3CSharp.Parsing
         public ASTNode? ParseDyadicOperation(List<Token> tokens)
         {
             if (tokens.Count < 3) return null; // Need at least: left op right
-            
             var rightmostOpIndex = FindRightmostOperator(tokens);
             
             ASTNode? result;
@@ -285,6 +284,71 @@ namespace K3CSharp.Parsing
                     adverbScanDepth++;
                 else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
                     adverbScanDepth--;
+                
+                // Handle parenthesized verb + adverb: (expr)\: or (expr)/ etc.
+                // When ) brings depth to 0 and next token is adverb, treat the parenthesized group as verb
+                if (adverbScanDepth == 0 && tokens[i].Type == TokenType.RIGHT_PAREN && 
+                    i + 1 < tokens.Count && IsAdverbToken(tokens[i + 1].Type))
+                {
+                    // Find the matching opening paren
+                    int parenStart = -1;
+                    int depth = 0;
+                    for (int j = i; j >= 0; j--)
+                    {
+                        if (tokens[j].Type == TokenType.RIGHT_PAREN) depth++;
+                        else if (tokens[j].Type == TokenType.LEFT_PAREN) depth--;
+                        if (depth == 0) { parenStart = j; break; }
+                    }
+                    if (parenStart >= 0)
+                    {
+                        int adverbStart = i + 1;
+                        int adverbEnd = adverbStart;
+                        while (adverbEnd < tokens.Count && IsAdverbToken(tokens[adverbEnd].Type))
+                            adverbEnd++;
+                        
+                        var adverbTokens = tokens.GetRange(adverbStart, adverbEnd - adverbStart);
+                        if (adverbTokens.Count > 0)
+                        {
+                            var adverbToken = adverbTokens[adverbTokens.Count - 1];
+                            var adverbLeftTokens = tokens.GetRange(0, parenStart);
+                            var adverbRightTokens = tokens.GetRange(adverbEnd, tokens.Count - adverbEnd);
+                            
+                            // Parse the parenthesized verb group
+                            var parenTokens = tokens.GetRange(parenStart, i - parenStart + 1);
+                            var subGroupingParser = new LRSGroupingParser(parenTokens, parentParser?.BuildParseTree ?? false, parentParser);
+                            int pos = 0;
+                            var verbNode = subGroupingParser.ParseParentheses(ref pos);
+                            
+                            if (verbNode != null)
+                            {
+                                var leftNode = adverbLeftTokens.Count > 0 ? BuildParseTreeFromTokens(adverbLeftTokens) : null;
+                                var rightNode = adverbRightTokens.Count > 0 ? BuildParseTreeFromTokens(adverbRightTokens) : null;
+                                
+                                // Build nested verb node for multiple adverbs
+                                ASTNode innerVerbNode = verbNode;
+                                for (int a = 0; a < adverbTokens.Count - 1; a++)
+                                {
+                                    var innerAdverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                                    innerAdverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbTokens[a].Type));
+                                    innerAdverbNode.Children.Add(innerVerbNode);
+                                    innerVerbNode = innerAdverbNode;
+                                }
+                                
+                                // Create top-level adverb node
+                                var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                                adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbToken.Type));
+                                adverbNode.Children.Add(innerVerbNode);
+                                
+                                if (leftNode != null) adverbNode.Children.Add(leftNode);
+                                if (rightNode != null) adverbNode.Children.Add(rightNode);
+                                if (adverbNode.Children.Count == 1)
+                                    adverbNode.Children.Add(ASTNode.MakeLiteral(new NullValue()));
+                                
+                                return adverbNode;
+                            }
+                        }
+                    }
+                }
                     
                 // Also handle VERB COLON ADVERB (disambiguating colon: e.g. +:/)
                 bool hasColonAdverb = adverbScanDepth == 0 &&

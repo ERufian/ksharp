@@ -1754,6 +1754,8 @@ namespace K3CSharp.Parsing
             // Pattern: IDENTIFIER followed by a non-assignment, non-adverb, non-bracket token
             // f[args] goes through the bracket-indexing path below, not here
             // Only applies when the identifier is NOT a known built-in verb token
+            // CRITICAL: Do NOT apply when the argument is a parenthesized verb+adverb pattern
+            // like x (+/*)\: y — that's an infix adverb expression, not a function call
             if (expressionTokens.Count >= 2 &&
                 expressionTokens[0].Type == TokenType.IDENTIFIER &&
                 expressionTokens[1].Type != TokenType.COLON &&
@@ -1762,14 +1764,39 @@ namespace K3CSharp.Parsing
                 !VerbRegistry.IsAdverbToken(expressionTokens[1].Type) &&
                 !VerbRegistry.IsVerbToken(expressionTokens[1].Type))
             {
-                var funcNode = CreateNodeFromToken(expressionTokens[0]);
-                var argTokens = expressionTokens.Skip(1).ToList();
-                ASTNode? argNode = argTokens.Count == 1
-                    ? CreateNodeFromToken(argTokens[0])
-                    : EvaluateFromRight(argTokens);
-                if (funcNode != null && argNode != null)
+                // Check if the remaining tokens (after identifier) form a (verb)adverb pattern
+                // If so, this is an infix adverb expression (e.g., x (+/*)\: y), not a function call
+                bool isInfixAdverbPattern = false;
+                if (expressionTokens[1].Type == TokenType.LEFT_PAREN)
                 {
-                    return ASTNode.MakeFunctionCall(funcNode, new System.Collections.Generic.List<ASTNode> { argNode });
+                    // Find matching close paren
+                    int pDepth = 0;
+                    int closeParenIdx = -1;
+                    for (int pi = 1; pi < expressionTokens.Count; pi++)
+                    {
+                        if (expressionTokens[pi].Type == TokenType.LEFT_PAREN) pDepth++;
+                        else if (expressionTokens[pi].Type == TokenType.RIGHT_PAREN) pDepth--;
+                        if (pDepth == 0) { closeParenIdx = pi; break; }
+                    }
+                    // If close paren is followed by an adverb, this is an infix adverb pattern
+                    if (closeParenIdx > 0 && closeParenIdx + 1 < expressionTokens.Count &&
+                        VerbRegistry.IsAdverbToken(expressionTokens[closeParenIdx + 1].Type))
+                    {
+                        isInfixAdverbPattern = true;
+                    }
+                }
+                
+                if (!isInfixAdverbPattern)
+                {
+                    var funcNode = CreateNodeFromToken(expressionTokens[0]);
+                    var argTokens = expressionTokens.Skip(1).ToList();
+                    ASTNode? argNode = argTokens.Count == 1
+                        ? CreateNodeFromToken(argTokens[0])
+                        : EvaluateFromRight(argTokens);
+                    if (funcNode != null && argNode != null)
+                    {
+                        return ASTNode.MakeFunctionCall(funcNode, new System.Collections.Generic.List<ASTNode> { argNode });
+                    }
                 }
             }
 

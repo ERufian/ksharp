@@ -1090,15 +1090,31 @@ namespace K3CSharp
                 
                 var arg2val = Evaluate(node.Children[1]);
                 var verbValue2 = Evaluate(verbNode2);
+                
+                // Verb composition: (f/ g) where g is a verb creates a composed dyadic function
+                // Per spec: "Each glyph represents its monadic interpretation except the rightmost one,
+                // which represents its dyadic interpretation."
+                // E.g., (+/*)[x;y] = +/(x * y), (*/^)[x;y] = */(x ^ y)
+                if (arg2val is SymbolValue composedInnerVerb && VerbRegistry.HasVerb(composedInnerVerb.Value))
+                {
+                    var adverbName = op.Value.ToString();
+                    // Create a FunctionValue that applies inner verb dyadically, then outer adverb+verb monadically
+                    string outerVerbStr = verbValue2 is SymbolValue sv ? sv.Value : verbValue2?.ToString() ?? "";
+                    string innerVerbStr = composedInnerVerb.Value;
+                    string bodyText = $"{outerVerbStr}{GetAdverbGlyph(adverbName)}(x{innerVerbStr}y)";
+                    string originalSource = $"{outerVerbStr}{GetAdverbGlyph(adverbName)}{innerVerbStr}";
+                    return new FunctionValue(bodyText, new List<string> { "x", "y" }, originalSourceText: originalSource);
+                }
+                
                 var monadicLeft2 = new NullValue();
                 return op.Value.ToString() switch
                 {
-                    "over" => ApplyAdverbSlash(verbValue2, monadicLeft2, arg2val),
-                    "scan" => ApplyAdverbBackslash(verbValue2, monadicLeft2, arg2val),
-                    "each" => HandleAdverbTick(verbValue2, monadicLeft2, arg2val),
-                    "each-right" => ApplyAdverbSlashColon(verbValue2, monadicLeft2, arg2val),
-                    "each-left" => ApplyAdverbBackslashColon(verbValue2, monadicLeft2, arg2val),
-                    "each-prior" => ApplyAdverbTickColon(verbValue2, monadicLeft2, arg2val),
+                    "over" => ApplyAdverbSlash(verbValue2!, monadicLeft2, arg2val!),
+                    "scan" => ApplyAdverbBackslash(verbValue2!, monadicLeft2, arg2val!),
+                    "each" => HandleAdverbTick(verbValue2!, monadicLeft2, arg2val!),
+                    "each-right" => ApplyAdverbSlashColon(verbValue2!, monadicLeft2, arg2val!),
+                    "each-left" => ApplyAdverbBackslashColon(verbValue2!, monadicLeft2, arg2val!),
+                    "each-prior" => ApplyAdverbTickColon(verbValue2!, monadicLeft2, arg2val!),
                     _ => throw new Exception($"Unknown adverb: {op.Value}")
                 };
             }
@@ -1287,6 +1303,21 @@ namespace K3CSharp
                 if (isModifiedVerb)
                 {
                     return ApplyOuterAdverbWithModifiedVerbDyadic(op.Value.ToString(), verbNode, safeLeft!, safeRight!);
+                }
+                
+                // Verb composition: if right is a verb and left is sentinel, create composed function
+                // Per spec: "Each glyph represents its monadic interpretation except the rightmost one,
+                // which represents its dyadic interpretation."
+                // E.g., (+/*)[x;y] = +/(x * y), (*/^)[x;y] = */(x ^ y)
+                if (safeLeft is NullValue && safeRight is SymbolValue composedInnerVerb3 && VerbRegistry.HasVerb(composedInnerVerb3.Value))
+                {
+                    var adverbName3 = op.Value.ToString();
+                    var verbValue3 = Evaluate(verbNode);
+                    string outerVerbStr3 = verbValue3 is SymbolValue sv3 ? sv3.Value : verbValue3?.ToString() ?? "";
+                    string innerVerbStr3 = composedInnerVerb3.Value;
+                    string bodyText3 = $"{outerVerbStr3}{GetAdverbGlyph(adverbName3)}(x{innerVerbStr3}y)";
+                    string originalSource3 = $"{outerVerbStr3}{GetAdverbGlyph(adverbName3)}{innerVerbStr3}";
+                    return new FunctionValue(bodyText3, new List<string> { "x", "y" }, originalSourceText: originalSource3);
                 }
                 
                 // Parse the verb with adverbs
@@ -1503,6 +1534,20 @@ namespace K3CSharp
 
         /// <summary>
         /// One-adverb-at-a-time dyadic: apply only the outermost adverb, keeping the inner modified
+        private static string GetAdverbGlyph(string adverbName)
+        {
+            return adverbName switch
+            {
+                "over" => "/",
+                "scan" => "\\",
+                "each" => "'",
+                "each-right" => "/:",
+                "each-left" => "\\:",
+                "each-prior" => "':",
+                _ => "/"
+            };
+        }
+
         /// verb as an AST node that gets re-evaluated for each element during iteration.
         /// Handles dyadic nested-adverb expressions like x,''-x or y _di\:\: 0 2.
         /// </summary>
