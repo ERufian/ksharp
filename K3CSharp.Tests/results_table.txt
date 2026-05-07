@@ -1796,7 +1796,7 @@ lt 4 │ (1 0 0 0;1 1 0 ...   │                      ║
 ║ idioms_12_187_direct_matrix_product.k              │ x:1+3 2#!6;y:1+2 4#!8;dp:{+:'x*\:\:y};dp[x;y] │ (((1 2 3 4;2 4 ...   │                      ║
 ║ idioms_12_188_shur_product.k                       │ x:1+3 2#!6;y:1+2 4#!8;((*|^x)#x)*(*^y)#'y │ (1 4;15 24)          │                      ║
 ║ idioms_12_191_shur_sum.k                           │ x:(1 2 3;4 5 6); y:(10 20 30;40 50 60); x+y │ (11 22 33;44 55...   │                      ║
-║ idioms_12_198_hilbert_matrix.k                     │ hm:{%1+(!x)+/:!x};hm 5 │ Error: Function...   │ (1.0 0.5 0.333 ...   ║
+║ idioms_12_198_hilbert_matrix.k                     │ hm:{%1+(!x)+/:!x};hm 5 │ (1.0 0.5 0.3333...   │                      ║
 ║ idioms_12_200_replicate_dimension.k                │ x:2 3 3#1+!18;y:3;x[;,/(y#1)*\:!(^x)[1];] │ ((1 2 3;4 5 6;7...   │                      ║
 ║ idioms_12_230_extend_transitive_relation.k         │ x:(0 1 0 0;0 0 1 1;1 0 0 0;0 0 1 0);x(|/&)\:x │                      │ (0 0 1 1;1 0 1 ...   ║
 ║ idioms_12_240_matrix_product.k                     │ x:(1 2 3;4 5 6)
@@ -2002,16 +2002,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                  │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                   │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1298/1340 tests passed (96.9%)                                                                             ║
+║ SUMMARY: 1299/1340 tests passed (96.9%)                                                                             ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_12_198_hilbert_matrix.k
-Input: hm:{%1+(!x)+/:!x};hm 5
-Expected: (1.0 0.5 0.333 0.25 0.2;0.5 0.333 0.25 0.2 0.167;0.333 0.25 0.2 0.167 0.143;0.25 0.2 0.167 0.143 0.125;0.2 0.167 0.143 0.125 0.111)
-Actual: Error: Function execution error: Cannot find reciprocal of Vector
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_230_extend_transitive_relation.k
 Input: x:(0 1 0 0;0 0 1 1;1 0 0 0;0 0 1 0);x(|/&)\:x
 Expected: (0 0 1 1;1 0 1 0;0 1 0 0;1 0 0 0)

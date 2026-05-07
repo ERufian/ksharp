@@ -1507,6 +1507,17 @@ namespace K3CSharp
 
         private K3Value Reciprocal(K3Value a)
         {
+            if (a is VectorValue vecA)
+            {
+                // Atomic iteration: apply reciprocal to each element
+                var results = new List<K3Value>();
+                foreach (var element in vecA.Elements)
+                {
+                    results.Add(Reciprocal(element));
+                }
+                return new VectorValue(results);
+            }
+            
             if (a is IntegerValue intA)
                 return new FloatValue(1.0 / intA.Value);
             if (a is LongValue longA)
