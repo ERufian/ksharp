@@ -2909,7 +2909,7 @@ namespace K3CSharp.Tests
                 ("idioms_12_200_replicate_dimension.k", "((1 2 3;4 5 6;7 8 9;1 2 3;4 5 6;7 8 9;1 2 3;4 5 6;7 8 9);(10 11 12;13 14 15;16 17 18;10 11 12;13 14 15;16 17 18;10 11 12;13 14 15;16 17 18))"),
                 ("idioms_12_230_extend_transitive_relation.k", "(0 0 1 1;1 0 1 0;0 1 0 0;1 0 0 0)"),
                 ("idioms_12_240_matrix_product.k", "(22 28;49 64)"),
-                ("idioms_12_244_product_over_subsets.k", "(3 8 3.0;35 48 35.0;99 120 99.0)"),
+                ("idioms_12_244_product_over_subsets.k", "(3 8 3;35 48 35;99 120 99)"),
                 ("idioms_12_313_two_by_two_determinant.k", "1"),
                 ("idioms_12_375_insert_row.k", "(1 2 3;4 5 6;7 8 9;13 14 15;10 11 12)"),
                 ("idioms_12_376_append_row.k", "(1 2 3;4 5 6;7 8 9;10 11 12;13 14 15)"),
