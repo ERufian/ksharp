@@ -1905,7 +1905,7 @@ g:2
 ║ idioms_12_376_append_row.k                                       │ x:4 3#1+!12
 y:13 14 15
 x,,y │ (1 2 3;4 5 6;7 ...   │                      ║
-║ idioms_12_390_conform_table_rows.k                               │ f390:{@[((1 0*+/^y)|^x)#0;!#x;:;x]};x:3 3#1+!9;y:1 2 3 4;f390[x;y] │ ((1 2 3;4 5 6;7...   │ (1 2 3;4 5 6;7 ...   ║
+║ idioms_12_390_conform_table_rows.k                               │ f390:{@[((1 0*+/^y)|^x)#0;!#x;:;x]};x:3 3#1+!9;y:1 2 3 4;f390[x;y] │ (1 2 3;4 5 6;7 ...   │                      ║
 ║ idioms_12_391_conform_table_columns.k                            │ x:4 2 # 9;y:5#8;a:((0 1*+/^y)|^x)#0;a[;!(^x)[1]]:x;a │ Error: Cannot e...   │ (9 9 0 0 0;9 9 ...   ║
 ║ idioms_12_392_matrix_from_scalar.k                               │ msv:{(1+~#^x),:/x};(msv 4;msv 7 8) │ (,,4;,7 8)           │                      ║
 ║ idioms_12_527_transpose_planes_3d.k                              │ x:2 2 2#!8;+:'x      │ ((0 2;1 3);(4 6...   │                      ║
@@ -2094,7 +2094,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1390/1432 tests passed (97.1%)                                                                                           ║
+║ SUMMARY: 1391/1432 tests passed (97.1%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2138,11 +2138,6 @@ Test: atomic_functions/atomic_system_ic.k
 Input: _ic 1 2 3
 Expected: type error
 Actual: ()
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_12_390_conform_table_rows.k
-Input: f390:{@[((1 0*+/^y)|^x)#0;!#x;:;x]};x:3 3#1+!9;y:1 2 3 4;f390[x;y]
-Expected: (1 2 3;4 5 6;7 8 9;0 0 0)
-Actual: ((1 2 3;4 5 6;7 8 9);(1 2 3;4 5 6;7 8 9);(1 2 3;4 5 6;7 8 9);0 0 0)
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_391_conform_table_columns.k
 Input: x:4 2 # 9;y:5#8;a:((0 1*+/^y)|^x)#0;a[;!(^x)[1]]:x;a

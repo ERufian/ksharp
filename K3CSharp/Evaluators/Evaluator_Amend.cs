@@ -308,6 +308,11 @@ namespace K3CSharp
 
             if (indices is VectorValue indexVec)
             {
+                // When newValue is a vector with the same count as indices, assign element-wise
+                // e.g., @[5#0;1 3;:;10 20] assigns 10 to index 1 and 20 to index 3
+                bool elementWise = newValue is VectorValue valVec && valVec.Elements.Count == indexVec.Elements.Count;
+                var valueElements = elementWise ? ((VectorValue)newValue).Elements : null;
+                
                 for (int i = 0; i < indexVec.Elements.Count; i++)
                 {
                     var index = indexVec.Elements[i];
@@ -318,7 +323,7 @@ namespace K3CSharp
                         {
                             throw new Exception($"Index {idx} out of bounds for list of length {result.Count}");
                         }
-                        result[idx] = newValue;
+                        result[idx] = elementWise ? valueElements![i] : newValue;
                     }
                     else
                     {
