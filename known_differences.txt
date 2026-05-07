@@ -260,7 +260,7 @@ idioms_15_46_transposed_formatted_integers :: regex:^\s+|\s+$|\s*\n\s*:\; :: Com
 idioms_15_52_truth_table :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_08_567_select_based_on_g :: regex:^\s+|\s+$|\s*\n\s*:\; :: Compact representation
 idioms_08_623_conditional_change_of_sign  :: regex:9.0:9 :: smart exponentiation
-
+atomic_adverb_nested :: regex:1::1.0 :: Do not use abbreviated float vectors
 # Variable scoping evaluation order - It looks like k.exe is caching values when it shouldn't and it is breaking L-R with LRS
 variable_scoping_parentheses :: regex:11 8:11 12 :: L-R with LRS
 variable_scoping_function_call :: regex:11 8:11 12 :: L-R with LRS

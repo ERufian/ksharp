@@ -74,8 +74,16 @@ namespace K3CSharp.Parsing
                 case TokenType.EVAL:
                     return ProcessFunctionExpression(ref position);
                     
-                // Handle system functions using VerbRegistry
+                // Don't handle adverbs here - let the expression-level parsing handle them
                 default:
+                    if (VerbRegistry.IsAdverbToken(token.Type))
+                    {
+                        // Skip adverb tokens to let expression-level parsing handle nested adverbs
+                        position++;
+                        return null;
+                    }
+                    
+                    // Handle system functions using VerbRegistry
                     if (OperatorDetector.IsFunction(token.Type))
                     {
                         return ProcessFunctionExpression(ref position);

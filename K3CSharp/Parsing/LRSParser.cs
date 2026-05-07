@@ -2706,13 +2706,6 @@ namespace K3CSharp.Parsing
         /// </summary>
         internal ASTNode CreateNodeFromToken(Token token)
         {
-            // Handle adverb tokens in Pure LRS mode
-            if (PureLRSMode && VerbRegistry.IsAdverbToken(token.Type))
-            {
-                // In Pure LRS mode, try to parse adverb operations
-                return ParseAdverbOperation(token);
-            }
-            
             if (LRSAtomicParser.CanBeParsedByAtomicParser(token.Type))
             {
                 return LRSAtomicParser.ParseAtomicToken(token, this);
@@ -2727,45 +2720,6 @@ namespace K3CSharp.Parsing
             
             // Handle operator symbols for parse trees
             return LRSAtomicParser.CreateOperatorNode(token.Type);
-        }
-        
-        /// <summary>
-        /// Parse adverb operation in Pure LRS mode
-        /// </summary>
-        /// <param name="adverbToken">The adverb token</param>
-        /// <returns>AST node representing the adverb operation</returns>
-        private ASTNode ParseAdverbOperation(Token adverbToken)
-        {
-            // Find the position of this adverb token in the original token list
-            int adverbPosition = -1;
-            for (int i = 0; i < tokens.Count; i++)
-            {
-                if (tokens[i].Type == adverbToken.Type && tokens[i].Lexeme == adverbToken.Lexeme)
-                {
-                    adverbPosition = i;
-                    break;
-                }
-            }
-            
-            if (adverbPosition == -1)
-            {
-                throw new Exception($"Adverb token not found in token list: {adverbToken.Lexeme}");
-            }
-            
-            // Use LRSAdverbParser for proper adverb handling
-            var adverbParser = new LRSAdverbParser(tokens, BuildParseTree);
-            int position = adverbPosition;
-            
-            // Try to parse verb-immediate-left adverb pattern (verb on left side only)
-            var result = adverbParser.ParseVerbImmediateLeftAdverb(ref position);
-            if (result != null)
-            {
-                return result;
-            }
-            
-            // Fallback: create a simple node for basic adverb handling
-            var children = new List<ASTNode>();
-            return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(adverbToken.Lexeme), children);
         }
         
         /// <summary>
