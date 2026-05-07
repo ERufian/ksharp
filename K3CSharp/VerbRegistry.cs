@@ -550,7 +550,7 @@ namespace K3CSharp
             RegisterVerb("MINUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null); // Note: % is atomic but it has special cases, like infinity handling, that cannot be processed by the standard atomic helper
             RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
