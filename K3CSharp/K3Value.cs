@@ -1055,14 +1055,16 @@ namespace K3CSharp
         public string Verb { get; }
         public int RequiredArguments { get; }
         public K3Value? BoundLeftArgument { get; }
+        public FunctionValue? FuncValue { get; }
 
-        public AdverbProjectedFunctionValue(string adverbName, string verb, int requiredArguments, K3Value? boundLeftArgument = null)
+        public AdverbProjectedFunctionValue(string adverbName, string verb, int requiredArguments, K3Value? boundLeftArgument = null, FunctionValue? funcValue = null)
         {
             Type = ValueType.Function; // Treat as a function type
             AdverbName = adverbName;
             Verb = verb;
             RequiredArguments = requiredArguments;
             BoundLeftArgument = boundLeftArgument;
+            FuncValue = funcValue;
         }
 
         public override string ToString()

@@ -442,6 +442,9 @@ namespace K3CSharp
             {
                 bool isMonadicCtx = left is NullValue;
                 bool rightIsSentinel = right is NullValue;
+                // Noun form: both sentinels — return projected function (e.g., f' used as a value)
+                if (isMonadicCtx && rightIsSentinel)
+                    return new AdverbProjectedFunctionValue("each", fvVerb.BodyText, 1, funcValue: fvVerb);
                 // right=data, left=sentinel: monadic each over right
                 if (isMonadicCtx && right is VectorValue dataVecFv)
                 {

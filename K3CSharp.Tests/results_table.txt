@@ -1932,7 +1932,7 @@ dz[x;y] │ 5 0 0                │                      ║
 " *"[x] │ ("***    ";"***...   │ ("*** ";"******...   ║
 ║ idioms_13_174_move_first_quadrant.k                              │ sm:{x-&/x}
 x:(1 6 4;3 4 7;7 8 6)
-sm'[x] │ Error: Function...   │ (0 5 3;0 1 4;1 ...   ║
+sm'[x] │ (0 5 3;0 1 4;1 ...   │                      ║
 ║ idioms_14_93_numbers_from_alphanumeric.k                         │ x:(" 1";" 12";" ";"0.5");@[.:'x;&&/'x=" ";:;0] │ (1;12;0;0.5)         │                      ║
 ║ idioms_14_94_number_with_default_empty.k                         │ x:"";y:"-1";.((x~"")#y),x │ -                    │ "-1"                 ║
 ║ idioms_14_94_number_with_default_value.k                         │ x:"234.5";y:"-1";.((x~"")#y),x │ 234.5                │                      ║
@@ -2048,7 +2048,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_126_polynomial_fit.k                                   │ x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1] │ Error: Undefine...   │ 5.0 -1.0 3.9999...   ║
 ║ idioms_19_363_solve_quadratic.k                                  │ qu:{(q%x),(z%q:qq[x;y;z])};qq:{-0.5*y+sg[y]*ds[x;y;z]};ds:{_sqrt[(y*y)-(4*x*z)]};sg:{(x>0)-(x<0)};qu[1;-8;15] │ 5.0 3.0              │                      ║
 ║ idioms_19_430_polynomial_derivative.k                            │ x:1 2 3 4 5;-1 _ x*|!#x │ 4 6 6 4              │                      ║
-║ idioms_19_137_taylor_series.k                                    │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ Error: Each not...   │ 8.5                  ║
+║ idioms_19_137_taylor_series.k                                    │ x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a] │ 8.5                  │                      ║
 ║ idioms_19_281_taylor_series_value.k                              │ x:12;y:7 5 6 6;+/y**\1.0,x%1+!-1+#y │ 2227.0               │                      ║
 ║ idioms_19_48_saddle_point_indices.k                              │ x:(4 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4;1 2 4 4 2 4;5 3 5 5 3 5;4 2 4 4 2 4);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};sp:{(^x) _vs ones x};sp x │ (1 1 4 4;1 4 1 4)    │                      ║
 ║ idioms_19_262_saddle_point_value.k                               │ x:(5 4 6 4 12 5;16 2 4 5 16 18;8 18 7 12 16 11;20 17 16 14 16 20;16 8 12 9 17 13);rn:{x='&/'x};cx:{x=\:|/x};minmax:{(rn x)&(cx x)};ones:{&,/minmax x};(,/x)[ones[x]] │ ,14                  │                      ║
@@ -2094,7 +2094,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1392/1432 tests passed (97.2%)                                                                                           ║
+║ SUMMARY: 1394/1432 tests passed (97.3%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2154,13 +2154,6 @@ Input: x:~3 6 5 7 2<\:1+!7
 " *"[x]
 Expected: ("*** ";"****** ";"***** ";"*******";"** ")
 Actual: ("***    ";"****** ";"*****  ";"*******";"**     ")
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_13_174_move_first_quadrant.k
-Input: sm:{x-&/x}
-x:(1 6 4;3 4 7;7 8 6)
-sm'[x]
-Expected: (0 5 3;0 1 4;1 2 0)
-Actual: Error: Function expects 1 arguments, got 2
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_14_94_number_with_default_empty.k
 Input: x:"";y:"-1";.((x~"")#y),x
@@ -2278,11 +2271,6 @@ Test: idioms_19_126_polynomial_fit.k
 Input: x:64 70 77 82 92;y:(5*x^3)+(-1*x^2)+(4*x)+182;g:3;| _lsq[y;x^/:!g+1]
 Expected: 5.0 -1.0 3.999997 182.0001
 Actual: Error: Undefined variable: _lsq
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_137_taylor_series.k
-Input: x:3;y:1 1 1;a:!#y;fac:{[n]:[n>1; n * _f[n-1];1]};+/y*(x^a)%fac'[a]
-Expected: 8.5
-Actual: Error: Each not implemented for types: Function, Integer, Integer
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_21_128_linear_fit_coefficients.k
 Input: x:64 70 77 82 92 107 125 143 165 189;y:56 60 66 70 78 88 102 118 136 155;z:_lsq[y;x^/:0 1];z

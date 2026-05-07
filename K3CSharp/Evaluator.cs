@@ -3371,6 +3371,14 @@ namespace K3CSharp
                 return CallProjectedFunction(projLeft, arguments);
             }
             
+            // @ operator for applying an adverb-projected function to arguments
+            // e.g., f'[a] (parsed as APPLY(AdverbProjectedFunctionValue, vector))
+            if (left is AdverbProjectedFunctionValue adverbProjLeft)
+            {
+                var arguments = new List<K3Value> { right ?? new NullValue() };
+                return CallAdverbProjectedFunction(adverbProjLeft, arguments);
+            }
+            
             // @ operator for function application: data @ function
             // When right is a function, apply it to the left operand
             if (right is FunctionValue funcVal)
@@ -3391,8 +3399,15 @@ namespace K3CSharp
             // Function application with multiple arguments: f[x;y;z] where left is FunctionValue and right is VectorValue
             if (left is FunctionValue funcLeft)
             {
+                // Encoded adverb functions (EACH:, OVER:, etc.) should receive the vector as-is
+                // so the adverb dispatch can iterate over it monadically
+                bool isEncodedAdverbFunc = funcLeft.BodyText != null &&
+                    (funcLeft.BodyText.StartsWith("EACH:") || funcLeft.BodyText.StartsWith("OVER:") ||
+                     funcLeft.BodyText.StartsWith("SCAN:") || funcLeft.BodyText.StartsWith("EACH_RIGHT:") ||
+                     funcLeft.BodyText.StartsWith("EACH_LEFT:") || funcLeft.BodyText.StartsWith("EACH_PRIOR:"));
+                
                 var argVec = right as VectorValue;
-                if (argVec != null && argVec.Elements.Count > 1 && (funcLeft.Parameters.Count > 1 || funcLeft.Parameters.Count == 0))
+                if (!isEncodedAdverbFunc && argVec != null && argVec.Elements.Count > 1 && (funcLeft.Parameters.Count > 1 || funcLeft.Parameters.Count == 0))
                 {
                     // Multi-parameter function or unknown arity with multiple args: unpack vector
                     var funcNode = new ASTNode(ASTNodeType.Function);

@@ -671,7 +671,30 @@ namespace K3CSharp
         private K3Value CallAdverbProjectedFunction(AdverbProjectedFunctionValue adverbProjected, List<K3Value> arguments)
         {
             // Call an adverb projected function like +/ (over with verb +) or >':0, (each-prior with verb > and left arg 0)
-            var verb = new SymbolValue(adverbProjected.Verb);
+            K3Value verb;
+            
+            // Use the stored FunctionValue if available (user-defined functions)
+            if (adverbProjected.FuncValue != null)
+            {
+                verb = adverbProjected.FuncValue;
+            }
+            else if (VerbRegistry.HasVerb(adverbProjected.Verb))
+            {
+                verb = new SymbolValue(adverbProjected.Verb);
+            }
+            else
+            {
+                // Try to resolve as a user-defined function variable
+                var resolved = GetVariable(adverbProjected.Verb);
+                if (resolved != null && resolved is FunctionValue)
+                {
+                    verb = resolved;
+                }
+                else
+                {
+                    verb = new SymbolValue(adverbProjected.Verb);
+                }
+            }
             
             // Handle arguments: if we have a single vector argument, pass it as is
             // Otherwise, pass individual arguments
@@ -687,15 +710,15 @@ namespace K3CSharp
             }
             
             // Use bound left argument if available, otherwise use default (0 as sentinel)
-            K3Value leftArg = adverbProjected.BoundLeftArgument ?? new IntegerValue(0);
+            K3Value leftArg = adverbProjected.BoundLeftArgument ?? new NullValue();
             
             // Call the appropriate adverb function based on the adverb name
             return adverbProjected.AdverbName switch
             {
-                "over" => Over(verb, leftArg, dataArg),
-                "scan" => Scan(verb, leftArg, dataArg),
-                "each" => Each(verb, leftArg, dataArg),
-                "each-prior" => EachPrior(verb, leftArg, dataArg),
+                "over" => verb is FunctionValue fvOver ? ApplyAdverbSlash(fvOver, leftArg, dataArg) : Over(verb, leftArg, dataArg),
+                "scan" => verb is FunctionValue fvScan ? ApplyAdverbBackslash(fvScan, leftArg, dataArg) : Scan(verb, leftArg, dataArg),
+                "each" => HandleAdverbTick(verb, leftArg, dataArg),
+                "each-prior" => verb is FunctionValue fvEP ? ApplyAdverbTickColon(fvEP, leftArg, dataArg) : EachPrior(verb, leftArg, dataArg),
                 _ => throw new Exception($"Unknown adverb projected function: {adverbProjected.AdverbName}")
             };
         }
