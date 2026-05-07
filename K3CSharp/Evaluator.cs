@@ -708,24 +708,36 @@ namespace K3CSharp
             {
                 // Check for atomic function - apply implicit iteration if applicable
                 var verbInfo = VerbRegistry.GetVerb(opName);
-                if (verbInfo != null && verbInfo.IsAtomic)
+                if (verbInfo != null && (verbInfo.IsDyadicAtomic || verbInfo.IsLeftAtomic))
                 {
                     K3Value? result = null;
+                    bool bothAreVectors = left is VectorValue && right is VectorValue;
                     
-                    // Try implicit iteration based on atomic type
-                    if (verbInfo.IsRightAtomic)
+                    if (verbInfo.IsDyadicAtomic)
+                    {
+                        // Both-atomic: when both args are vectors, element-wise has precedence
+                        if (bothAreVectors)
+                        {
+                            result = ApplyImplicitIterationBoth(left, right, dyadicOp);
+                        }
+                        if (result == null)
+                        {
+                            // Try left-atomic (scalar left, vector right → iterate right)
+                            result = ApplyImplicitIterationRight(left, right, dyadicOp);
+                        }
+                        if (result == null)
+                        {
+                            // Try right-atomic (vector left, scalar right → iterate left)
+                            result = ApplyImplicitIterationLeft(left, right, dyadicOp);
+                        }
+                    }
+                    else if (verbInfo.IsRightAtomic)
                     {
                         result = ApplyImplicitIterationRight(left, right, dyadicOp);
                     }
-                    else
+                    else if (verbInfo.IsLeftAtomic)
                     {
-                        // Try left-atomic first
                         result = ApplyImplicitIterationLeft(left, right, dyadicOp);
-                        if (result == null)
-                        {
-                            // Try both-atomic
-                            result = ApplyImplicitIterationBoth(left, right, dyadicOp);
-                        }
                     }
                     
                     // If implicit iteration succeeded, return it
@@ -5939,7 +5951,7 @@ namespace K3CSharp
         /// </summary>
         private K3Value? ApplyImplicitIterationLeft(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
         {
-            if (left is VectorValue leftVector && right is not VectorValue)
+            if (left is VectorValue leftVector && leftVector.VectorType != -3 && right is not VectorValue)
             {
                 // Iterate over left vector elements
                 var results = new List<K3Value>();
@@ -5958,7 +5970,7 @@ namespace K3CSharp
         /// </summary>
         private K3Value? ApplyImplicitIterationRight(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
         {
-            if (right is VectorValue rightVector && left is not VectorValue)
+            if (right is VectorValue rightVector && rightVector.VectorType != -3 && left is not VectorValue)
             {
                 // Iterate over right vector elements
                 var results = new List<K3Value>();
@@ -5977,7 +5989,8 @@ namespace K3CSharp
         /// </summary>
         private K3Value? ApplyImplicitIterationBoth(K3Value left, K3Value right, Func<K3Value, K3Value, K3Value> verbFunc)
         {
-            if (left is VectorValue leftVector && right is VectorValue rightVector)
+            if (left is VectorValue leftVector && right is VectorValue rightVector
+                && leftVector.VectorType != -3 && rightVector.VectorType != -3)
             {
                 // Check if vectors have same length
                 if (leftVector.Elements.Count == rightVector.Elements.Count)

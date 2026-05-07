@@ -48,9 +48,19 @@ namespace K3CSharp
         public string? Description { get; set; }
         
         // Atomic function properties for implicit iteration
-        public bool IsAtomic { get; set; } = false;
+        // Per-arity atomicity: allows monadic and dyadic to be independently atomic
+        public bool IsMonadicAtomic { get; set; } = false;
+        public bool IsDyadicAtomic { get; set; } = false;
+        public bool IsLeftAtomic { get; set; } = false;
         public bool IsRightAtomic { get; set; } = false;
         public bool IsStringAtomic { get; set; } = false;
+        
+        // Convenience property: sets/gets both monadic and dyadic atomicity
+        public bool IsAtomic
+        {
+            get => IsMonadicAtomic && IsDyadicAtomic;
+            set { IsMonadicAtomic = value; IsDyadicAtomic = value; }
+        }
     }
 
     /// <summary>
@@ -180,9 +190,9 @@ namespace K3CSharp
             // Note: All verb implementations are handled by the Evaluator
         }
 
-        public static void RegisterVerb(string name, VerbType type, int[] arities, Func<K3Value[], K3Value>?[]? implementations, bool isSystemVariable = false, string? description = null, bool isAtomic = false, bool isRightAtomic = false, bool isStringAtomic = false)
+        public static void RegisterVerb(string name, VerbType type, int[] arities, Func<K3Value[], K3Value>?[]? implementations, bool isSystemVariable = false, string? description = null, bool isAtomic = false, bool isRightAtomic = false, bool isStringAtomic = false, bool isLeftAtomic = false, bool isMonadicAtomic = false, bool isDyadicAtomic = false)
         {
-            verbs[name] = new VerbInfo
+            var info = new VerbInfo
             {
                 Name = name,
                 SupportedArities = arities,
@@ -190,10 +200,18 @@ namespace K3CSharp
                 Type = type,
                 IsSystemVariable = isSystemVariable,
                 Description = description,
-                IsAtomic = isAtomic,
                 IsRightAtomic = isRightAtomic,
-                IsStringAtomic = isStringAtomic
+                IsStringAtomic = isStringAtomic,
+                IsLeftAtomic = isLeftAtomic
             };
+            // isAtomic sets both monadic and dyadic; individual flags override
+            if (isAtomic)
+            {
+                info.IsAtomic = true;
+            }
+            if (isMonadicAtomic) info.IsMonadicAtomic = true;
+            if (isDyadicAtomic) info.IsDyadicAtomic = true;
+            verbs[name] = info;
         }
 
         public static VerbInfo? GetVerb(string name)
@@ -550,8 +568,8 @@ namespace K3CSharp
             RegisterVerb("MINUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null); // Note: % is atomic but it has special cases, like infinity handling, that cannot be processed by the standard atomic helper
-            RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true); // Monadic % (reciprocal) is atomic; dyadic % has special infinity handling
+            RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true);
             RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("&", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
@@ -564,8 +582,8 @@ namespace K3CSharp
             RegisterVerb("GREATER", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("=", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("EQUAL", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("!", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("MODULUS", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("!", VerbType.Operator, new[] { 1, 2 }, null, isLeftAtomic: true);
+            RegisterVerb("MODULUS", VerbType.Operator, new[] { 1, 2 }, null, isLeftAtomic: true);
             RegisterVerb("#", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("HASH", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("_", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
@@ -1074,6 +1092,15 @@ namespace K3CSharp
         {
             var verb = GetVerb(verbName);
             return verb != null && verb.IsRightAtomic;
+        }
+
+        /// <summary>
+        /// Check if a verb by name is left-atomic (atomic in its left argument)
+        /// </summary>
+        public static bool IsLeftAtomicVerb(string verbName)
+        {
+            var verb = GetVerb(verbName);
+            return verb != null && verb.IsLeftAtomic;
         }
 
         /// <summary>
