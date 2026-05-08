@@ -1,1 +1,1 @@
-_sm "abc" "def"
+("foo";"bar";"baz") _sm "ba*" 

@@ -361,11 +361,11 @@ foo - 12 │ 20                   │                      ║
 ║ atomic_functions/atomic_reciprocal_dyadic_vector_vector_nested.k │ (1 2;3 4) % (5 6;7 8) │ (0.2 0.3333333;...   │                      ║
 ║ atomic_functions/atomic_floor_dyadic_atom_vector.k               │ _ 5 1.5 2.7 3.2      │ 5 1 2 3              │                      ║
 ║ atomic_functions/atomic_math_atan2_dyadic_vector_vector.k        │ _atan 2 1 2 3 4 5    │ 1.107149 0.7853...   │                      ║
-║ atomic_functions/atomic_math_div_dyadic_vector_vector.k          │ _div 10 20 30        │ Error: _div can...   │ reserved error       ║
-║ atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k   │ _sm "abc" "def"      │ Error: _sm: lef...   │ type error           ║
-║ atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k   │ _ss "abc" "def"      │ Error: _ss: lef...   │ type error           ║
-║ atomic_functions/atomic_system_ci.k                              │ _ci "abc"            │ Error: _ci: all...   │ type error           ║
-║ atomic_functions/atomic_system_ic.k                              │ _ic 1 2 3            │ ()                   │ type error           ║
+║ atomic_functions/atomic_math_div_dyadic_vector_vector.k          │ 900 _div 10 20 30    │ 90 45 30             │                      ║
+║ atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k   │ ("foo";"bar";"baz") _sm "ba*" │ Error: _sm: lef...   │ 0 1 1                ║
+║ atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k   │ ("foo";"bar";"baz") _sm ("foo";"fie";"baz") │ Error: _sm: lef...   │ 1 0 1                ║
+║ atomic_functions/atomic_system_ci.k                              │ _ci 86 87 88         │ "VWX"                │                      ║
+║ atomic_functions/atomic_system_ic.k                              │ _ic "qwe"            │ 113 119 101          │                      ║
 ║ shape_operator_jagged_3d.k                                       │ ^ (((1 2); (3 4 5)); ((6 7); (8 9 10))) │ 2 2                  │                      ║
 ║ shape_operator_jagged_matrix.k                                   │ ^ ((1 2 3); (4 5); (6 7 8 9)) │ ,3                   │                      ║
 ║ shape_operator_matrix.k                                          │ ^ ((1 2 3); (4 5 6); (7 8 9)) │ 3 3                  │                      ║
@@ -2104,7 +2104,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1410/1442 tests passed (97.8%)                                                                                           ║
+║ SUMMARY: 1413/1442 tests passed (98.0%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2114,30 +2114,15 @@ Input: (1 2;3 4) $ (5 6;7 8)
 Expected: ((,"5";" 6");("  7";"   8"))
 Actual: Error: Invalid format specifier: 1 2
 ──────────────────────────────────────────────────────────────────────────
-Test: atomic_functions/atomic_math_div_dyadic_vector_vector.k
-Input: _div 10 20 30
-Expected: reserved error
-Actual: Error: _div can only be applied to int/long values or int/long vectors
-──────────────────────────────────────────────────────────────────────────
 Test: atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k
-Input: _sm "abc" "def"
-Expected: type error
+Input: ("foo";"bar";"baz") _sm "ba*"
+Expected: 0 1 1
 Actual: Error: _sm: left argument must be character or symbol
 ──────────────────────────────────────────────────────────────────────────
 Test: atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k
-Input: _ss "abc" "def"
-Expected: type error
-Actual: Error: _ss: left argument must be character or symbol
-──────────────────────────────────────────────────────────────────────────
-Test: atomic_functions/atomic_system_ci.k
-Input: _ci "abc"
-Expected: type error
-Actual: Error: _ci: all elements must be integers
-──────────────────────────────────────────────────────────────────────────
-Test: atomic_functions/atomic_system_ic.k
-Input: _ic 1 2 3
-Expected: type error
-Actual: ()
+Input: ("foo";"bar";"baz") _sm ("foo";"fie";"baz")
+Expected: 1 0 1
+Actual: Error: _sm: left argument must be character or symbol
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_12_391_conform_table_columns.k
 Input: x:4 2 # 9;y:5#8;a:((0 1*+/^y)|^x)#0;a[;!(^x)[1]]:x;a

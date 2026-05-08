@@ -1092,11 +1092,11 @@ namespace K3CSharp.Tests
 
                 // Additional atomic function tests (reserved error / type error)
                 ("atomic_functions/atomic_math_atan2_dyadic_vector_vector.k", "1.107149 0.7853982 1.107149 1.249046 1.325818 1.373401"),
-                ("atomic_functions/atomic_math_div_dyadic_vector_vector.k", "reserved error"),
-                ("atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k", "type error"),
-                ("atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k", "type error"),
-                ("atomic_functions/atomic_system_ci.k", "type error"),
-                ("atomic_functions/atomic_system_ic.k", "type error"),
+                ("atomic_functions/atomic_math_div_dyadic_vector_vector.k", "90 45 30"),
+                ("atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k", "0 1 1"),
+                ("atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k", "1 0 1"),
+                ("atomic_functions/atomic_system_ci.k", "\"VWX\""),
+                ("atomic_functions/atomic_system_ic.k", "113 119 101"),
 
                 ("shape_operator_jagged_3d.k", "2 2"),
 

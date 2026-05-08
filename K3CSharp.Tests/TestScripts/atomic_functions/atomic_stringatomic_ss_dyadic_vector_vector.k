@@ -1,1 +1,1 @@
-_ss "abc" "def"
+("foo";"bar";"baz") _sm ("foo";"fie";"baz")
