@@ -1860,6 +1860,14 @@ namespace K3CSharp
                 else
                     return new IntegerValue((int)Math.Floor(floatA.Value));
             }
+            // Atomic: iterate over vector elements
+            if (a is VectorValue vec)
+            {
+                var results = new List<K3Value>();
+                foreach (var elem in vec.Elements)
+                    results.Add(Floor(elem));
+                return new VectorValue(results, DetermineVectorType(results));
+            }
             
             throw new Exception($"Cannot floor {a.Type}");
         }
