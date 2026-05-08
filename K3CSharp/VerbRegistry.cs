@@ -562,36 +562,36 @@ namespace K3CSharp
             
             // Primitive verbs
             // + - * % | & ^ < > = ! # _ ~ $ ? @ . ,
-            RegisterVerb("+", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("PLUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("+", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("PLUS", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
             RegisterVerb("-", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("MINUS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("*", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("MULTIPLY", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
             RegisterVerb("%", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true); // Monadic % (reciprocal) is atomic; dyadic % has special infinity handling
             RegisterVerb("DIVIDE", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true);
-            RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("&", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("MIN", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("^", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("POWER", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("<", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("LESS", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb(">", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("GREATER", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("=", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("EQUAL", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("|", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("MAX", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("&", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("MIN", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("^", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("POWER", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("<", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("LESS", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb(">", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("GREATER", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("=", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("EQUAL", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
             RegisterVerb("!", VerbType.Operator, new[] { 1, 2 }, null, isLeftAtomic: true);
             RegisterVerb("MODULUS", VerbType.Operator, new[] { 1, 2 }, null, isLeftAtomic: true);
             RegisterVerb("#", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("HASH", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("_", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("UNDERSCORE", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("_", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true);
+            RegisterVerb("UNDERSCORE", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true);
             RegisterVerb("~", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("MATCH", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
+            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
             RegisterVerb("?", VerbType.Operator, new[] { 1, 2, 3 }, null);
             RegisterVerb("QUESTION", VerbType.Operator, new[] { 1, 2, 3 }, null);
             RegisterVerb("@", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);

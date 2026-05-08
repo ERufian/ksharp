@@ -1507,23 +1507,19 @@ namespace K3CSharp
 
         private K3Value Reciprocal(K3Value a)
         {
-            if (a is VectorValue vecA)
-            {
-                // Atomic iteration: apply reciprocal to each element
-                var results = new List<K3Value>();
-                foreach (var element in vecA.Elements)
-                {
-                    results.Add(Reciprocal(element));
-                }
-                return new VectorValue(results);
-            }
-            
             if (a is IntegerValue intA)
                 return new FloatValue(1.0 / intA.Value);
             if (a is LongValue longA)
                 return new FloatValue(1.0 / longA.Value);
             if (a is FloatValue floatA)
                 return new FloatValue(1.0 / floatA.Value);
+            if (a is VectorValue vecA)
+            {
+                var results = new List<K3Value>();
+                foreach (var element in vecA.Elements)
+                    results.Add(Reciprocal(element));
+                return new VectorValue(results);
+            }
             
             throw new Exception($"Cannot find reciprocal of {a.Type}");
         }
@@ -1859,14 +1855,6 @@ namespace K3CSharp
                     return new IntegerValue("0N");
                 else
                     return new IntegerValue((int)Math.Floor(floatA.Value));
-            }
-            // Atomic: iterate over vector elements
-            if (a is VectorValue vec)
-            {
-                var results = new List<K3Value>();
-                foreach (var elem in vec.Elements)
-                    results.Add(Floor(elem));
-                return new VectorValue(results, DetermineVectorType(results));
             }
             
             throw new Exception($"Cannot floor {a.Type}");

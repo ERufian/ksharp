@@ -316,6 +316,23 @@ namespace K3CSharp
                     if (verbSymbol == null)
                         throw new Exception("MonadicOp must have a verb symbol as its value");
                     
+                    // Implicit iteration for monadic atomic verbs on vectors
+                    var monoVerbInfo = VerbRegistry.GetVerb(verbSymbol.Value);
+                    if (monoVerbInfo != null && monoVerbInfo.IsMonadicAtomic && operand is VectorValue monoVec)
+                    {
+                        var monoResults = new List<K3Value>();
+                        foreach (var elem in monoVec.Elements)
+                        {
+                            var childNode = new ASTNode(ASTNodeType.MonadicOp);
+                            childNode.Value = verbSymbol;
+                            var literalNode = new ASTNode(ASTNodeType.Literal);
+                            literalNode.Value = elem;
+                            childNode.Children.Add(literalNode);
+                            monoResults.Add(Evaluate(childNode));
+                        }
+                        return new VectorValue(monoResults, DetermineVectorType(monoResults));
+                    }
+
                     // Use the same monadic operator evaluation as in EvaluateDyadicOp
                     var monoResult = verbSymbol.Value switch
                     {
@@ -826,6 +843,23 @@ namespace K3CSharp
             {
                 var operand = Evaluate(node.Children[0]);
                 
+                // Implicit iteration for monadic atomic verbs on vectors
+                var dyadicMonoVerbInfo = VerbRegistry.GetVerb(op.Value);
+                if (dyadicMonoVerbInfo != null && dyadicMonoVerbInfo.IsMonadicAtomic && operand is VectorValue dyadicMonoVec)
+                {
+                    var dyadicMonoResults = new List<K3Value>();
+                    foreach (var elem in dyadicMonoVec.Elements)
+                    {
+                        var childNode = new ASTNode(ASTNodeType.MonadicOp);
+                        childNode.Value = new SymbolValue(op.Value);
+                        var literalNode = new ASTNode(ASTNodeType.Literal);
+                        literalNode.Value = elem;
+                        childNode.Children.Add(literalNode);
+                        dyadicMonoResults.Add(Evaluate(childNode));
+                    }
+                    return new VectorValue(dyadicMonoResults, DetermineVectorType(dyadicMonoResults));
+                }
+
                 return op.Value switch
                 {
                     "-" => MonadicMinus(operand),
