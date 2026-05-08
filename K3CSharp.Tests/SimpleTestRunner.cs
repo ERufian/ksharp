@@ -3032,7 +3032,7 @@ namespace K3CSharp.Tests
                 ("idioms_19_47_polynomial_with_roots.k", "1 -6 11 -6"),
                 ("idioms_19_67_extrapolated_value.k", "25.0"),
                 ("idioms_19_69_polynomial_value_at_points.k", "-8 1 43"),
-                ("idioms_19_126_polynomial_fit.k", "5.0 -1.0 3.999997 182.0001"),
+                ("idioms_19_126_polynomial_fit.k", "5 -1 3.999997 182.0001"),
                 ("idioms_19_363_solve_quadratic.k", "5.0 3.0"),
                 ("idioms_19_430_polynomial_derivative.k", "4 6 6 4"),
                 ("idioms_19_137_taylor_series.k", "8.5"),

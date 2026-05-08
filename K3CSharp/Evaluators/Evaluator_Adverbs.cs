@@ -113,6 +113,17 @@ namespace K3CSharp
                         "$:" => Format(operand),  // Monadic format
                         "@" => Atom(operand),
                         "@:" => Atom(operand),  // Monadic atom
+                        "STRING_REPRESENTATION" => IoVerbMonadic(operand, 5),
+                        "IO_VERB_0" => IoVerbMonadic(operand, 0),
+                        "IO_VERB_1" => IoVerbMonadic(operand, 1),
+                        "IO_VERB_2" => IoVerbMonadic(operand, 2),
+                        "IO_VERB_3" => IoVerbMonadic(operand, 3),
+                        "IO_VERB_4" => IoVerbMonadic(operand, 4),
+                        "IO_VERB_5" => IoVerbMonadic(operand, 5),
+                        "IO_VERB_6" => IoVerbMonadic(operand, 6),
+                        "IO_VERB_7" => IoVerbMonadic(operand, 7),
+                        "IO_VERB_8" => IoVerbMonadic(operand, 8),
+                        "IO_VERB_9" => IoVerbMonadic(operand, 9),
                         _ => throw new Exception($"Verb '{verbName}' is registered as monadic but not implemented in ApplyMonadicVerb")
                     };
                 }
