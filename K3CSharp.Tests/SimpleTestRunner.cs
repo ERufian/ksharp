@@ -2943,7 +2943,7 @@ namespace K3CSharp.Tests
                 ("idioms_13_144_histogram.k", "(\"            \";\"         *  \";\"   *     *  \";\"   *  *  *  \";\"   ** **** *\")"),
                 ("idioms_13_464_framing_matrix.k", "(\"------\";\"|abcd|\";\"|efgh|\";\"|ijkl|\";\"|mnop|\";\"------\")"),
                 ("idioms_13_572_division_by_zero.k", "5 0 0"),
-                ("idioms_13_605_plotting_chars.k", "(\"*** \";\"****** \";\"***** \";\"*******\";\"** \")"),
+                ("idioms_13_605_plotting_chars.k", "(\"***    \";\"****** \";\"*****  \";\"*******\";\"**     \")"),
                 ("idioms_13_174_move_first_quadrant.k", "(0 5 3;0 1 4;1 2 0)"),
 
                 // Chapter 14 idioms: Conversions between numbers and character vectors
