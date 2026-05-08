@@ -2091,6 +2091,38 @@ namespace K3CSharp.Parsing
                     // and the remaining tokens form an operation with it
                     var remainingTokens = tokens.GetRange(position, tokens.Count - position);
                     
+                    // Check if remaining tokens are bracket indexing (e.g., (^x)[1])
+                    if (remainingTokens.Count > 0 && remainingTokens[0].Type == TokenType.LEFT_BRACKET)
+                    {
+                        // Apply bracket indexing to the parenthesized result
+                        var currentNode = groupedResult;
+                        int bracketPos = 0;
+                        while (bracketPos < remainingTokens.Count && remainingTokens[bracketPos].Type == TokenType.LEFT_BRACKET)
+                        {
+                            var bracketEnd = FindMatchingBracket(remainingTokens, bracketPos);
+                            if (bracketEnd == -1) break;
+                            
+                            var argTokens = remainingTokens.GetRange(bracketPos + 1, bracketEnd - bracketPos - 1);
+                            var splitArgs = SplitBracketArguments(argTokens, int.MaxValue);
+                            var argNodes = new List<ASTNode>();
+                            foreach (var splitArgTokens in splitArgs)
+                            {
+                                if (splitArgTokens.Count == 0)
+                                    argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                                else
+                                {
+                                    var argNode = BuildParseTreeFromRight(splitArgTokens);
+                                    if (argNode != null) argNodes.Add(argNode);
+                                }
+                            }
+                            if (argNodes.Count > 0)
+                                currentNode = CreateBracketApply(currentNode, argNodes);
+                            bracketPos = bracketEnd + 1;
+                        }
+                        position = tokens.Count;
+                        return currentNode;
+                    }
+                    
                     // Check if the first remaining token is an operator
                     if (remainingTokens.Count > 0 && OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
                     {
