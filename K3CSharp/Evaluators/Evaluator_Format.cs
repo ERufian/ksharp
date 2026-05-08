@@ -18,19 +18,11 @@ namespace K3CSharp
             // Handle vectors with consistent recursion
             if (value is VectorValue vec)
             {
-                // Special handling for character vectors (strings) - split into individual characters
+                // For string-atomic behavior: character vectors are atomic units
                 if (vec.Elements.Count > 0 && vec.Elements.All(e => e is CharacterValue))
                 {
-                    if (vec.Elements.Count == 1)
-                    {
-                        // Single character - return as character vector directly, don't enlist
-                        return vec.Elements[0];
-                    }
-                    else
-                    {
-                        // Multiple characters - return as-is (already a character vector)
-                        return vec;
-                    }
+                    // Character vector is atomic - return as-is
+                    return vec;
                 }
                 
                 // Regular vector - recursively format each element and create list of character vectors
@@ -124,6 +116,62 @@ namespace K3CSharp
             if (IsTypeConversionSpecifier(left) && IsCharacterVectorOrList(right))
             {
                 return PerformTypeConversion(left, right);
+            }
+            
+            // Atomic iteration: dyadic format is a string-atomic function
+            // Apply element-wise when both arguments are conformable vectors
+            // But NOT for type conversion specifiers (already handled above)
+            // Character vectors are treated as atomic units (not broken into characters)
+            if (left is VectorValue leftVec && right is VectorValue rightVec)
+            {
+                // Check if right is a character vector - treat as atomic
+                if (rightVec.Elements.Count > 0 && rightVec.Elements.All(e => e is CharacterValue))
+                {
+                    // Character vector is atomic, don't iterate
+                    // Fall through to normal format handling
+                }
+                // Check conformability at top level
+                else if (leftVec.Elements.Count == rightVec.Elements.Count)
+                {
+                    // Apply format element-wise
+                    var result = new List<K3Value>();
+                    for (int i = 0; i < leftVec.Elements.Count; i++)
+                    {
+                        result.Add(Format(leftVec.Elements[i], rightVec.Elements[i]));
+                    }
+                    return new VectorValue(result);
+                }
+            }
+            // Atomic iteration: left vector, right atom
+            // But NOT if right is a character vector (already handled above)
+            if (left is VectorValue leftVec2 && !(right is VectorValue))
+            {
+                var result = new List<K3Value>();
+                foreach (var leftElem in leftVec2.Elements)
+                {
+                    result.Add(Format(leftElem, right));
+                }
+                return new VectorValue(result);
+            }
+            // Atomic iteration: left atom, right vector
+            // But NOT if right is a character vector (treat as atomic)
+            if (!(left is VectorValue) && right is VectorValue rightVec2)
+            {
+                // Check if right is a character vector - treat as atomic
+                if (rightVec2.Elements.Count > 0 && rightVec2.Elements.All(e => e is CharacterValue))
+                {
+                    // Character vector is atomic, don't iterate
+                    // Fall through to normal format handling
+                }
+                else
+                {
+                    var result = new List<K3Value>();
+                    foreach (var rightElem in rightVec2.Elements)
+                    {
+                        result.Add(Format(left, rightElem));
+                    }
+                    return new VectorValue(result);
+                }
             }
             
             // Otherwise, this is a format operation with numeric specifier

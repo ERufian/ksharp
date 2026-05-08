@@ -590,8 +590,8 @@ namespace K3CSharp
             RegisterVerb("UNDERSCORE", VerbType.Operator, new[] { 1, 2 }, null, isMonadicAtomic: true);
             RegisterVerb("~", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("MATCH", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
-            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isDyadicAtomic: true);
+            RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isStringAtomic: true);
+            RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isStringAtomic: true);
             RegisterVerb("?", VerbType.Operator, new[] { 1, 2, 3 }, null);
             RegisterVerb("QUESTION", VerbType.Operator, new[] { 1, 2, 3 }, null);
             RegisterVerb("@", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);
@@ -630,8 +630,8 @@ namespace K3CSharp
             RegisterVerb("TOLERANTFLOOR", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb("~:", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb("LOGICALNEGATE", VerbType.Operator, new[] { 1 }, null);
-            RegisterVerb("$:", VerbType.Operator, new[] { 1 }, null);
-            RegisterVerb("FORMAT", VerbType.Operator, new[] { 1 }, null);
+            RegisterVerb("$:", VerbType.Operator, new[] { 1 }, null, isStringAtomic:true);
+            RegisterVerb("FORMAT", VerbType.Operator, new[] { 1 }, null, isStringAtomic:true);
             RegisterVerb("?:", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb("UNIQUES", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb("@:", VerbType.Operator, new[] { 1 }, null);

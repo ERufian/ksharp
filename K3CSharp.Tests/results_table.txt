@@ -320,7 +320,7 @@ foo - 12 │ 20                   │                      ║
 ║ atomic_functions/atomic_times_dyadic_atom_vector.k               │ 2 * 1 2 3 4 5        │ 2 4 6 8 10           │                      ║
 ║ atomic_functions/atomic_times_dyadic_vector_atom.k               │ 1 2 3 4 5 * 2        │ 2 4 6 8 10           │                      ║
 ║ atomic_functions/atomic_format_dyadic_vector_vector.k            │ 1 2 3 $ 4 5 6        │ (,"4";" 5";"  6")    │                      ║
-║ atomic_functions/atomic_format_dyadic_vector_vector_nested.k     │ (1 2;3 4) $ (5 6;7 8) │ Error: Invalid ...   │ ((,"5";" 6");("...   ║
+║ atomic_functions/atomic_format_dyadic_vector_vector_nested.k     │ (1 2;3 4) $ (5 6;7 8) │ ((,"5";" 6");("...   │                      ║
 ║ atomic_functions/atomic_format_dyadic_atom_vector.k              │ 5 $ 1 2 3            │ ("    1";"    2...   │                      ║
 ║ atomic_functions/atomic_format_dyadic_vector_atom.k              │ 1 2 3 $ 5            │ (,"5";" 5";"  5")    │                      ║
 ║ atomic_functions/atomic_math_abs_monadic_vector.k                │ _abs -1 -2 -3        │ 1 2 3                │                      ║
@@ -2102,16 +2102,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1422/1442 tests passed (98.6%)                                                                                           ║
+║ SUMMARY: 1423/1442 tests passed (98.7%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: atomic_functions/atomic_format_dyadic_vector_vector_nested.k
-Input: (1 2;3 4) $ (5 6;7 8)
-Expected: ((,"5";" 6");("  7";"   8"))
-Actual: Error: Invalid format specifier: 1 2
-──────────────────────────────────────────────────────────────────────────
 Test: atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k
 Input: ("foo";"bar";"baz") _sm "ba*"
 Expected: 0 1 1
