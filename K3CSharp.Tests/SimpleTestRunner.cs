@@ -3066,7 +3066,7 @@ namespace K3CSharp.Tests
                 ("idioms_21_128_linear_fit_coefficients.k", "4.587803 0.7927486"),
                 ("idioms_21_125_linear_fit_predicted.k", "55.32371 60.08021 65.62945 69.59319 77.52068 89.41191 103.6814 117.9509 135.3913 154.4173"),
                 ("idioms_21_127_exponential_fit_coefficients.k", "35.2829 0.00817742"),
-                ("idioms_21_124_exponential_fit_predicted.k", "56 60 66 70 78.0"),
+                ("idioms_21_124_exponential_fit_predicted.k", "56.10745 60.28622 65.55641 69.60062 78.45289"),
                 ("idioms_21_173_assign_to_classes.k", "0 2 4 2"),
                 ("idioms_21_201_moving_index.k", "(26 40 39;40 39 28;39 28 27;28 27 48)"),
                 ("idioms_21_546_is_count_of_atoms_1.k", "1"),
