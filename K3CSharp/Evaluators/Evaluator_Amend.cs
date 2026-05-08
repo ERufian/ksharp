@@ -412,10 +412,14 @@ namespace K3CSharp
                 if (index is NullValue)
                 {
                     // Null index: amend every element — .[d;,_n;f;y] / .[d;(_n;...);f;y]
+                    // When value is a vector of matching length, distribute value[i] to element i
+                    // e.g., a[;0 1]:x where a is 4×5 and x is 4×2 — each row i gets x[i]
                     var result = new List<K3Value>(list.Elements);
+                    bool distribute = value is VectorValue valVec && valVec.Elements.Count == result.Count;
                     for (int i = 0; i < result.Count; i++)
                     {
-                        result[i] = AmendAtPath(result[i], path, pathIndex + 1, function, value);
+                        var elementValue = distribute ? ((VectorValue)value!).Elements[i] : value;
+                        result[i] = AmendAtPath(result[i], path, pathIndex + 1, function, elementValue);
                     }
                     return new VectorValue(result);
                 }
@@ -433,9 +437,13 @@ namespace K3CSharp
                 else if (index is VectorValue idxVec)
                 {
                     // Multiple indices at this level
+                    // When value is a vector with matching count, distribute value[i] to index indices[i]
+                    // e.g., row[0 1]:9 9 assigns 9 to index 0 and 9 to index 1
                     var result = new List<K3Value>(list.Elements);
-                    foreach (var subIdx in idxVec.Elements)
+                    bool distribute = value is VectorValue valVec2 && valVec2.Elements.Count == idxVec.Elements.Count;
+                    for (int i = 0; i < idxVec.Elements.Count; i++)
                     {
+                        var subIdx = idxVec.Elements[i];
                         if (subIdx is IntegerValue subIntIdx)
                         {
                             int idx = (int)subIntIdx.Value;
@@ -443,7 +451,8 @@ namespace K3CSharp
                             {
                                 throw new Exception($"Index {idx} out of bounds for list of length {result.Count}");
                             }
-                            result[idx] = AmendAtPath(result[idx], path, pathIndex + 1, function, value);
+                            var elementValue = distribute ? ((VectorValue)value!).Elements[i] : value;
+                            result[idx] = AmendAtPath(result[idx], path, pathIndex + 1, function, elementValue);
                         }
                         else
                         {
