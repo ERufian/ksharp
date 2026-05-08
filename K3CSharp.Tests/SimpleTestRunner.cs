@@ -2955,7 +2955,7 @@ namespace K3CSharp.Tests
                 ("idioms_14_99_numeric_vector_rows.k", "(3 5;4 7)"),
                 ("idioms_14_101_sum_numbers_matrix.k", "10"),
                 ("idioms_14_106_leading_zeros.k", "(\"037\";\"036\";\"017\";\"038\";\"029\";\"004\";\"031\";\"012\";\"035\";\"025\")"),
-                ("idioms_14_452_number_of_positions.k", "4"),
+                ("idioms_14_452_number_of_positions.k", "4 5 1 1 1 8"),
                 ("idioms_14_456_number_digits.k", "1 2 3 5"),
 
                 // Chapter 15 idioms: Numeric base conversions
