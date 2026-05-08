@@ -251,23 +251,26 @@ namespace K3CSharp.Parsing
                             var argNodes = splitArgs.Select(argTokens =>
                                 BuildParseTree ? BuildParseTreeFromRight(argTokens) : EvaluateFromRight(argTokens)).ToList();
                             
-                            if (argNodes.Count == 2)
+                            // System functions (e.g., _lsq, _log) should be dispatched as FunctionCall
+                            // so the evaluator routes them through CallFunction, not EvaluateDyadicOp
+                            var verbName0 = VerbRegistry.TokenTypeToVerbName(expressionTokens[0].Type);
+                            var verbInfo0 = VerbRegistry.GetVerb(verbName0);
+                            bool isSystemFunction = verbInfo0 != null && 
+                                (verbInfo0.Type == VerbType.SystemFunction || verbInfo0.Type == VerbType.Function);
+                            
+                            if (isSystemFunction || argNodes.Count != 2)
                             {
-                                // Dyadic: create DyadicOp node
-                                return new ASTNode(ASTNodeType.DyadicOp, expressionTokens[0].Lexeme == "." ? new SymbolValue(".") : new SymbolValue(expressionTokens[0].Lexeme),
-                                    new List<ASTNode> { argNodes[0]!, argNodes[1]! });
-                            }
-                            else
-                            {
-                                // N-ary: fall through to ParseTriadicFromBracketCall below
-                                // (triadic/tetradic amend is handled there for . and @)
-                                // For other verbs with 3+ args, create a FunctionCall node
+                                // Create FunctionCall node for system functions and N-ary calls
                                 var funcNode = new ASTNode(ASTNodeType.FunctionCall);
-                                // Function name stored in Children[0] only (not in Value)
-                                // This follows the convention: FunctionCall.Children[0] = function node
                                 funcNode.Children.Add(ASTNode.MakeVariable(expressionTokens[0].Lexeme));
                                 funcNode.Children.AddRange(argNodes.Where(n => n != null)!);
                                 return funcNode;
+                            }
+                            else
+                            {
+                                // Dyadic primitive operator: create DyadicOp node
+                                return new ASTNode(ASTNodeType.DyadicOp, expressionTokens[0].Lexeme == "." ? new SymbolValue(".") : new SymbolValue(expressionTokens[0].Lexeme),
+                                    new List<ASTNode> { argNodes[0]!, argNodes[1]! });
                             }
                         }
                         else
@@ -393,7 +396,11 @@ namespace K3CSharp.Parsing
                             if (prefixTokens.Count > 1)
                             {
                                 int prefixDepth = 0;
-                                for (int i = 0; i < prefixTokens.Count; i++)
+                                // Exclude the last token in prefix — it's the function/identifier
+                                // immediately before '[' and is the callee, not an infix operator.
+                                // e.g., in z:_lsq[y;x], prefix=[z,:,_lsq], _lsq is the callee.
+                                int scanLimit = prefixTokens.Count - 1;
+                                for (int i = 0; i < scanLimit; i++)
                                 {
                                     var tok = prefixTokens[i];
                                     if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE)
@@ -960,9 +967,9 @@ namespace K3CSharp.Parsing
             // Handle identifier[bracketArgs] followed by additional tokens: e.g. d[x;y#,:]z
             // Also handles function tokens like _f[expression] for recursion
             // This is a bracket function call whose result is then applied to the remaining tokens.
-            // Detect: first token is IDENTIFIER or FUNCTION, second is '[', there's a matching ']', and more tokens follow.
+            // Detect: first token is IDENTIFIER, FUNCTION, or system function, second is '[', there's a matching ']', and more tokens follow.
             if (tokens.Count >= 4 &&
-                (firstTok.Type == TokenType.IDENTIFIER || firstTok.Type == TokenType.FUNCTION) &&
+                (firstTok.Type == TokenType.IDENTIFIER || firstTok.Type == TokenType.FUNCTION || OperatorDetector.IsFunction(firstTok.Type)) &&
                 tokens[1].Type == TokenType.LEFT_BRACKET)
             {
                 int closingBracket = FindMatchingBracket(tokens, 1);
@@ -2087,10 +2094,10 @@ namespace K3CSharp.Parsing
             }
 
             // Check for bracket indexing pattern: identifier[expression] or identifier[a;b;...]
-            // Also handles function tokens like _f[expression] for recursion
+            // Also handles function tokens like _f[expression] or system functions like _lsq[y;x]
             // Only fires when the bracket group spans to the end of the token list.
             if (expressionTokens.Count >= 4 &&
-                (expressionTokens[0].Type == TokenType.IDENTIFIER || expressionTokens[0].Type == TokenType.FUNCTION) &&
+                (expressionTokens[0].Type == TokenType.IDENTIFIER || expressionTokens[0].Type == TokenType.FUNCTION || OperatorDetector.IsFunction(expressionTokens[0].Type)) &&
                 expressionTokens[1].Type == TokenType.LEFT_BRACKET)
             {
                 var bracketEnd = FindMatchingBracket(expressionTokens, 1);
@@ -2340,8 +2347,9 @@ namespace K3CSharp.Parsing
             }
 
             // Handle identifier[bracket] indexing pattern (e.g., x[;y] inside monadic operator)
+            // Also handles system function bracket calls (e.g., _lsq[y;x])
             if (tokens.Count >= 2 &&
-                (tokens[0].Type == TokenType.IDENTIFIER || tokens[0].Type == TokenType.FUNCTION) &&
+                (tokens[0].Type == TokenType.IDENTIFIER || tokens[0].Type == TokenType.FUNCTION || OperatorDetector.IsFunction(tokens[0].Type)) &&
                 tokens[1].Type == TokenType.LEFT_BRACKET)
             {
                 var bracketEnd = FindMatchingBracket(tokens, 1);

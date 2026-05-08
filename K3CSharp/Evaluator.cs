@@ -2582,6 +2582,18 @@ namespace K3CSharp
                 // Not a system variable, continue with regular function evaluation
             }
             
+            // Handle dyadic system functions called via bracket notation (e.g., _lsq[y;x])
+            // These are registered in VerbRegistry but dispatched through EvaluateDyadicOperatorWithRegistry
+            if (arguments.Count == 2)
+            {
+                var verbForBracket = VerbRegistry.GetVerb(functionName);
+                if (verbForBracket != null && verbForBracket.Type == VerbType.SystemFunction &&
+                    verbForBracket.SupportedArities.Contains(2))
+                {
+                    return EvaluateDyadicOperatorWithRegistry(functionName, arguments[0], arguments[1]);
+                }
+            }
+            
             // Check if it's a built-in function first
             switch (functionName)
             {
