@@ -822,6 +822,14 @@ namespace K3CSharp.Parsing
                 }
             }
             
+            // Handle IDENTIFIER-led function application with LRS
+            if (parentParser != null)
+            {
+                var identFnResult = parentParser.TryParseIdentifierLedFunctionApplication(tokens);
+                if (identFnResult != null)
+                    return identFnResult;
+            }
+
             // Try dyadic operation (monadic parsing is handled at main LRS level)
             var dyadicResult = ParseDyadicOperation(tokens);
             if (dyadicResult != null)

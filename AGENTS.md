@@ -70,5 +70,5 @@ description: Expert software developer, Interpreters and compilers, C#, K, APL a
 - Use codemaps and fast context to search for functionality
 - Use debugger for debugging
 - Use Postmortems to learn from previous mistakes [text](../vibe-docs/ksharp/Postmortems/*.md)
-- If reading status or results from the terminal fails, redirect terminal and error output to a file and read the file.
+- Always check the result from commands. If reading status or results from the terminal fails, redirect terminal and error output to a file and read the file. Ask for help if necessary
 - Clean up temporary files when they have been read and are no longer needed

@@ -1958,10 +1958,8 @@ d:"0123456789 "
 ║ idioms_14_101_sum_numbers_matrix.k                               │ x:$!5
 +/ .:' x       │ 10                   │                      ║
 ║ idioms_14_106_leading_zeros.k                                    │ x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z │ ("037";"036";"0...   │                      ║
-║ idioms_14_452_number_of_positions.k                              │ dp:{#$x};dp 1234     │ 4                    │                      ║
-║ idioms_14_456_number_digits.k                                    │ np:{1+_ log10 x+0=x}
-x:0 13 523 16008
-np x │ Error: Function...   │ 1 2 3 5              ║
+║ idioms_14_452_number_of_positions.k                              │ log10:{_log[x]%_log[10]};dp:{1+(x<0)+_ log10[_abs[x+0=x]]};dp 1234 -1234 0 1 7 12345678 │ 4 5 1 1 1 8          │                      ║
+║ idioms_14_456_number_digits.k                                    │ log10:{_log[x]%_log[10]};np:{1+_ log10 x+0=x};x:0 13 523 16008;np x │ 1 2 3 5              │                      ║
 ║ idioms_15_46_transposed_formatted_integers.k                     │ x:5
 +$1+!x           │ ,"12345"             │                      ║
 ║ idioms_15_49_hex_from_decimal.k                                  │ x:255
@@ -2010,7 +2008,7 @@ ii[3.0]   │ 1                    │                      ║
 ║ idioms_17_62_fractional_part.k                                   │ x:3.7
 x-_ x          │ 0.7                  │                      ║
 ║ idioms_17_478_fractional_part.k                                  │ x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1 │ 0.0 0.0 0.0 0.4...   │ 0.0 0.0 0.0 0.4...   ║
-║ idioms_17_465_magnitude_fractional_part.k                        │ x:6.13 -6.13;_abs[x]!1 │ 6.13 6.13            │ 0.13 0.13            ║
+║ idioms_17_465_magnitude_fractional_part.k                        │ x:6.13 -6.13;_abs[x]!1 │ 0.13 0.13            │                      ║
 ║ idioms_17_476_fractional_part_with_sign.k                        │ x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ 0.2 0.3 -0.2 -0...   │ 0.2 0.3 -0.2 -0...   ║
 ║ idioms_17_453_round_nearest_even.k                               │ x:0.9 1.0 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ 0 2 2 4 -1 -2        │ 0 2 2 4 0 -2         ║
 ║ idioms_17_454_rounding_nearest_even_half.k                       │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ 24 40 3 -14 4 4      │                      ║
@@ -2104,7 +2102,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1419/1442 tests passed (98.4%)                                                                                           ║
+║ SUMMARY: 1421/1442 tests passed (98.5%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2124,13 +2122,6 @@ Input: ("foo";"bar";"baz") _sm ("foo";"fie";"baz")
 Expected: 1 0 1
 Actual: Error: _sm: left argument must be character or symbol
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_14_456_number_digits.k
-Input: np:{1+_ log10 x+0=x}
-x:0 13 523 16008
-np x
-Expected: 1 2 3 5
-Actual: Error: Function execution error: Undefined variable: log10
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_56_hex_from_decimal_chars.k
 Input: x:"255"
 h:"0123456789abcdef"
@@ -2149,11 +2140,6 @@ Test: idioms_17_478_fractional_part.k
 Input: x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1
 Expected: 0.0 0.0 0.0 0.4 0.4 0.9
 Actual: 0.0 0.0 0.0 0.4 -0.6 -0.1
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_465_magnitude_fractional_part.k
-Input: x:6.13 -6.13;_abs[x]!1
-Expected: 0.13 0.13
-Actual: 6.13 6.13
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_476_fractional_part_with_sign.k
 Input: x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1

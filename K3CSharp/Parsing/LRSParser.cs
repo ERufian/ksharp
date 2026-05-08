@@ -518,6 +518,104 @@ namespace K3CSharp.Parsing
                             } // Close if (currentNode != null)
                             } // Close if (!prefixHasDyadicOperator)
                         } // Close if (allBrackets && bracketGroups.Count > 0)
+                        
+                        // Handle partial bracket case: f[args] followed by more tokens (e.g., _log[1234]%_log[10])
+                        // The bracket groups form a function call, and remaining tokens continue the expression
+                        if (!allBrackets && bracketGroups.Count > 0)
+                        {
+                            // Check if remaining tokens form an amend-assign pattern (op + COLON)
+                            // e.g., a[1;0 2]+:100 — must NOT be handled here
+                            int afterBracketsCheck = bracketGroups[bracketGroups.Count - 1].end + 1;
+                            bool isAmendAssign = false;
+                            if (afterBracketsCheck < expressionTokens.Count - 1 &&
+                                OperatorDetector.SupportsDyadic(expressionTokens[afterBracketsCheck].Type) &&
+                                expressionTokens[afterBracketsCheck + 1].Type == TokenType.COLON)
+                            {
+                                isAmendAssign = true;
+                            }
+                            
+                            if (!isAmendAssign)
+                            {
+                                var prefixTokens = expressionTokens.GetRange(0, firstBracket);
+                                // Only handle when prefix has no dyadic operators (simple function call)
+                                bool prefixHasDyadic = false;
+                                if (prefixTokens.Count > 1)
+                                {
+                                    int pd = 0;
+                                    foreach (var tok in prefixTokens)
+                                    {
+                                        if (tok.Type == TokenType.LEFT_PAREN || tok.Type == TokenType.LEFT_BRACKET || tok.Type == TokenType.LEFT_BRACE) pd++;
+                                        else if (tok.Type == TokenType.RIGHT_PAREN || tok.Type == TokenType.RIGHT_BRACKET || tok.Type == TokenType.RIGHT_BRACE) pd--;
+                                        else if (pd == 0 && OperatorDetector.SupportsDyadic(tok.Type)) { prefixHasDyadic = true; break; }
+                                    }
+                                }
+                                if (!prefixHasDyadic)
+                                {
+                                    // Parse the function call (prefix + bracket groups)
+                                    ASTNode? funcCallNode;
+                                    if (BuildParseTree)
+                                        funcCallNode = BuildParseTreeFromRight(prefixTokens);
+                                    else
+                                        funcCallNode = EvaluateFromRight(prefixTokens);
+                                    
+                                    if (funcCallNode != null)
+                                    {
+                                        // Apply bracket groups to the function
+                                        foreach (var (groupStart, groupEnd) in bracketGroups)
+                                        {
+                                            var argTokens = expressionTokens.GetRange(groupStart + 1, groupEnd - groupStart - 1);
+                                            if (argTokens.Count == 0)
+                                            {
+                                                funcCallNode = ASTNode.MakeDyadicOp(TokenType.APPLY, funcCallNode, ASTNode.MakeVector(new List<ASTNode>()));
+                                            }
+                                            else
+                                            {
+                                                var splitArgs = SplitBracketArguments(argTokens, int.MaxValue);
+                                                var argNodes = new List<ASTNode>();
+                                                foreach (var splitArgTokens in splitArgs)
+                                                {
+                                                    if (splitArgTokens.Count == 0)
+                                                        argNodes.Add(ASTNode.MakeLiteral(new NullValue()));
+                                                    else
+                                                    {
+                                                        ASTNode? argNode = BuildParseTree
+                                                            ? BuildParseTreeFromRight(splitArgTokens)
+                                                            : EvaluateFromRight(splitArgTokens);
+                                                        if (argNode != null) argNodes.Add(argNode);
+                                                    }
+                                                }
+                                                if (argNodes.Count > 0)
+                                                    funcCallNode = CreateBracketApply(funcCallNode, argNodes);
+                                            }
+                                        }
+                                        
+                                        // Now handle remaining tokens after the bracket groups
+                                        int afterBrackets = bracketGroups[bracketGroups.Count - 1].end + 1;
+                                        var remainingTokens = expressionTokens.GetRange(afterBrackets, expressionTokens.Count - afterBrackets);
+                                        
+                                        if (remainingTokens.Count == 0)
+                                            return funcCallNode;
+                                        
+                                        if (remainingTokens.Count >= 2 && OperatorDetector.SupportsDyadic(remainingTokens[0].Type))
+                                        {
+                                            // Pattern: f[args] op rest — create dyadic node
+                                            var opToken = remainingTokens[0];
+                                            var rightTokens = remainingTokens.GetRange(1, remainingTokens.Count - 1);
+                                            ASTNode? rightNode = BuildParseTree
+                                                ? BuildParseTreeFromRight(rightTokens)
+                                                : EvaluateFromRight(rightTokens);
+                                            if (rightNode != null)
+                                            {
+                                                return new ASTNode(ASTNodeType.DyadicOp, new SymbolValue(VerbRegistry.TokenTypeToVerbName(opToken.Type)), new List<ASTNode> { funcCallNode, rightNode });
+                                            }
+                                        }
+                                        
+                                        // Remaining tokens don't form an obvious dyadic expression — fall through
+                                        // to let the normal parser handle it
+                                    }
+                                }
+                            }
+                        }
                     } // Close else block
                 } // Close if (firstBracket != -1)
             }
@@ -809,6 +907,12 @@ namespace K3CSharp.Parsing
                 }
             }
             
+            // Handle IDENTIFIER-led function application with LRS
+            // This must be checked BEFORE dyadic parsing to prevent incorrect splitting
+            var identFnResult = TryParseIdentifierLedFunctionApplication(tokens);
+            if (identFnResult != null)
+                return identFnResult;
+            
             // Handle multi-token expressions using dyadic parser (right-to-left evaluation)
             // This ensures expressions like "_bd ,5" are parsed as: _bd (monadic) applied to (,5 monadic enlist)
             // rather than as a function call _bd(,5)
@@ -838,7 +942,19 @@ namespace K3CSharp.Parsing
                     projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(1)));
                     return projectedNode;
                 }
-                return monadicParser.ParseMonadicOperator(tokens);
+                var monadicOp = monadicParser.ParseMonadicOperator(tokens);
+                if (monadicOp != null)
+                    return monadicOp;
+                // Identifier followed by atom/identifier: function application (e.g., log10 x)
+                if (tokens[0].Type == TokenType.IDENTIFIER && !IsVerbToken(tokens[1].Type))
+                {
+                    var fnNode = CreateNodeFromToken(tokens[0]);
+                    var argNode = CreateNodeFromToken(tokens[1]);
+                    if (fnNode != null && argNode != null)
+                    {
+                        return ASTNode.MakeFunctionCall(fnNode, new List<ASTNode> { argNode });
+                    }
+                }
             }
             
             // Handle identifier[bracketArgs] followed by additional tokens: e.g. d[x;y#,:]z
@@ -966,6 +1082,50 @@ namespace K3CSharp.Parsing
         }
         
         /// <summary>
+        /// Try to parse IDENTIFIER-led function application with LRS.
+        /// Pattern: IDENTIFIER followed by non-verb/non-adverb tokens containing operators.
+        /// e.g., "log10 x+0=x" → log10(x+(0=x)) — the identifier takes everything to its right.
+        /// </summary>
+        /// <param name="tokens">Tokens starting with an IDENTIFIER</param>
+        /// <returns>FunctionCall AST node, or null if pattern doesn't match</returns>
+        internal ASTNode? TryParseIdentifierLedFunctionApplication(List<Token> tokens)
+        {
+            if (tokens.Count <= 2 || tokens[0].Type != TokenType.IDENTIFIER)
+                return null;
+            if (VerbRegistry.IsVerbToken(tokens[0].Type) || OperatorDetector.SupportsDyadic(tokens[0].Type))
+                return null;
+            if (tokens[1].Type == TokenType.COLON || tokens[1].Type == TokenType.GLOBAL_ASSIGNMENT ||
+                tokens[1].Type == TokenType.LEFT_BRACKET ||
+                VerbRegistry.IsAdverbToken(tokens[1].Type) || VerbRegistry.IsVerbToken(tokens[1].Type))
+                return null;
+            
+            // Check if the rest of the tokens contain any operators at depth 0
+            bool hasOperator = false;
+            int depth = 0;
+            for (int i = 1; i < tokens.Count; i++)
+            {
+                var t = tokens[i];
+                if (t.Type == TokenType.LEFT_PAREN || t.Type == TokenType.LEFT_BRACKET || t.Type == TokenType.LEFT_BRACE)
+                    depth++;
+                else if (t.Type == TokenType.RIGHT_PAREN || t.Type == TokenType.RIGHT_BRACKET || t.Type == TokenType.RIGHT_BRACE)
+                    depth--;
+                else if (depth == 0 && OperatorDetector.SupportsDyadic(t.Type))
+                {
+                    hasOperator = true;
+                    break;
+                }
+            }
+            if (!hasOperator)
+                return null;
+            
+            var fnNode = CreateNodeFromToken(tokens[0]);
+            var argTokens = tokens.GetRange(1, tokens.Count - 1);
+            var argNode = BuildParseTree ? BuildParseTreeFromRight(argTokens) : EvaluateFromRight(argTokens);
+            if (fnNode != null && argNode != null)
+                return ASTNode.MakeFunctionCall(fnNode, new List<ASTNode> { argNode });
+            return null;
+        }
+        
         /// Try to parse right-nested monadic operations according to LRS rules (Right Scope First)
         /// For expressions like "_db _bd (1;2.5;"a")", parse as right-nested monadic operations
         /// Structure: _db(_bd((1;2.5;"a")))
@@ -2274,6 +2434,14 @@ namespace K3CSharp.Parsing
                     position = tokens.Count;
                     return monadicResult;
                 }
+            }
+            
+            // Handle IDENTIFIER-led function application with LRS
+            var identFnResult2 = TryParseIdentifierLedFunctionApplication(tokens);
+            if (identFnResult2 != null)
+            {
+                position = tokens.Count;
+                return identFnResult2;
             }
             
             // Try dyadic operation as fallback

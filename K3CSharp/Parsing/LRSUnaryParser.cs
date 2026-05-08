@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace K3CSharp.Parsing
 {
@@ -181,6 +182,19 @@ namespace K3CSharp.Parsing
             
             if (allAtomic)
             {
+                // Check for IDENTIFIER-led function application: e.g., "log10 x"
+                // IDENTIFIER followed by another token is function application, not a vector
+                if (tokens.Count >= 2 && tokens[0].Type == TokenType.IDENTIFIER &&
+                    !VerbRegistry.IsVerbToken(tokens[0].Type))
+                {
+                    var fnNode = CreateNodeFromToken(tokens[0]);
+                    var argTokens = tokens.GetRange(1, tokens.Count - 1);
+                    ASTNode? argNode = argTokens.Count == 1
+                        ? CreateNodeFromToken(argTokens[0])
+                        : CreateVectorFromTokens(argTokens);
+                    if (fnNode != null && argNode != null)
+                        return ASTNode.MakeFunctionCall(fnNode, new System.Collections.Generic.List<ASTNode> { argNode });
+                }
                 // Create a vector from these atomic tokens
                 return CreateVectorFromTokens(tokens);
             }
