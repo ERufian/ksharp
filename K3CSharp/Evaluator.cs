@@ -2551,6 +2551,15 @@ namespace K3CSharp
             // Check if it's a built-in function first
             switch (functionName)
             {
+                case "?":
+                    // Monadic: unique; Dyadic: find or function inverse; Triadic: function inverse with guess
+                    if (arguments.Count == 1)
+                        return Unique(arguments[0]);
+                    else if (arguments.Count == 2)
+                        return Find(arguments[0], arguments[1]);
+                    else if (arguments.Count == 3)
+                        return FunctionInverse(arguments[0], arguments[1], arguments[2]);
+                    throw new Exception("? operator requires 1-3 arguments");
                 case "!":
                     // Handle monadic enumerate operator
                     if (arguments.Count == 1)
@@ -2943,6 +2952,12 @@ namespace K3CSharp
 
         private K3Value Find(K3Value left, K3Value right)
         {
+            // Function Inverse: f ? y — when left is a function, compute inverse
+            if (left is ProjectedFunctionValue || left is FunctionValue)
+            {
+                return FunctionInverse(left, right);
+            }
+
             // Find operator: d ? y
             // If y occurs among the items of d then d?y is the smallest index of all occurrences
             // Otherwise, d?y is #d (the smallest nonnegative integer that is not a valid index of d)
@@ -5469,6 +5484,11 @@ namespace K3CSharp
             {
                 // _ssr is a ternary system function: _ssr[text;pattern;replacement]
                 return SsrFunction(arg1Eval!, arg2Eval!, arg3Eval!);
+            }
+            else if (opName == "?")
+            {
+                // Triadic ?: ?[f; y; x] — Function Inverse with initial guess x
+                return FunctionInverse(arg1Eval!, arg2Eval!, arg3Eval);
             }
             else
             {

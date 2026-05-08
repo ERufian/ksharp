@@ -592,8 +592,8 @@ namespace K3CSharp
             RegisterVerb("MATCH", VerbType.Operator, new[] { 1, 2 }, null);
             RegisterVerb("$", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
             RegisterVerb("DOLLAR", VerbType.Operator, new[] { 1, 2 }, null, isAtomic: true);
-            RegisterVerb("?", VerbType.Operator, new[] { 1, 2 }, null);
-            RegisterVerb("QUESTION", VerbType.Operator, new[] { 1, 2 }, null);
+            RegisterVerb("?", VerbType.Operator, new[] { 1, 2, 3 }, null);
+            RegisterVerb("QUESTION", VerbType.Operator, new[] { 1, 2, 3 }, null);
             RegisterVerb("@", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);
             RegisterVerb("APPLY", VerbType.Operator, new[] { 1, 2, 3, 4 }, null, isRightAtomic: true);
             RegisterVerb(".", VerbType.Operator, new[] { 1, 2, 3, 4 }, null);

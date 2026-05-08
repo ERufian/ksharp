@@ -663,6 +663,18 @@ namespace K3CSharp.Tests
 
                 ("math_trig_pi.k", "-1.0"),
 
+                // Function inverse tests
+                ("func_inverse_exp.k", "0.6931472"),
+                ("func_inverse_log.k", "7.389056"),
+                ("func_inverse_sqr.k", "3.0"),
+                ("func_inverse_sqrt.k", "9.0"),
+                ("func_inverse_sin.k", "0.5235988"),
+                ("func_inverse_cos.k", "1.047198"),
+                ("func_inverse_user_defined.k", "1.618034"),
+                ("func_inverse_triadic.k", "-0.618034"),
+                ("func_inverse_scaled_exp.k", "0.6931472"),
+                ("func_inverse_offset_log.k", "2.718282"),
+
                 
 
                 // Maximum operator

@@ -169,6 +169,16 @@ foo - 12 │ 20                   │                      ║
 ║ math_mul_matrix_4x2_2x4.k                                        │ ((1 2);(3 4);(5 6);(7 8)) _mul ((9 10 11 12);(13 14 15 16)) │ (35 38 41 44;79...   │                      ║
 ║ math_trig_basic.k                                                │ _sin 0               │ 0.0                  │                      ║
 ║ math_trig_pi.k                                                   │ _cos 3.141592653589793 │ -1.0                 │                      ║
+║ func_inverse_exp.k                                               │ (_exp) ? 2           │ 0.6931472            │                      ║
+║ func_inverse_log.k                                               │ (_log) ? 2           │ 7.389056             │                      ║
+║ func_inverse_sqr.k                                               │ (_sqr) ? 9           │ 3.0                  │                      ║
+║ func_inverse_sqrt.k                                              │ (_sqrt) ? 3          │ 9.0                  │                      ║
+║ func_inverse_sin.k                                               │ (_sin) ? 0.5         │ 0.5235988            │                      ║
+║ func_inverse_cos.k                                               │ (_cos) ? 0.5         │ 1.047198             │                      ║
+║ func_inverse_user_defined.k                                      │ f:{(x^2)+(-x)+(-1)};f ? 0 │ 1.618034             │                      ║
+║ func_inverse_triadic.k                                           │ f:{(x^2)+(-x)+(-1)};?[f;0;0.25] │ -0.618034            │                      ║
+║ func_inverse_scaled_exp.k                                        │ {3*_exp x} ? 6       │ 0.6931472            │                      ║
+║ func_inverse_offset_log.k                                        │ {2+_log x} ? 3       │ 2.718282             │                      ║
 ║ maximum_operator.k                                               │ 3 | 5                │ 5                    │                      ║
 ║ minimum_operator.k                                               │ 3 & 5                │ 3                    │                      ║
 ║ mixed_list_with_null.k                                           │ (1;_n;`test;42.5)    │ (1;;`test;42.5)      │                      ║
@@ -2094,7 +2104,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1394/1432 tests passed (97.3%)                                                                                           ║
+║ SUMMARY: 1404/1442 tests passed (97.4%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
