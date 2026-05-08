@@ -1007,20 +1007,35 @@ namespace K3CSharp
         private K3Value ModRotate(K3Value left, K3Value right)
         {
             // Enhanced ! operator with multiple behaviors
+            // Scalar modulus cases (int!int, float!float, int!float, float!int)
             if (left is IntegerValue leftInt && right is IntegerValue rightInt)
             {
                 // Integer mod: remainder of division
                 return new IntegerValue(leftInt.Value % rightInt.Value);
             }
-            else if (left is VectorValue leftVec && right is IntegerValue rightIntVal)
+            else if (left is FloatValue leftFloat && right is FloatValue rightFloat)
             {
-                // Vector mod: remainder for each element (recursively handles nested vectors)
+                // Float mod: mathematical modulus
+                return new FloatValue(leftFloat.Value % rightFloat.Value);
+            }
+            else if (left is IntegerValue leftIntF && right is FloatValue rightFloatV)
+            {
+                // Mixed mod: promote to float
+                return new FloatValue((double)leftIntF.Value % rightFloatV.Value);
+            }
+            else if (left is FloatValue leftFloatV && right is IntegerValue rightIntF)
+            {
+                // Mixed mod: promote to float
+                return new FloatValue(leftFloatV.Value % (double)rightIntF.Value);
+            }
+            else if (left is VectorValue leftVec && right is not VectorValue)
+            {
+                // Vector mod scalar: remainder for each element (recursively handles nested vectors)
                 var result = new List<K3Value>();
                 foreach (var element in leftVec.Elements)
                 {
-                    result.Add(ModRotate(element, rightIntVal));
+                    result.Add(ModRotate(element, right));
                 }
-                // Preserve input vector type, use GetVectorType to handle null case
                 int vectorType = GetVectorType(leftVec);
                 return new VectorValue(result, vectorType);
             }
