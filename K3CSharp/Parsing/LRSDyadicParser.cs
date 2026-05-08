@@ -285,21 +285,24 @@ namespace K3CSharp.Parsing
                 else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
                     adverbScanDepth--;
                 
-                // Handle parenthesized verb + adverb: (expr)\: or (expr)/ etc.
-                // When ) brings depth to 0 and next token is adverb, treat the parenthesized group as verb
-                if (adverbScanDepth == 0 && tokens[i].Type == TokenType.RIGHT_PAREN && 
+                // Handle parenthesized or braced verb + adverb: (expr)/ or {lambda}/ etc.
+                // When ) or } brings depth to 0 and next token is adverb, treat the group as verb
+                if (adverbScanDepth == 0 && 
+                    (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACE) && 
                     i + 1 < tokens.Count && IsAdverbToken(tokens[i + 1].Type))
                 {
-                    // Find the matching opening paren
-                    int parenStart = -1;
+                    // Find the matching opening delimiter
+                    TokenType closeType = tokens[i].Type;
+                    TokenType openType = closeType == TokenType.RIGHT_PAREN ? TokenType.LEFT_PAREN : TokenType.LEFT_BRACE;
+                    int groupStart = -1;
                     int depth = 0;
                     for (int j = i; j >= 0; j--)
                     {
-                        if (tokens[j].Type == TokenType.RIGHT_PAREN) depth++;
-                        else if (tokens[j].Type == TokenType.LEFT_PAREN) depth--;
-                        if (depth == 0) { parenStart = j; break; }
+                        if (tokens[j].Type == closeType) depth++;
+                        else if (tokens[j].Type == openType) depth--;
+                        if (depth == 0) { groupStart = j; break; }
                     }
-                    if (parenStart >= 0)
+                    if (groupStart >= 0)
                     {
                         int adverbStart = i + 1;
                         int adverbEnd = adverbStart;
@@ -310,14 +313,16 @@ namespace K3CSharp.Parsing
                         if (adverbTokens.Count > 0)
                         {
                             var adverbToken = adverbTokens[adverbTokens.Count - 1];
-                            var adverbLeftTokens = tokens.GetRange(0, parenStart);
+                            var adverbLeftTokens = tokens.GetRange(0, groupStart);
                             var adverbRightTokens = tokens.GetRange(adverbEnd, tokens.Count - adverbEnd);
                             
-                            // Parse the parenthesized verb group
-                            var parenTokens = tokens.GetRange(parenStart, i - parenStart + 1);
-                            var subGroupingParser = new LRSGroupingParser(parenTokens, parentParser?.BuildParseTree ?? false, parentParser);
+                            // Parse the verb group
+                            var groupTokens = tokens.GetRange(groupStart, i - groupStart + 1);
+                            var subGroupingParser = new LRSGroupingParser(groupTokens, parentParser?.BuildParseTree ?? false, parentParser);
                             int pos = 0;
-                            var verbNode = subGroupingParser.ParseParentheses(ref pos);
+                            ASTNode? verbNode = closeType == TokenType.RIGHT_PAREN
+                                ? subGroupingParser.ParseParentheses(ref pos)
+                                : subGroupingParser.ParseBraces(ref pos);
                             
                             if (verbNode != null)
                             {

@@ -1944,7 +1944,7 @@ dz[x;y] │ 5 0 0                │                      ║
 x:(1 6 4;3 4 7;7 8 6)
 sm'[x] │ (0 5 3;0 1 4;1 ...   │                      ║
 ║ idioms_14_93_numbers_from_alphanumeric.k                         │ x:(" 1";" 12";" ";"0.5");@[.:'x;&&/'x=" ";:;0] │ (1;12;0;0.5)         │                      ║
-║ idioms_14_94_number_with_default_empty.k                         │ x:"";y:"-1";.((x~"")#y),x │ -                    │ "-1"                 ║
+║ idioms_14_94_number_with_default_empty.k                         │ x:"";y:"-1";.((x~"")#"y"),x │ "-1"                 │                      ║
 ║ idioms_14_94_number_with_default_value.k                         │ x:"234.5";y:"-1";.((x~"")#y),x │ 234.5                │                      ║
 ║ idioms_14_111_count_format.k                                     │ cf:{#$x}
 cf 12.345
@@ -1957,7 +1957,7 @@ d:"0123456789 "
 .:'x │ (3 5;4 7)            │                      ║
 ║ idioms_14_101_sum_numbers_matrix.k                               │ x:$!5
 +/ .:' x       │ 10                   │                      ║
-║ idioms_14_106_leading_zeros.k                                    │ x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z │ Error: Cannot a...   │ ("037";"036";"0...   ║
+║ idioms_14_106_leading_zeros.k                                    │ x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z │ ("037";"036";"0...   │                      ║
 ║ idioms_14_452_number_of_positions.k                              │ dp:{#$x};dp 1234     │ 4                    │                      ║
 ║ idioms_14_456_number_digits.k                                    │ np:{1+_ log10 x+0=x}
 x:0 13 523 16008
@@ -2104,7 +2104,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1417/1442 tests passed (98.3%)                                                                                           ║
+║ SUMMARY: 1419/1442 tests passed (98.4%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2123,16 +2123,6 @@ Test: atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k
 Input: ("foo";"bar";"baz") _sm ("foo";"fie";"baz")
 Expected: 1 0 1
 Actual: Error: _sm: left argument must be character or symbol
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_14_94_number_with_default_empty.k
-Input: x:"";y:"-1";.((x~"")#y),x
-Expected: "-1"
-Actual: -
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_14_106_leading_zeros.k
-Input: x:37 36 17 38 29 4 31 12 35 25;y:3;z:$:'x+(y-1){x*10}/10;1 _/: z
-Expected: ("037";"036";"017";"038";"029";"004";"031";"012";"035";"025")
-Actual: Error: Cannot add Integer and Null
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_14_456_number_digits.k
 Input: np:{1+_ log10 x+0=x}
