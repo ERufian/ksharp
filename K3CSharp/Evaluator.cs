@@ -2865,6 +2865,12 @@ namespace K3CSharp
                 case "_ci":
                     if (arguments.Count == 1) return Ci(arguments[0]);
                     throw new Exception("_ci requires 1 argument");
+                case "_sv":
+                    if (arguments.Count == 2) return Sv(arguments[0], arguments[1]);
+                    throw new Exception("_sv requires 2 arguments");
+                case "_vs":
+                    if (arguments.Count == 2) return Vs(arguments[0], arguments[1]);
+                    throw new Exception("_vs requires 2 arguments");
                 case "_val":
                     if (arguments.Count == 1) return ValFunction(arguments[0]);
                     throw new Exception("_val requires 1 argument");
