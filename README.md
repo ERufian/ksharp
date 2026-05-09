@@ -103,6 +103,7 @@ K3CSharp/
 
 ### **Run K3Sharp Interpreter**
 ```bash
+cd K3CSharp
 dotnet run
 ```
 
@@ -619,12 +620,197 @@ dotnet run
 - **Character Vector Identity**: `" "$"abc"` → `"abc"` (proper character vector handling)
 - **Symbol Identity**: `` ` `$symbol `` → `"symbol"` (symbol to string conversion)
 - **Expression Evaluation**: `{"x+y"}[2;3]` → `5` (dynamic expression with variables)
+
+---
+
+## 🛠️ **Building and Running**
+
+### **Prerequisites**
+
+**.NET 8.0 SDK** is required to build and run K3CSharp.
+
+#### **Windows**
+```powershell
+# Download and install .NET 8.0 SDK
+# Visit: https://dotnet.microsoft.com/download/dotnet/8.0
+```
+
+#### **Linux (Ubuntu/Debian)**
+```bash
+# Install .NET 8.0 SDK
+wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+sudo apt-get update
+sudo apt-get install -y dotnet-sdk-8.0
+```
+
+#### **Linux (Fedora/CentOS)**
+```bash
+# Install .NET 8.0 SDK
+sudo rpm -Uvh https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
+sudo dnf install -y dotnet-sdk-8.0
+```
+
+#### **macOS**
+```bash
+# Install .NET 8.0 SDK using Homebrew
+brew install dotnet-sdk
+
+# Or download installer from:
+# https://dotnet.microsoft.com/download/dotnet/8.0
+```
+
+### **Installation**
+
+#### **Windows**
+```powershell
+# Clone repository
+git clone https://github.com/ERufian/ksharp.git
+cd ksharp
+
+# Restore dependencies
+dotnet restore
+
+# Build solution
+dotnet build
+
+# Run tests
+dotnet test
+```
+
+#### **Linux (Ubuntu/Debian)**
+```bash
+# Clone repository
+git clone https://github.com/ERufian/ksharp.git
+cd ksharp
+
+# Restore dependencies
+dotnet restore
+
+# Build solution
+dotnet build
+
+# Run tests
+dotnet test
+```
+
+#### **Linux (Fedora/CentOS)**
+```bash
+# Clone repository
+git clone https://github.com/ERufian/ksharp.git
+cd ksharp
+
+# Restore dependencies
+dotnet restore
+
+# Build solution
+dotnet build
+
+# Run tests
+dotnet test
+```
+
+#### **macOS**
+```bash
+# Clone repository
+git clone https://github.com/ERufian/ksharp.git
+cd ksharp
+
+# Restore dependencies
+dotnet restore
+
+# Build solution
+dotnet build
+
+# Run tests
+dotnet test
+```
+
+### **Build**
+
+```bash
+# Build the entire solution
+dotnet build
+
+# Build in Release mode
+dotnet build -c Release
+
+# Build specific project
+dotnet build K3CSharp/K3CSharp.csproj
+```
+
+### **Run**
+
+```bash
+# Run the interpreter
+cd K3CSharp
+dotnet run
+
+# Run with script file
+dotnet run -- script.k
+
+# Run tests
+cd K3CSharp.Tests
+dotnet run
+
+# Run comparison
+cd K3CSharp.Comparison
+dotnet run
+```
+
+### **Troubleshooting**
+
+#### **Common Issues**
+
+**"dotnet: command not found"**
+- Ensure .NET 8.0 SDK is installed and in PATH
+- Restart terminal after installation
+- Verify with `echo $PATH` (Linux/macOS) or `echo %PATH%` (Windows)
+
+**"Cannot find project or solution file"**
+- Ensure you're in the correct directory containing `.csproj` or `.sln` files
+- Use `ls` (Linux/macOS) or `dir` (Windows) to verify files
+
+**Build errors on Linux/macOS**
+- Ensure all required packages are installed
+- Try `dotnet clean` followed by `dotnet build`
+- Check file permissions: `chmod +x *.sh` (if using shell scripts)
+
+**Performance issues**
+- Use release build: `dotnet run -c Release`
+- For large datasets, consider increasing memory: `dotnet run --environment DOTNET_GCHeapCount=1`
+
+#### **Platform-Specific Tips**
+
+**Windows PowerShell:**
+```powershell
+# Set execution policy for scripts (if needed)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Linux/macOS Shell:**
+```bash
+# Make script files executable
+chmod +x *.sh
+
+# Use bash explicitly if needed
+bash script.sh
+```
+
+**macOS Specific:**
+```bash
+# If using zsh (default on modern macOS)
+echo 'export PATH=$PATH:$HOME/.dotnet' >> ~/.zshrc
+source ~/.zshrc
+```
+
+---
+
 ## **Development Plan Status**: **3.2% functionality remaining** for complete K3 specification compliance
 
 Based on comprehensive analysis of current implementation status, K3CSharp has achieved **96.8% K3 specification compliance** with **3.2% functionality remaining**. The addition of K3 IPC functionality by Michal Wallace provides complete inter-process communication capabilities.
 
-### **I/O System Status** ✅ **Mostly Implemented**
-
+### **I/O System Status** 
 **Excellent Progress**: Comprehensive I/O system implementation with most file handle operations fully functional.
 
 #### **✅ Fully Implemented I/O Operations**
