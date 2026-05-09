@@ -666,7 +666,7 @@ brew install dotnet-sdk
 ```powershell
 # Clone repository
 git clone https://github.com/ERufian/ksharp.git
-cd ksharp
+cd ksharp\K3CSharp
 
 # Restore dependencies
 dotnet restore
@@ -674,31 +674,26 @@ dotnet restore
 # Build solution
 dotnet build
 
-# Run tests
-dotnet test
 ```
 
 #### **Linux (Ubuntu/Debian)**
 ```bash
 # Clone repository
 git clone https://github.com/ERufian/ksharp.git
-cd ksharp
+cd ksharp/K3Csharp
 
 # Restore dependencies
 dotnet restore
 
 # Build solution
 dotnet build
-
-# Run tests
-dotnet test
 ```
 
 #### **Linux (Fedora/CentOS)**
 ```bash
 # Clone repository
 git clone https://github.com/ERufian/ksharp.git
-cd ksharp
+cd ksharp/K3CSharp
 
 # Restore dependencies
 dotnet restore
@@ -706,15 +701,13 @@ dotnet restore
 # Build solution
 dotnet build
 
-# Run tests
-dotnet test
 ```
 
 #### **macOS**
 ```bash
 # Clone repository
 git clone https://github.com/ERufian/ksharp.git
-cd ksharp
+cd ksharp/K3CSharp
 
 # Restore dependencies
 dotnet restore
@@ -722,8 +715,8 @@ dotnet restore
 # Build solution
 dotnet build
 
-# Run tests
-dotnet test
+# Run 
+dotnet run
 ```
 
 ### **Build**
@@ -734,26 +727,23 @@ dotnet build
 
 # Build in Release mode
 dotnet build -c Release
-
-# Build specific project
-dotnet build K3CSharp/K3CSharp.csproj
 ```
 
 ### **Run**
 
 ```bash
-# Run the interpreter
+# Run the interpreter (starting from a bash or zsh prompt at the root directory)
 cd K3CSharp
 dotnet run
 
 # Run with script file
 dotnet run -- script.k
 
-# Run tests
+# Run tests (starting from a bash prompt at the root directory)
 cd K3CSharp.Tests
 dotnet run
 
-# Run comparison
+# Run comparison (starting from a bash prompt at the root directory)
 cd K3CSharp.Comparison
 dotnet run
 ```
