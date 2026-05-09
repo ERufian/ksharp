@@ -803,11 +803,135 @@ namespace K3CSharp
             return new IntegerValue((int)charValue);
         }
 
+        // Helper function to check if a value is a character vector
+        // Used by string-atomic functions (_sm, _ss, $)
+        private bool IsCharacterVector(K3Value val)
+        {
+            if (val is VectorValue vec && vec.Elements.Count > 0)
+            {
+                return vec.Elements.All(e => e is CharacterValue);
+            }
+            return false;
+        }
+
+        // Helper function to convert character vector to string
+        // Used by string-atomic functions (_sm, _ss, $)
+        private string CharacterVectorToString(K3Value val)
+        {
+            if (val is CharacterValue charVal)
+                return charVal.Value;
+            else if (val is SymbolValue symVal)
+                return symVal.Value;
+            else if (IsCharacterVector(val))
+            {
+                var vec = (VectorValue)val;
+                return new string(vec.Elements.Cast<CharacterValue>().Select(c => c.Value[0]).ToArray());
+            }
+            throw new Exception("cannot convert to string");
+        }
+
         private K3Value Sm(K3Value left, K3Value right)
         {
             // _sm (string match) function
             // Dyadic verb: x _sm y
             // Returns 1 if left argument matches right argument pattern, 0 otherwise
+            
+            // Atomic iteration: _sm is a string-atomic function
+            // Character vectors are treated as atomic units and iterated element-wise
+            // This works for arbitrarily deep nested lists
+            
+            // General atomic iteration: if left is a vector, iterate over its elements
+            // This handles arbitrarily deep nested lists
+            // But character vectors are treated as atomic units (not broken into characters)
+            if (left is VectorValue leftVec)
+            {
+                // Don't break character vectors - treat them as atomic
+                // But DO iterate over vectors of character vectors (nested lists)
+                if (!IsCharacterVector(left))
+                {
+                    // If right is also a vector, iterate element-wise
+                    if (right is VectorValue rightVec)
+                    {
+                        // If right is also not a character vector, iterate element-wise
+                        if (!IsCharacterVector(right) && leftVec.Elements.Count == rightVec.Elements.Count)
+                        {
+                            var result = new List<K3Value>();
+                            for (int i = 0; i < leftVec.Elements.Count; i++)
+                            {
+                                result.Add(Sm(leftVec.Elements[i], rightVec.Elements[i]));
+                            }
+                            return new VectorValue(result);
+                        }
+                        // If right IS a character vector, iterate over left elements with right as scalar
+                        else if (IsCharacterVector(right))
+                        {
+                            var result = new List<K3Value>();
+                            foreach (var leftElem in leftVec.Elements)
+                            {
+                                result.Add(Sm(leftElem, right));
+                            }
+                            return new VectorValue(result);
+                        }
+                    }
+                    else
+                    {
+                        // Right is not a vector, iterate over left elements with right as scalar
+                        var result = new List<K3Value>();
+                        foreach (var leftElem in leftVec.Elements)
+                        {
+                            result.Add(Sm(leftElem, right));
+                        }
+                        return new VectorValue(result);
+                    }
+                }
+            }
+            
+            // If right is a vector but left is not, iterate over right elements
+            // But don't break character vectors
+            if (!(left is VectorValue) && right is VectorValue rightVecScalar)
+            {
+                if (!IsCharacterVector(right))
+                {
+                    var result = new List<K3Value>();
+                    foreach (var rightElem in rightVecScalar.Elements)
+                    {
+                        result.Add(Sm(left, rightElem));
+                    }
+                    return new VectorValue(result);
+                }
+            }
+            
+            // Base case: both are atoms (or character vectors treated as atoms)
+            // For string-atomic functions, character vectors are treated as atomic units
+            if (IsCharacterVector(left) && IsCharacterVector(right))
+            {
+                // Treat both as atomic strings - don't break into characters
+                string leftStrCharVec = CharacterVectorToString(left);
+                string rightStrCharVec = CharacterVectorToString(right);
+                
+                // Check if right argument contains regex wildcards
+                bool useRegexCharVec = rightStrCharVec.Contains('*') || rightStrCharVec.Contains('?') || rightStrCharVec.Contains('[');
+                
+                if (useRegexCharVec)
+                {
+                    try
+                    {
+                        // Use C# regex for pattern matching
+                        var regex = new System.Text.RegularExpressions.Regex(rightStrCharVec);
+                        return new IntegerValue(regex.IsMatch(leftStrCharVec) ? 1 : 0);
+                    }
+                    catch
+                    {
+                        // If regex fails, fall back to exact match
+                        return new IntegerValue(leftStrCharVec == rightStrCharVec ? 1 : 0);
+                    }
+                }
+                else
+                {
+                    // Simple string comparison
+                    return new IntegerValue(leftStrCharVec == rightStrCharVec ? 1 : 0);
+                }
+            }
             
             // Convert both arguments to strings for comparison
             string leftStr = left switch
@@ -854,6 +978,99 @@ namespace K3CSharp
             // Dyadic verb: x _ss y
             // Returns start indices where pattern occurs in text (0-based)
             
+            // String-atomic iteration: _ss is a string-atomic function
+            // Character vectors are treated as atomic units and iterated element-wise
+            // This handles arbitrarily deep nested lists
+            
+            // General atomic iteration: if left is a vector, iterate over its elements
+            // This handles arbitrarily deep nested lists
+            // But character vectors are treated as atomic units (not broken into characters)
+            if (left is VectorValue leftVec)
+            {
+                // Don't break character vectors - treat them as atomic
+                // But DO iterate over vectors of character vectors (nested lists)
+                if (!IsCharacterVector(left))
+                {
+                    // If right is also a vector, iterate element-wise
+                    if (right is VectorValue rightVec)
+                    {
+                        // If right is also not a character vector, iterate element-wise
+                        if (!IsCharacterVector(right) && leftVec.Elements.Count == rightVec.Elements.Count)
+                        {
+                            var result = new List<K3Value>();
+                            for (int i = 0; i < leftVec.Elements.Count; i++)
+                            {
+                                result.Add(SsFunction(leftVec.Elements[i], rightVec.Elements[i]));
+                            }
+                            return new VectorValue(result);
+                        }
+                        // If right IS a character vector, iterate over left elements with right as scalar
+                        else if (IsCharacterVector(right))
+                        {
+                            var result = new List<K3Value>();
+                            foreach (var leftElem in leftVec.Elements)
+                            {
+                                result.Add(SsFunction(leftElem, right));
+                            }
+                            return new VectorValue(result);
+                        }
+                    }
+                    else
+                    {
+                        // Right is not a vector, iterate over left elements with right as scalar
+                        var result = new List<K3Value>();
+                        foreach (var leftElem in leftVec.Elements)
+                        {
+                            result.Add(SsFunction(leftElem, right));
+                        }
+                        return new VectorValue(result);
+                    }
+                }
+            }
+            
+            // If right is a vector but left is not, iterate over right elements
+            // But don't break character vectors
+            if (!(left is VectorValue) && right is VectorValue rightVecScalar)
+            {
+                if (!IsCharacterVector(right))
+                {
+                    var result = new List<K3Value>();
+                    foreach (var rightElem in rightVecScalar.Elements)
+                    {
+                        result.Add(SsFunction(left, rightElem));
+                    }
+                    return new VectorValue(result);
+                }
+            }
+            
+            // Base case: both are atoms (or character vectors treated as atoms)
+            // For string-atomic functions, character vectors are treated as atomic units
+            if (IsCharacterVector(left) && IsCharacterVector(right))
+            {
+                // Treat both as atomic strings - don't break into characters
+                string leftStrCharVec = CharacterVectorToString(left);
+                string rightStrCharVec = CharacterVectorToString(right);
+                
+                List<int> indices = new List<int>();
+                int index = 0;
+                
+                while (true)
+                {
+                    int foundIndex = leftStrCharVec.IndexOf(rightStrCharVec, index);
+                    if (foundIndex == -1)
+                        break;
+                    indices.Add(foundIndex); // Keep 0-based indexing
+                    index = foundIndex + 1; // Move to next character after found pattern
+                }
+                
+                // Always return integer vector, even for 0 or 1 items
+                if (indices.Count == 0)
+                    return new VectorValue(new List<K3Value>(), -1); // Empty integer vector
+                else
+                    return new VectorValue(indices.Select(i => new IntegerValue(i)).Cast<K3Value>().ToList());
+            }
+            
+            // Convert both arguments to strings for comparison
             string leftStr = left switch
             {
                 CharacterValue charVal => charVal.Value,
@@ -870,23 +1087,23 @@ namespace K3CSharp
                 _ => throw new Exception("_ss: right argument must be character or symbol")
             };
             
-            List<int> indices = new List<int>();
-            int index = 0;
+            List<int> indicesDefault = new List<int>();
+            int indexDefault = 0;
             
             while (true)
             {
-                int foundIndex = leftStr.IndexOf(rightStr, index);
+                int foundIndex = leftStr.IndexOf(rightStr, indexDefault);
                 if (foundIndex == -1)
                     break;
-                indices.Add(foundIndex); // Keep 0-based indexing
-                index = foundIndex + 1; // Move to next character after found pattern
+                indicesDefault.Add(foundIndex); // Keep 0-based indexing
+                indexDefault = foundIndex + 1; // Move to next character after found pattern
             }
             
             // Always return integer vector, even for 0 or 1 items
-            if (indices.Count == 0)
+            if (indicesDefault.Count == 0)
                 return new VectorValue(new List<K3Value>(), -1); // Empty integer vector
             else
-                return new VectorValue(indices.Select(i => new IntegerValue(i)).Cast<K3Value>().ToList());
+                return new VectorValue(indicesDefault.Select(i => new IntegerValue(i)).Cast<K3Value>().ToList());
         }
 
         private K3Value SsrFunction(K3Value text, K3Value pattern, K3Value replacement)

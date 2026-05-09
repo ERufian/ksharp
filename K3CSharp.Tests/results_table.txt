@@ -362,8 +362,10 @@ foo - 12 │ 20                   │                      ║
 ║ atomic_functions/atomic_floor_dyadic_atom_vector.k               │ _ 5 1.5 2.7 3.2      │ 5 1 2 3              │                      ║
 ║ atomic_functions/atomic_math_atan2_dyadic_vector_vector.k        │ _atan 2 1 2 3 4 5    │ 1.107149 0.7853...   │                      ║
 ║ atomic_functions/atomic_math_div_dyadic_vector_vector.k          │ 900 _div 10 20 30    │ 90 45 30             │                      ║
-║ atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k   │ ("foo";"bar";"baz") _sm "ba*" │ Error: _sm: lef...   │ 0 1 1                ║
-║ atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k   │ ("foo";"bar";"baz") _sm ("foo";"fie";"baz") │ Error: _sm: lef...   │ 1 0 1                ║
+║ atomic_functions/atomic_stringatomic_sm_list_vector.k            │ ("foo";"bar";"baz") _sm "ba*" │ 0 1 1                │                      ║
+║ atomic_functions/atomic_stringatomic_sm_list_list.k              │ ("foo";"bar";"baz") _sm ("foo";"fie";"baz") │ 1 0 1                │                      ║
+║ atomic_functions/atomic_stringatomic_ss_list_vector.k            │ ("foo";"bar";"poobah";"bababa") _ss "ba" │ (!0;,0;,3;0 2 4)     │                      ║
+║ atomic_functions/atomic_stringatomic_ss_list_list.k              │ ("foo";"bar";"bazabaz") _ss ("oo";"fi";"ba") │ (,1;!0;0 4)          │                      ║
 ║ atomic_functions/atomic_system_ci.k                              │ _ci 86 87 88         │ "VWX"                │                      ║
 ║ atomic_functions/atomic_system_ic.k                              │ _ic "qwe"            │ 113 119 101          │                      ║
 ║ shape_operator_jagged_3d.k                                       │ ^ (((1 2); (3 4 5)); ((6 7); (8 9 10))) │ 2 2                  │                      ║
@@ -2102,21 +2104,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1425/1442 tests passed (98.8%)                                                                                           ║
+║ SUMMARY: 1429/1444 tests passed (99.0%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: atomic_functions/atomic_stringatomic_sm_dyadic_vector_vector.k
-Input: ("foo";"bar";"baz") _sm "ba*"
-Expected: 0 1 1
-Actual: Error: _sm: left argument must be character or symbol
-──────────────────────────────────────────────────────────────────────────
-Test: atomic_functions/atomic_stringatomic_ss_dyadic_vector_vector.k
-Input: ("foo";"bar";"baz") _sm ("foo";"fie";"baz")
-Expected: 1 0 1
-Actual: Error: _sm: left argument must be character or symbol
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_56_hex_from_decimal_chars.k
 Input: x:"255"
 h:"0123456789abcdef"

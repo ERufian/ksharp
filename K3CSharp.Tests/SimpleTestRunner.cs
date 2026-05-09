@@ -1095,7 +1095,7 @@ namespace K3CSharp.Tests
                 ("atomic_functions/atomic_math_div_dyadic_vector_vector.k", "90 45 30"),
                 ("atomic_functions/atomic_stringatomic_sm_list_vector.k", "0 1 1"),
                 ("atomic_functions/atomic_stringatomic_sm_list_list.k", "1 0 1"),
-                ("atomic_functions/atomic_stringatomic_ss_list_vector.k", "(!0;0;3;0 2 4)"),
+                ("atomic_functions/atomic_stringatomic_ss_list_vector.k", "(!0;,0;,3;0 2 4)"),
                 ("atomic_functions/atomic_stringatomic_ss_list_list.k", "(,1;!0;0 4)"),
                 ("atomic_functions/atomic_system_ci.k", "\"VWX\""),
                 ("atomic_functions/atomic_system_ic.k", "113 119 101"),
