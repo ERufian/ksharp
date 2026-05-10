@@ -948,10 +948,19 @@ namespace K3CSharp
 
         private K3Value Power(K3Value a, K3Value b)
         {
+            // Integer power with negative exponent should promote to float
             if (a is IntegerValue intA && b is IntegerValue intB)
+            {
+                if (intB.Value < 0)
+                    return new FloatValue(Math.Pow(intA.Value, intB.Value));
                 return new IntegerValue((int)Math.Pow(intA.Value, intB.Value));
+            }
             if (a is LongValue longA && b is LongValue longB)
+            {
+                if (longB.Value < 0)
+                    return new FloatValue(Math.Pow(longA.Value, longB.Value));
                 return new LongValue((long)Math.Pow(longA.Value, longB.Value));
+            }
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new FloatValue(Math.Pow(floatA.Value, floatB.Value));
             
@@ -965,9 +974,17 @@ namespace K3CSharp
             if (a is FloatValue floatA3 && b is LongValue longB2)
                 return new FloatValue(Math.Pow(floatA3.Value, longB2.Value));
             if (a is IntegerValue intA3 && b is LongValue longB3)
+            {
+                if (longB3.Value < 0)
+                    return new FloatValue(Math.Pow(intA3.Value, longB3.Value));
                 return new LongValue((long)Math.Pow(intA3.Value, longB3.Value));
+            }
             if (a is LongValue longA3 && b is IntegerValue intB3)
+            {
+                if (intB3.Value < 0)
+                    return new FloatValue(Math.Pow(longA3.Value, intB3.Value));
                 return new LongValue((long)Math.Pow(longA3.Value, intB3.Value));
+            }
             
             // Handle vector operations
             if (a is VectorValue vecA)
