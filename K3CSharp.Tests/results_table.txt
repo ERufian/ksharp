@@ -1984,7 +1984,7 @@ x:"ff"
 16 _sv h?/:x │ 255                  │                      ║
 ║ idioms_15_66_selection_encoded_list.k                            │ x:("red";"green";"blue";"yellow")
 y:2 2#1 0 0 1
-x[2 _sv+y] │ Error: _sv: all...   │ ("blue";"green")     ║
+x[2 _sv+y] │ ("blue";"green")     │                      ║
 ║ idioms_15_342_arabic_from_roman.k                                │ ar:{+/_ a*-1^a<1!a:0,1000 500 100 50 10 5 1["MDCLXVI"?/:x]}
 ar["MCMIX"] │ 1909                 │                      ║
 ║ idioms_16_57_vector_from_date.k                                  │ x:19981231
@@ -2104,18 +2104,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1433/1444 tests passed (99.2%)                                                                                           ║
+║ SUMMARY: 1434/1444 tests passed (99.3%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_15_66_selection_encoded_list.k
-Input: x:("red";"green";"blue";"yellow")
-y:2 2#1 0 0 1
-x[2 _sv+y]
-Expected: ("blue";"green")
-Actual: Error: _sv: all elements must be integers
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_476_fractional_part_with_sign.k
 Input: x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
 Expected: 0.2 0.3 -0.2 -0.8 0.0 0.0 -0.0

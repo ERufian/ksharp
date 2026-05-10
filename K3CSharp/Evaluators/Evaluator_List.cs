@@ -474,6 +474,39 @@ namespace K3CSharp
             }
             else if (right is VectorValue rv)
             {
+                // Check if right is a matrix (nested vector) - apply _sv to each column
+                if (rv.Elements.Count > 0 && rv.Elements[0] is VectorValue)
+                {
+                    // Matrix case: apply _sv to each column
+                    // Extract columns from the matrix
+                    var numCols = ((VectorValue)rv.Elements[0]).Elements.Count;
+                    var result = new List<K3Value>();
+                    
+                    for (int col = 0; col < numCols; col++)
+                    {
+                        // Extract column as a vector
+                        var column = new List<K3Value>();
+                        for (int row = 0; row < rv.Elements.Count; row++)
+                        {
+                            var rowVec = (VectorValue)rv.Elements[row];
+                            column.Add(rowVec.Elements[col]);
+                        }
+                        var columnVec = new VectorValue(column);
+                        
+                        // Apply _sv to this column
+                        // Use the same logic as for regular vectors
+                        if (leftVec.Elements.Count == 1)
+                        {
+                            result.Add(SvSingleBase(leftVec, columnVec));
+                        }
+                        else
+                        {
+                            result.Add(SvMultipleRadices(leftVec, columnVec));
+                        }
+                    }
+                    
+                    return new VectorValue(result);
+                }
                 rightVec = rv;
             }
             else
