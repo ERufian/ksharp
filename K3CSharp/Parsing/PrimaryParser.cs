@@ -31,7 +31,7 @@ namespace K3CSharp
         {
             var token = context.CurrentToken();
             
-            return token.Type switch
+            var result = token.Type switch
             {
                 TokenType.INTEGER => ParseInteger(context),
                 TokenType.LONG => ParseLong(context),
@@ -56,12 +56,11 @@ namespace K3CSharp
                 TokenType.MATCH => ParseMonadicMatch(context),
                 TokenType.NOT => ParseMonadicNot(context),
                 TokenType.HASH => ParseMonadicCount(context),
-                TokenType.UNDERSCORE => ParseMonadicFloor(context),
-                TokenType.QUESTION => ParseMonadicUnique(context),
-                TokenType.DOLLAR => ParseMonadicFormat(context),
                 TokenType.APPLY => ParseMonadicApply(context),
                 _ => throw new Exception($"Unexpected token: {token.Type}({token.Lexeme})")
             };
+
+            return result;
         }
 
         private ASTNode ParseInteger(ParseContext context)
@@ -1066,36 +1065,6 @@ namespace K3CSharp
             var operand = ParseBracketArgument(context);
             var node = new ASTNode(ASTNodeType.MonadicOp);
             node.Value = new SymbolValue("#");
-            if (operand != null) node.Children.Add(operand);
-            return node;
-        }
-
-        private ASTNode ParseMonadicFloor(ParseContext context)
-        {
-            context.Advance();
-            var operand = ParseBracketArgument(context);
-            var node = new ASTNode(ASTNodeType.MonadicOp);
-            node.Value = new SymbolValue("_");
-            if (operand != null) node.Children.Add(operand);
-            return node;
-        }
-
-        private ASTNode ParseMonadicUnique(ParseContext context)
-        {
-            context.Advance();
-            var operand = ParseBracketArgument(context);
-            var node = new ASTNode(ASTNodeType.MonadicOp);
-            node.Value = new SymbolValue("?");
-            if (operand != null) node.Children.Add(operand);
-            return node;
-        }
-
-        private ASTNode ParseMonadicFormat(ParseContext context)
-        {
-            context.Advance();
-            var operand = ParseBracketArgument(context);
-            var node = new ASTNode(ASTNodeType.MonadicOp);
-            node.Value = new SymbolValue("$");
             if (operand != null) node.Children.Add(operand);
             return node;
         }
