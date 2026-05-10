@@ -161,6 +161,8 @@ namespace K3CSharp.Parsing
         /// </summary>
         /// <param name="position">Starting position, updated to end of parsed expression</param>
         /// <returns>AST node representing the parsed expression</returns>
+        /// <remarks>DEPRECATED: use EvaluateFromRight or BuildParseTreeFromRight for proper LRS semantics.
+        /// This method uses the legacy parser path and does not apply full LRS rules inside bracket content.</remarks>
         public ASTNode? ParseExpression(ref int position)
         {
             // Step 1: Read entire expression until separator
@@ -2194,10 +2196,27 @@ namespace K3CSharp.Parsing
             // Parse based on the determined arity - no trial and error
             if (determinedArity == 1)
             {
-                var monadicResult = monadicParser.ParseMonadicOperator(expressionTokens);
-                if (monadicResult != null)
-                    return monadicResult;
-                // Fall through to dyadic fallback if monadic parsing failed
+                // Guard: if a system function is followed by [bracket] that does NOT span to the
+                // end of the token list, skip monadic and fall through to dyadic. This ensures
+                // _log[x]%_log[10] is parsed as (_log[x]) % (_log[10]) rather than
+                // _log([x]%_log[10]) which would be incorrect.
+                bool skipMonadic = false;
+                if (expressionTokens.Count >= 4 &&
+                    OperatorDetector.IsFunction(expressionTokens[0].Type) &&
+                    expressionTokens[1].Type == TokenType.LEFT_BRACKET)
+                {
+                    int closingIdx = FindMatchingBracket(expressionTokens, 1);
+                    if (closingIdx > 0 && closingIdx < expressionTokens.Count - 1)
+                        skipMonadic = true;
+                }
+                
+                if (!skipMonadic)
+                {
+                    var monadicResult = monadicParser.ParseMonadicOperator(expressionTokens);
+                    if (monadicResult != null)
+                        return monadicResult;
+                }
+                // Fall through to dyadic fallback if monadic parsing failed or was skipped
                 // (e.g., IDENTIFIER[args]*value where IDENTIFIER is treated as arity-1 but is really a dyadic sub-expression)
             }
             else if (determinedArity == 2)

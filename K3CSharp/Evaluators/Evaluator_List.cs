@@ -768,7 +768,13 @@ namespace K3CSharp
                     return IcSingle(c);
                 }
                 else
-                    throw new Exception("_ic: left argument must be a single character");
+                {
+                    // Character vector, return integer vector
+                    var results = new List<K3Value>();
+                    foreach (char c in leftChar.Value)
+                        results.Add(IcSingle(c));
+                    return new VectorValue(results);
+                }
             }
             else if (left is VectorValue leftVec)
             {

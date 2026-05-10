@@ -459,12 +459,25 @@ namespace K3CSharp.Parsing
                 return ASTNode.MakeLiteral(new NullValue());
             }
             
+            // Single verb token inside grouping is a noun-form (projected function), e.g. (_exp)
+            if (exprTokens.Count == 1 && VerbRegistry.IsVerbToken(exprTokens[0].Type))
+            {
+                var verbName = VerbRegistry.TokenTypeToVerbName(exprTokens[0].Type);
+                var projNode = new ASTNode(ASTNodeType.ProjectedFunction);
+                projNode.Value = new SymbolValue(verbName);
+                var verb = VerbRegistry.GetVerb(verbName);
+                int defaultArity = verb?.SupportedArities?.Max() ?? 2;
+                projNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(defaultArity)));
+                return projNode;
+            }
+            
             // Delegate to parent LRS parser for proper expression parsing
             // Parent parser will handle nested parentheses recursively
             ASTNode? result = null;
-            
+
             // Use LRSParser.ParseExpression for correct VERB[args] handling
-            // EvaluateFromRight/BuildParseTreeFromRight do not fully handle bracket function calls
+            // EvaluateFromRight/BuildParseTreeFromRight do not fully handle bracket 
+            // function calls (e.g. x[{...}arg] inside function bodies)
             var lrsParser = new LRSParser(exprTokens, buildParseTree);
             int pos = 0;
             result = lrsParser.ParseExpression(ref pos);

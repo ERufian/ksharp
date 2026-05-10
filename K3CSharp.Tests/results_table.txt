@@ -1978,7 +1978,7 @@ y:8
 y _vs x    │ 1 4 4                │                      ║
 ║ idioms_15_56_hex_from_decimal_chars.k                            │ x:"255"
 h:"0123456789abcdef"
-h[16 _vs 10 _sv _ic[x]-_ic"0"] │ Error: Cannot s...   │ "ff"                 ║
+h[16 _vs 10 _sv _ic[x]-_ic"0"] │ "ff"                 │                      ║
 ║ idioms_15_75_decimal_from_hex.k                                  │ h:"0123456789abcdef"
 x:"ff"
 16 _sv h?/:x │ 255                  │                      ║
@@ -2104,18 +2104,11 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1432/1444 tests passed (99.2%)                                                                                           ║
+║ SUMMARY: 1433/1444 tests passed (99.2%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_15_56_hex_from_decimal_chars.k
-Input: x:"255"
-h:"0123456789abcdef"
-h[16 _vs 10 _sv _ic[x]-_ic"0"]
-Expected: "ff"
-Actual: Error: Cannot subtract Character and Integer
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_15_66_selection_encoded_list.k
 Input: x:("red";"green";"blue";"yellow")
 y:2 2#1 0 0 1

@@ -449,17 +449,32 @@ namespace K3CSharp.Parsing
                 return CreateNodeFromToken(tokens[0]);
             }
             
-            // Check if this is a parenthesized expression and use grouping parser
+            // Check if this is a parenthesized or bracketed expression and use grouping parser
             if (tokens.Count >= 2 && 
                 tokens[0].Type == TokenType.LEFT_PAREN && 
                 tokens[tokens.Count - 1].Type == TokenType.RIGHT_PAREN)
             {
-                // Use grouping parser for parenthesized expressions
                 var subGroupingParser = new LRSGroupingParser(tokens, parentParser?.BuildParseTree ?? false, parentParser);
                 int pos = 0;
                 try
                 {
                     return subGroupingParser.ParseParentheses(ref pos);
+                }
+                catch
+                {
+                    // Fall through to dyadic parsing if grouping parser fails
+                }
+            }
+            
+            if (tokens.Count >= 2 && 
+                tokens[0].Type == TokenType.LEFT_BRACKET && 
+                tokens[tokens.Count - 1].Type == TokenType.RIGHT_BRACKET)
+            {
+                var subGroupingParser = new LRSGroupingParser(tokens, parentParser?.BuildParseTree ?? false, parentParser);
+                int pos = 0;
+                try
+                {
+                    return subGroupingParser.ParseBrackets(ref pos);
                 }
                 catch
                 {
@@ -525,14 +540,34 @@ namespace K3CSharp.Parsing
                 // If it's a system function that supports monadic arity, treat rest as its argument
                 if (verb?.Type == VerbType.SystemFunction && verb.SupportedArities.Contains(1))
                 {
-                    var argTokens = tokens.GetRange(1, tokens.Count - 1);
-                    var argNode = BuildParseTreeFromTokens(argTokens);
-                    if (argNode != null)
+                    if (tokens[1].Type == TokenType.LEFT_BRACKET)
                     {
-                        var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
-                        funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
-                        funcCallNode.Children.Add(argNode);
-                        return funcCallNode;
+                        int closingBracket = FindMatchingBracket(tokens, 1);
+                        if (closingBracket > 0 && closingBracket == tokens.Count - 1)
+                        {
+                            var bracketTokens = tokens.GetRange(1, closingBracket);
+                            var argNode = BuildParseTreeFromTokens(bracketTokens);
+                            if (argNode != null)
+                            {
+                                var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                                funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                                funcCallNode.Children.Add(argNode);
+                                return funcCallNode;
+                            }
+                        }
+                        // Bracket does not end the token list — fall through to dyadic parsing
+                    }
+                    else
+                    {
+                        var argTokens = tokens.GetRange(1, tokens.Count - 1);
+                        var argNode = BuildParseTreeFromTokens(argTokens);
+                        if (argNode != null)
+                        {
+                            var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                            funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                            funcCallNode.Children.Add(argNode);
+                            return funcCallNode;
+                        }
                     }
                 }
             }
@@ -788,14 +823,38 @@ namespace K3CSharp.Parsing
                 // If it's a system function that supports monadic arity, treat rest as its argument
                 if (verb?.Type == VerbType.SystemFunction && verb.SupportedArities.Contains(1))
                 {
-                    var argTokens = tokens.GetRange(1, tokens.Count - 1);
-                    var argNode = ParseSubExpression(argTokens);
-                    if (argNode != null)
+                    // When verb is immediately followed by [bracket] and the bracket spans to the
+                    // end of the token list, treat it as verb[bracketContent] function application.
+                    // If more tokens follow the closing bracket, fall through so dyadic parsing can
+                    // split the expression correctly (e.g., _ic[x]-_ic"0" → (_ic[x]) - (_ic"0")).
+                    if (tokens[1].Type == TokenType.LEFT_BRACKET)
                     {
-                        var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
-                        funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
-                        funcCallNode.Children.Add(argNode);
-                        return funcCallNode;
+                        int closingBracket = FindMatchingBracket(tokens, 1);
+                        if (closingBracket > 0 && closingBracket == tokens.Count - 1)
+                        {
+                            var bracketTokens = tokens.GetRange(1, closingBracket);
+                            var argNode = ParseSubExpression(bracketTokens);
+                            if (argNode != null)
+                            {
+                                var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                                funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                                funcCallNode.Children.Add(argNode);
+                                return funcCallNode;
+                            }
+                        }
+                        // Bracket does not end the token list — fall through to dyadic parsing
+                    }
+                    else
+                    {
+                        var argTokens = tokens.GetRange(1, tokens.Count - 1);
+                        var argNode = ParseSubExpression(argTokens);
+                        if (argNode != null)
+                        {
+                            var funcCallNode = new ASTNode(ASTNodeType.FunctionCall);
+                            funcCallNode.Children.Add(ASTNode.MakeVariable(funcName));
+                            funcCallNode.Children.Add(argNode);
+                            return funcCallNode;
+                        }
                     }
                 }
             }
@@ -968,6 +1027,23 @@ namespace K3CSharp.Parsing
         private bool IsAdverbToken(TokenType tokenType)
         {
             return VerbRegistry.IsAdverbToken(tokenType);
+        }
+        
+        private static int FindMatchingBracket(List<Token> tokens, int openPos)
+        {
+            if (openPos >= tokens.Count || tokens[openPos].Type != TokenType.LEFT_BRACKET)
+                return -1;
+            int depth = 0;
+            for (int i = openPos; i < tokens.Count; i++)
+            {
+                if (tokens[i].Type == TokenType.LEFT_BRACKET) depth++;
+                else if (tokens[i].Type == TokenType.RIGHT_BRACKET)
+                {
+                    depth--;
+                    if (depth == 0) return i;
+                }
+            }
+            return -1;
         }
     }
 }
