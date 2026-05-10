@@ -1,14 +1,14 @@
 # K3CSharp Parser Failures
 
-**Generated:** 2026-05-10 12:41:13
-**Test Results:** 1434/1444 passed (99.3%)
+**Generated:** 2026-05-10 17:34:38
+**Test Results:** 1436/1444 passed (99.4%)
 
 ## Executive Summary
 
 **Total Tests:** 1444
-**Passed Tests:** 1434
-**Failed Tests:** 10
-**Success Rate:** 99.3%
+**Passed Tests:** 1436
+**Failed Tests:** 8
+**Success Rate:** 99.4%
 
 **LRS Parser Statistics:**
 - NULL Results: 0

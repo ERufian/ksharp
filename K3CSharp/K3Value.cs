@@ -146,6 +146,12 @@ namespace K3CSharp
                 IsSpecial = true;
                 SpecialName = "-0i";
             }
+            // Detect signed zero
+            else if (value == 0.0 && double.IsNegative(value))
+            {
+                IsSpecial = true;
+                SpecialName = "-0.0";
+            }
         }
 
         public FloatValue(string specialName)

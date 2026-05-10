@@ -2011,14 +2011,14 @@ ii[3.0]   │ 1                    │                      ║
 x-_ x          │ 0.7                  │                      ║
 ║ idioms_17_478_fractional_part.k                                  │ x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1 │ 0.0 0.0 0.0 0.4...   │                      ║
 ║ idioms_17_465_magnitude_fractional_part.k                        │ x:6.13 -6.13;_abs[x]!1 │ 0.13 0.13            │                      ║
-║ idioms_17_476_fractional_part_with_sign.k                        │ x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ 0.2 0.3 -0.2 -0...   │ 0.2 0.3 -0.2 -0...   ║
+║ idioms_17_476_fractional_part_with_sign.k                        │ x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ 0.2 0.3 -0.2 -0...   │                      ║
 ║ idioms_17_453_round_nearest_even.k                               │ x:0.9 1.0 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ 0 2 2 4 0 -2         │                      ║
 ║ idioms_17_454_rounding_nearest_even_half.k                       │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ 24 40 3 -14 4 4      │                      ║
 ║ idioms_17_460_round_to_decimals.k                                │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
 ║ idioms_17_461_round_nearest_hundredth.k                          │ rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x │ 3.14 2.72 -12.67     │                      ║
 ║ idioms_17_462_round_nearest_int.k                                │ x:3.7
 _ x+0.5        │ 4                    │                      ║
-║ idioms_17_474_round_to_zero_magnitude.k                          │ y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x │ 0.0001 0.0 0.0 0.0   │ 0.0001 -0.0 -0....   ║
+║ idioms_17_474_round_to_zero_magnitude.k                          │ y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x │ 0.0001 -0.0 -0....   │                      ║
 ║ idioms_17_87_number_of_decimals.k                                │ nd:{:[1=#x;0;-2+#x]};ff:{$x-_ x};nd ff 1.234 │ 3                    │                      ║
 ║ idioms_17_149_number_of_decimals_max.k                           │ nd:{+/~0=_(x*10^y)!/:|10^!y+1};x:1.4321 1.21 10;y:3;nd[x;y] │ 3 2 0                │                      ║
 ║ idioms_17_470_divisible_by_y.k                                   │ x:1 2 3 4 5 6 7 8 9 10
@@ -2104,25 +2104,15 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1434/1444 tests passed (99.3%)                                                                                           ║
+║ SUMMARY: 1436/1444 tests passed (99.4%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
 ═════════════════════════════════════════════════════════════════════════════════════
-Test: idioms_17_476_fractional_part_with_sign.k
-Input: x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
-Expected: 0.2 0.3 -0.2 -0.8 0.0 0.0 -0.0
-Actual: 0.2 0.3 -0.2 -0.8 0.0 0.0 0.0
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_460_round_to_decimals.k
 Input: y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y]
 Expected: 3.326
 Actual: 0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_474_round_to_zero_magnitude.k
-Input: y:1e-4;x:1e-4 -1e-8 -1e-12 1e-16;x*~y>_abs x
-Expected: 0.0001 -0.0 -0.0 0.0
-Actual: 0.0001 0.0 0.0 0.0
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_260_figurate_numbers.k
 Input: a:10#1;2(+\)/a

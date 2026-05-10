@@ -158,9 +158,15 @@ namespace K3CSharp
                 }
             }
             if (a is IntegerValue && b is FloatValue)
+            {
+                // Integer * float always produces float (no smart conversion needed)
                 return new FloatValue(((IntegerValue)a).Value * ((FloatValue)b).Value);
+            }
             if (a is FloatValue && b is IntegerValue)
+            {
+                // Float * integer always produces float (no smart conversion needed)
                 return new FloatValue(((FloatValue)a).Value * ((IntegerValue)b).Value);
+            }
             if (a is LongValue && b is FloatValue)
                 return new FloatValue(((LongValue)a).Value * ((FloatValue)b).Value);
             if (a is FloatValue && b is LongValue)
