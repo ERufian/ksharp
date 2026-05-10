@@ -2009,10 +2009,10 @@ lp:((0=y!4)&~(0=y!100))|(0=y!400)
 ii[3.0]   │ 1                    │                      ║
 ║ idioms_17_62_fractional_part.k                                   │ x:3.7
 x-_ x          │ 0.7                  │                      ║
-║ idioms_17_478_fractional_part.k                                  │ x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1 │ 0.0 0.0 0.0 0.4...   │ 0.0 0.0 0.0 0.4...   ║
+║ idioms_17_478_fractional_part.k                                  │ x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1 │ 0.0 0.0 0.0 0.4...   │                      ║
 ║ idioms_17_465_magnitude_fractional_part.k                        │ x:6.13 -6.13;_abs[x]!1 │ 0.13 0.13            │                      ║
 ║ idioms_17_476_fractional_part_with_sign.k                        │ x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1 │ 0.2 0.3 -0.2 -0...   │ 0.2 0.3 -0.2 -0...   ║
-║ idioms_17_453_round_nearest_even.k                               │ x:0.9 1.0 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ 0 2 2 4 -1 -2        │ 0 2 2 4 0 -2         ║
+║ idioms_17_453_round_nearest_even.k                               │ x:0.9 1.0 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x │ 0 2 2 4 0 -2         │                      ║
 ║ idioms_17_454_rounding_nearest_even_half.k                       │ x:23.6 40.5 3.2 -14.02 3.5 4.5;rn:{_ x+0.5*~0.5=x!2};rn x │ 24 40 3 -14 4 4      │                      ║
 ║ idioms_17_460_round_to_decimals.k                                │ y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y] │ 0                    │ 3.326                ║
 ║ idioms_17_461_round_nearest_hundredth.k                          │ rh:{0.01*_0.5+x*100};x:3.1414 2.71828 -12.66666;rh x │ 3.14 2.72 -12.67     │                      ║
@@ -2051,7 +2051,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ idioms_19_369_alternating_sum.k                                  │ x:1+!10;+/x*(#x)#1 -1 │ -5                   │                      ║
 ║ idioms_19_367_alternating_product.k                              │ x:1 2 3 4 5;a:(#x)#1 -1;*/x^a │ 0                    │ 1.875                ║
 ║ idioms_19_558_consecutive_integers.k                             │ ci:{x+!1+y-x};ci[5;10] │ 5 6 7 8 9 10         │                      ║
-║ idioms_19_164_divisors.k                                         │ dv:{&0=x!/:!1+x};x:363;dv[x] │ Error: Function...   │ 1 3 11 33 121 363    ║
+║ idioms_19_164_divisors.k                                         │ dv:{&0=x!/:!1+x};x:363;dv[x] │ 1 3 11 33 121 363    │                      ║
 ║ idioms_19_47_polynomial_with_roots.k                             │ x:1 2 3;{(x,0)-y*0,x}/1,x │ 1 -6 11 -6           │                      ║
 ║ idioms_19_67_extrapolated_value.k                                │ x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x │ Error: _sv: all...   │ 25.0                 ║
 ║ idioms_19_69_polynomial_value_at_points.k                        │ x:-1 0 2;y:4 0 5 1;x _sv\:y │ -8 1 43              │                      ║
@@ -2104,7 +2104,7 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1429/1444 tests passed (99.0%)                                                                                           ║
+║ SUMMARY: 1432/1444 tests passed (99.2%)                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 FAILING TESTS DETAILS:
@@ -2123,20 +2123,10 @@ x[2 _sv+y]
 Expected: ("blue";"green")
 Actual: Error: _sv: all elements must be integers
 ──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_478_fractional_part.k
-Input: x:0.0 1.0 -2.0 3.4 -5.6 -6.1;x!1
-Expected: 0.0 0.0 0.0 0.4 0.4 0.9
-Actual: 0.0 0.0 0.0 0.4 -0.6 -0.1
-──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_476_fractional_part_with_sign.k
 Input: x:0.2 2.3 -0.2 -1.8 0.0 5.0 -7.0;sg:{(x>0)-(x<0)};(sg x)*(_abs x)!1
 Expected: 0.2 0.3 -0.2 -0.8 0.0 0.0 -0.0
 Actual: 0.2 0.3 -0.2 -0.8 0.0 0.0 0.0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_17_453_round_nearest_even.k
-Input: x:0.9 1.0 2.5 3.1 -0.2 -1.9;rn:{_ x+~1>x!2};rn x
-Expected: 0 2 2 4 0 -2
-Actual: 0 2 2 4 -1 -2
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_17_460_round_to_decimals.k
 Input: y:3.3256789;x:3;rn:{(10^-x)*_ 0.5+y*10^x};rn[x;y]
@@ -2162,11 +2152,6 @@ Test: idioms_19_367_alternating_product.k
 Input: x:1 2 3 4 5;a:(#x)#1 -1;*/x^a
 Expected: 1.875
 Actual: 0
-──────────────────────────────────────────────────────────────────────────
-Test: idioms_19_164_divisors.k
-Input: dv:{&0=x!/:!1+x};x:363;dv[x]
-Expected: 1 3 11 33 121 363
-Actual: Error: Function execution error: Attempted to divide by zero.
 ──────────────────────────────────────────────────────────────────────────
 Test: idioms_19_67_extrapolated_value.k
 Input: x:-1 0 1;y:1 0 1.0;g:5;g _sv y _lsq x^/:|!#x

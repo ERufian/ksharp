@@ -1008,25 +1008,43 @@ namespace K3CSharp
         {
             // Enhanced ! operator with multiple behaviors
             // Scalar modulus cases (int!int, float!float, int!float, float!int)
+            // K mod formula: x - y * floor(x / y) (floor toward negative infinity, not truncation toward zero)
+            // When y=0, K returns x (mod by zero returns the left operand)
             if (left is IntegerValue leftInt && right is IntegerValue rightInt)
             {
-                // Integer mod: remainder of division
-                return new IntegerValue(leftInt.Value % rightInt.Value);
+                // Integer mod using floor division
+                int x = leftInt.Value;
+                int y = rightInt.Value;
+                if (y == 0) return new IntegerValue(x); // mod by zero returns left operand
+                int result = x - y * (int)Math.Floor((double)x / y);
+                return new IntegerValue(result);
             }
             else if (left is FloatValue leftFloat && right is FloatValue rightFloat)
             {
-                // Float mod: mathematical modulus
-                return new FloatValue(leftFloat.Value % rightFloat.Value);
+                // Float mod using floor division
+                double x = leftFloat.Value;
+                double y = rightFloat.Value;
+                if (y == 0) return new FloatValue(x); // mod by zero returns left operand
+                double result = x - y * Math.Floor(x / y);
+                return new FloatValue(result);
             }
             else if (left is IntegerValue leftIntF && right is FloatValue rightFloatV)
             {
                 // Mixed mod: promote to float
-                return new FloatValue((double)leftIntF.Value % rightFloatV.Value);
+                double x = (double)leftIntF.Value;
+                double y = rightFloatV.Value;
+                if (y == 0) return new FloatValue(x); // mod by zero returns left operand
+                double result = x - y * Math.Floor(x / y);
+                return new FloatValue(result);
             }
             else if (left is FloatValue leftFloatV && right is IntegerValue rightIntF)
             {
                 // Mixed mod: promote to float
-                return new FloatValue(leftFloatV.Value % (double)rightIntF.Value);
+                double x = leftFloatV.Value;
+                double y = (double)rightIntF.Value;
+                if (y == 0) return new FloatValue(x); // mod by zero returns left operand
+                double result = x - y * Math.Floor(x / y);
+                return new FloatValue(result);
             }
             else if (left is VectorValue leftVec && right is not VectorValue)
             {
