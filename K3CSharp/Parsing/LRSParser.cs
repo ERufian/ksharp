@@ -691,6 +691,19 @@ namespace K3CSharp.Parsing
                     return statementParser.ParseStatement(tokens);
                 if (tokens[1].Type == TokenType.GLOBAL_ASSIGNMENT)
                     return statementParser.ParseStatement(tokens);
+                // Handle indexed assignment: a[0]:expression or a[0][1]:expression
+                if (tokens[1].Type == TokenType.LEFT_BRACKET)
+                {
+                    for (int i = 2; i < tokens.Count; i++)
+                    {
+                        if (tokens[i].Type == TokenType.COLON &&
+                            i > 1 &&
+                            tokens[i - 1].Type == TokenType.RIGHT_BRACKET)
+                        {
+                            return statementParser.ParseStatement(tokens);
+                        }
+                    }
+                }
             }
             
             // Check for projection patterns BEFORE grouping constructs
@@ -1734,8 +1747,14 @@ namespace K3CSharp.Parsing
                         bool isAssignmentOnly = expressionTokens[i].Type == TokenType.COLON && 
                                                 i == expressionTokens.Count - 2 && 
                                                 expressionTokens[0].Type == TokenType.IDENTIFIER;
+                        // Handle indexed assignment: a[0]:expression or a[0][1]:expression
+                        bool isIndexedAssignment = expressionTokens[i].Type == TokenType.COLON &&
+                                                   i > 1 &&
+                                                   expressionTokens[i - 1].Type == TokenType.RIGHT_BRACKET &&
+                                                   expressionTokens[0].Type == TokenType.IDENTIFIER &&
+                                                   expressionTokens[1].Type == TokenType.LEFT_BRACKET;
                         
-                        if (isSimpleAssignment || isAssignmentOnly)
+                        if (isSimpleAssignment || isAssignmentOnly || isIndexedAssignment)
                     {
                         return statementParser.ParseStatement(expressionTokens);
                         }
