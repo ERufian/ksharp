@@ -145,6 +145,18 @@ namespace K3CSharp
                 // For functions, execute the function with left and right as arguments
                 return ExecuteFunction(function, new List<K3Value> { left, right });
             }
+            else if (verb is AdverbProjectedFunctionValue adverbProjected)
+            {
+                // For adverb projections like +\ (scan), call the projection function
+                // In over context, the projection should be applied to the accumulated result
+                // The over adverb handles the accumulation
+                return CallAdverbProjectedFunction(adverbProjected, new List<K3Value> { left });
+            }
+            else if (verb is ProjectedFunctionValue projected)
+            {
+                // For projected functions (e.g., +[3 3 5]), call with arguments
+                return CallProjectedFunction(projected, new List<K3Value> { left, right });
+            }
             else
             {
                 // For numeric verbs, assume addition by default
@@ -758,6 +770,26 @@ namespace K3CSharp
         
         private K3Value OverVectorWithProvidedInit(K3Value verb, K3Value initialization, VectorValue dataVec)
         {
+            // Special case: scan projection in over context
+            // For expressions like 2(+\)/a, the scan generates indices 1..n and applies itself
+            // The initialization value is ignored for the index generation
+            if (verb is AdverbProjectedFunctionValue adverbProjected && (adverbProjected.AdverbName == "\\" || adverbProjected.AdverbName == "scan"))
+            {
+                // Generate indices 1..n where n is the vector length
+                var indices = new List<K3Value>();
+                for (int i = 1; i <= dataVec.Elements.Count; i++)
+                {
+                    indices.Add(new IntegerValue(i));
+                }
+                var indexVector = new VectorValue(indices);
+                
+                // Apply the scan directly to the index vector
+                // The scan adverb (\) with verb + produces cumulative sums
+                var underlyingVerb = adverbProjected.Verb;
+                var verbSymbol = new SymbolValue(underlyingVerb);
+                return Scan(verbSymbol, new NullValue(), indexVector);
+            }
+            
             var result = initialization;
             
             if (verb is SymbolValue verbSym)
