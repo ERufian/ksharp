@@ -459,6 +459,10 @@ namespace K3CSharp
             {
                 leftVec = new VectorValue(new List<K3Value> { leftInt });
             }
+            else if (left is FloatValue leftFloat)
+            {
+                leftVec = new VectorValue(new List<K3Value> { leftFloat });
+            }
             else if (left is VectorValue lv)
             {
                 leftVec = lv;
@@ -545,51 +549,85 @@ namespace K3CSharp
         private K3Value SvSingleBase(VectorValue radices, VectorValue digits)
         {
             // Single radix case: use the first radix element for all digits
-            long baseValue = (radices.Elements[0] is IntegerValue iv) ? iv.Value : 0;
+            bool hasFloat = radices.Elements[0] is FloatValue;
+            foreach (var d in digits.Elements)
+                if (d is FloatValue) { hasFloat = true; break; }
             
-            // Convert digits from given base to base 10 using right-to-left evaluation
-            long result = 0;
-            long multiplier = 1;
-            
-            // Process digits from right to left (least significant to most significant)
-            for (int i = digits.Elements.Count - 1; i >= 0; i--)
+            if (hasFloat)
             {
-                if (digits.Elements[i] is IntegerValue digit)
+                // Float path: use double arithmetic
+                double baseValue = (radices.Elements[0] is FloatValue fv) ? fv.Value :
+                                   (radices.Elements[0] is IntegerValue iv) ? iv.Value : 0;
+                double result = 0;
+                double multiplier = 1;
+                
+                for (int i = digits.Elements.Count - 1; i >= 0; i--)
                 {
-                    var digitValue = digit.Value;
+                    double digitValue = (digits.Elements[i] is FloatValue fDigit) ? fDigit.Value :
+                                        (digits.Elements[i] is IntegerValue iDigit) ? iDigit.Value : 0;
                     result += digitValue * multiplier;
                     multiplier *= baseValue;
                 }
-                else
-                {
-                    throw new Exception("_sv: all elements in right argument must be integers");
-                }
+                
+                return new FloatValue(result);
             }
-            
-            return new IntegerValue((int)result);
+            else
+            {
+                // Integer path: use long arithmetic to preserve overflow/wrap behavior
+                long baseValue = (radices.Elements[0] is IntegerValue iv) ? iv.Value : 0;
+                long result = 0;
+                long multiplier = 1;
+                
+                for (int i = digits.Elements.Count - 1; i >= 0; i--)
+                {
+                    long digitValue = ((IntegerValue)digits.Elements[i]).Value;
+                    result += digitValue * multiplier;
+                    multiplier *= baseValue;
+                }
+                
+                return new IntegerValue((int)result);
+            }
         }
         
         private K3Value SvMultipleRadices(VectorValue radices, VectorValue digitVec)
         {
-            // Convert digits from mixed radices to base 10 using Horner's method
-            // Process from left to right: result = result * radix + digit
-            long result = 0;
+            bool hasFloat = false;
+            foreach (var r in radices.Elements)
+                if (r is FloatValue) { hasFloat = true; break; }
+            if (!hasFloat)
+                foreach (var d in digitVec.Elements)
+                    if (d is FloatValue) { hasFloat = true; break; }
             
-            for (int i = 0; i < digitVec.Elements.Count; i++)
+            if (hasFloat)
             {
-                if (i < radices.Elements.Count && radices.Elements[i] is IntegerValue radix && digitVec.Elements[i] is IntegerValue digit)
+                double result = 0;
+                for (int i = 0; i < digitVec.Elements.Count; i++)
                 {
-                    var radixValue = radix.Value;
-                    var digitValue = digit.Value;
+                    if (i >= radices.Elements.Count)
+                        throw new Exception("_sv: radices and digits length mismatch");
+                    
+                    double radixValue = (radices.Elements[i] is FloatValue fr) ? fr.Value :
+                                        (radices.Elements[i] is IntegerValue ir) ? ir.Value : 0;
+                    double digitValue = (digitVec.Elements[i] is FloatValue fd) ? fd.Value :
+                                        (digitVec.Elements[i] is IntegerValue id) ? id.Value : 0;
                     result = result * radixValue + digitValue;
                 }
-                else
-                {
-                    throw new Exception("_sv: all elements must be integers");
-                }
+                return new FloatValue(result);
             }
-            
-            return new IntegerValue((int)result);
+            else
+            {
+                long result = 0;
+                for (int i = 0; i < digitVec.Elements.Count; i++)
+                {
+                    if (i >= radices.Elements.Count)
+                        throw new Exception("_sv: radices and digits length mismatch");
+                    
+                    long radixValue = ((IntegerValue)radices.Elements[i]).Value;
+                    long digitValue = ((IntegerValue)digitVec.Elements[i]).Value;
+                    result = result * radixValue + digitValue;
+                }
+                return new IntegerValue((int)result);
+            }
         }
 
         private K3Value Vs(K3Value left, K3Value right)
