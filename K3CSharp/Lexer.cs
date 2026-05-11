@@ -182,8 +182,17 @@ namespace K3CSharp
                         position + 1 < input.Length && 
                         (char.IsLetterOrDigit(input[position + 1]) || input[position + 1] == '_'))
                     {
-                        // Underscore is part of an identifier
-                        tokens.Add(ReadIdentifier());
+                        // Underscore follows alphanumeric/dot - could be part of identifier
+                        // or a system function (e.g., 2_sv). Try system function first.
+                        var systemFunc = ReadSystemFunction();
+                        if (systemFunc != null)
+                        {
+                            tokens.Add(systemFunc);
+                        }
+                        else
+                        {
+                            tokens.Add(ReadIdentifier());
+                        }
                     }
                     else
                     {

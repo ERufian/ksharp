@@ -1674,6 +1674,8 @@ namespace K3CSharp.Parsing
             // Check for function variable + adverb patterns
             // Pattern: f/vector or f\vector where f is a function variable
             // Also: f' or f/ with no argument (noun form — e.g. x' in lambda body)
+            // This MUST be checked before dyadic parsing so the adverb consumes the
+            // entire remaining expression (e.g., sa'(il y)_ x → sa' applied to (il y)_ x).
             if (expressionTokens.Count >= 2 && expressionTokens[0].Type == TokenType.IDENTIFIER)
             {
                 var potentialAdverb = expressionTokens[1];

@@ -124,6 +124,15 @@ namespace K3CSharp
                         "IO_VERB_7" => IoVerbMonadic(operand, 7),
                         "IO_VERB_8" => IoVerbMonadic(operand, 8),
                         "IO_VERB_9" => IoVerbMonadic(operand, 9),
+                        "_exp" => MathExp(operand),
+                        "_abs" => MathAbs(operand),
+                        "_sqrt" => MathSqrt(operand),
+                        "_sin" => MathSin(operand),
+                        "_cos" => MathCos(operand),
+                        "_tan" => MathTan(operand),
+                        "_log" => MathLog(operand),
+                        "_floor" => MathFloor(operand),
+                        "_ceil" => MathCeil(operand),
                         _ => throw new Exception($"Verb '{verbName}' is registered as monadic but not implemented in ApplyMonadicVerb")
                     };
                 }
@@ -273,40 +282,26 @@ namespace K3CSharp
 
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
 
-            // FunctionValue verb: n {lambda}/ x — adverbial do with lambda
-            // Applies the lambda function n times starting from x.
-            // n=0 means apply 0 times (return x unchanged).
-            // This must be checked before sentinel disambiguation since n=0 is valid (not a sentinel here).
-            if (verb is FunctionValue funcVerb)
+            // Route function verbs (FunctionValue or SymbolValue referring to function) to OverMonadForFunction
+            FunctionValue? funcVerb = null;
+            if (verb is FunctionValue fv)
             {
-                // Noun form: both sentinels — return projected function placeholder
+                funcVerb = fv;
+            }
+            else if (verb is SymbolValue verbSym)
+            {
+                var symbolValue = GetVariableValue(verbSym.Value);
+                if (symbolValue is FunctionValue symbolFunc)
+                {
+                    funcVerb = symbolFunc;
+                }
+            }
+
+            if (funcVerb != null)
+            {
                 if (leftSentinel && rightSentinel)
                     return new AdverbProjectedFunctionValue("over", funcVerb.BodyText, 2);
-                
-                // n {lambda}/ x — apply lambda n times to x (n != 0, since 0 is sentinel for 'no left arg')
-                if (left is IntegerValue nInt && !leftSentinel)
-                {
-                    var current = right;
-                    for (int i = 0; i < nInt.Value; i++)
-                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
-                    return current;
-                }
-                
-                // {lambda}/ x — fixed-point iteration with lambda (monadic only)
-                // For dyadic functions, fall through to standard Over handling
-                if (leftSentinel && funcVerb.Valence == 1)
-                {
-                    var prev = right;
-                    var curr2 = ExecuteFunction(funcVerb, new List<K3Value> { prev });
-                    const int maxIter2 = 1000000;
-                    for (int i = 0; i < maxIter2; i++)
-                    {
-                        if (ValuesMatch(curr2, prev)) return prev;
-                        prev = curr2;
-                        curr2 = ExecuteFunction(funcVerb, new List<K3Value> { prev });
-                    }
-                    return prev;
-                }
+                return OverMonadForFunction(funcVerb, left, right);
             }
 
             // Over Monad dispatch: verb is monadic (ends with ':' or registry says monadic-only)
@@ -353,6 +348,280 @@ namespace K3CSharp
         ///   n f:\ x     — apply exactly n times, return [x, f[x], ..., f^n[x]]
         ///   b f:\ x     — apply while b[current]!=0, return all collected values
         /// </summary>
+        internal K3Value ScanMonadForFunction(FunctionValue funcVerb, K3Value left, K3Value x)
+        {
+            bool leftSentinel = left is NullValue;
+            bool isDyadic = funcVerb.Valence == 2;
+
+            // f:\ x where x is VectorValue — scan over vector (seeded or unseeded)
+            if (x is VectorValue vec)
+            {
+                if (isDyadic)
+                {
+                    // Dyadic scan: result[0] = seed or x[0], result[i] = f(result[i-1], x[i])
+                    var results = new List<K3Value>();
+                    K3Value current;
+                    int startIndex;
+
+                    if (!leftSentinel)
+                    {
+                        // Seed provided: n f\ x
+                        results.Add(left);
+                        current = left;
+                        startIndex = 0;
+                    }
+                    else if (vec.Elements.Count > 0)
+                    {
+                        // No seed: use first element
+                        results.Add(vec.Elements[0]);
+                        current = vec.Elements[0];
+                        startIndex = 1;
+                    }
+                    else
+                    {
+                        return new VectorValue(results);
+                    }
+
+                    for (int i = startIndex; i < vec.Elements.Count; i++)
+                    {
+                        try
+                        {
+                            current = ExecuteFunction(funcVerb, new List<K3Value> { current, vec.Elements[i] });
+                            results.Add(current);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new InvalidOperationException($"Dyadic scan failed at element {i}/{vec.Elements.Count}: {ex.Message}", ex);
+                        }
+                    }
+                    return new VectorValue(results);
+                }
+                else
+                {
+                    // Monadic scan over vector: treat as fixed-point scan applied to the vector as a whole
+                    // (same as scalar case below)
+                }
+            }
+
+            // n f:\ x where x is scalar — Adverbial Do (monadic only; for dyadic with scalar, treat as seed)
+            if (!leftSentinel && left is IntegerValue nVal)
+            {
+                if (isDyadic && !(x is VectorValue))
+                {
+                    // n f\ x with dyadic f and scalar x: apply once with seed, return as vector
+                    var result = ExecuteFunction(funcVerb, new List<K3Value> { left, x });
+                    return new VectorValue(new List<K3Value> { left, result });
+                }
+
+                var results = new List<K3Value> { x };
+                var current = x;
+                for (int i = 0; i < nVal.Value; i++)
+                {
+                    try
+                    {
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                        results.Add(current);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Scan adverbial do failed at iteration {i + 1}/{nVal.Value}: {ex.Message}", ex);
+                    }
+                }
+                return new VectorValue(results);
+            }
+
+            // b f:\ x — Adverbial While: collect values while b[current] != 0 (monadic only)
+            if (!leftSentinel && (left is FunctionValue || left is SymbolValue))
+            {
+                if (isDyadic)
+                {
+                    throw new InvalidOperationException("Scan adverbial while requires a monadic step function");
+                }
+
+                var results = new List<K3Value> { x };
+                var current = x;
+                const int maxIter = 1000000;
+                for (int i = 0; i < maxIter; i++)
+                {
+                    try
+                    {
+                        K3Value condition;
+                        if (left is FunctionValue bf)
+                            condition = ExecuteFunction(bf, new List<K3Value> { current });
+                        else if (left is SymbolValue sv)
+                            condition = ApplyMonadicVerb(sv.Value, current);
+                        else
+                            throw new InvalidOperationException($"Invalid condition type for scan while: {left.GetType()}");
+                        
+                        if (condition is IntegerValue cv && cv.Value == 0) break;
+                        if (condition is LongValue lv && lv.Value == 0L) break;
+                        if (condition is FloatValue fv && fv.Value == 0.0) break;
+                        
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                        results.Add(current);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Scan adverbial while failed at iteration {i + 1}: {ex.Message}", ex);
+                    }
+                }
+                return new VectorValue(results);
+            }
+
+            // f:\ x where f is dyadic and x is scalar: return x unchanged
+            if (isDyadic && leftSentinel && !(x is VectorValue))
+            {
+                return x;
+            }
+
+            // f:\ x — fixed-point scan for monadic functions: collect x, f[x], f[f[x]], ... until fixed-point
+            {
+                var results = new List<K3Value> { x };
+                var prev = x;
+                K3Value current;
+                try
+                {
+                    current = ExecuteFunction(funcVerb, new List<K3Value> { x });
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Fixed-point scan failed at initial call: {ex.Message}", ex);
+                }
+                const int maxIter = 1000000;
+                for (int i = 0; i < maxIter; i++)
+                {
+                    try
+                    {
+                        bool matchesPrev = ValuesMatch(current, prev);
+                        bool matchesInitial = ValuesMatch(current, x);
+                        if (matchesPrev || matchesInitial)
+                            break; // stop — don't add the repeated value
+                        results.Add(current);
+                        prev = current;
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Fixed-point scan failed at iteration {i + 1}: {ex.Message}", ex);
+                    }
+                }
+                return new VectorValue(results);
+            }
+        }
+
+        internal K3Value OverMonadForFunction(FunctionValue funcVerb, K3Value left, K3Value x)
+        {
+            bool leftSentinel = left is NullValue;
+            bool isDyadic = funcVerb.Valence == 2;
+
+            // f/ x where x is VectorValue — over fold (seeded or unseeded)
+            if (x is VectorValue vec)
+            {
+                if (isDyadic)
+                {
+                    // Delegate to the standard Over which already handles FunctionValue correctly
+                    return Over(funcVerb, left, x);
+                }
+                // Monadic over on vector: fixed-point iteration on the vector as a whole
+            }
+
+            // n f/ x where x is scalar — Adverbial Do (monadic only; for dyadic with scalar, treat as seed)
+            if (!leftSentinel && left is IntegerValue nVal)
+            {
+                if (isDyadic && !(x is VectorValue))
+                {
+                    // n f/ x with dyadic f and scalar x: apply once with seed
+                    return ExecuteFunction(funcVerb, new List<K3Value> { left, x });
+                }
+
+                var current = x;
+                for (int i = 0; i < nVal.Value; i++)
+                {
+                    try
+                    {
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Over adverbial do failed at iteration {i + 1}/{nVal.Value}: {ex.Message}", ex);
+                    }
+                }
+                return current;
+            }
+
+            // b f/ x — Adverbial While (monadic only)
+            if (!leftSentinel && (left is FunctionValue || left is SymbolValue))
+            {
+                if (isDyadic)
+                {
+                    throw new InvalidOperationException("Over adverbial while requires a monadic step function");
+                }
+
+                var current = x;
+                const int maxIter = 1000000;
+                for (int i = 0; i < maxIter; i++)
+                {
+                    try
+                    {
+                        K3Value condition;
+                        if (left is FunctionValue bf)
+                            condition = ExecuteFunction(bf, new List<K3Value> { current });
+                        else if (left is SymbolValue sv)
+                            condition = ApplyMonadicVerb(sv.Value, current);
+                        else
+                            throw new InvalidOperationException($"Invalid condition type for over while: {left.GetType()}");
+
+                        if (condition is IntegerValue cv && cv.Value == 0) break;
+                        if (condition is LongValue lv && lv.Value == 0L) break;
+                        if (condition is FloatValue fv && fv.Value == 0.0) break;
+
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { current });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Over adverbial while failed at iteration {i + 1}: {ex.Message}", ex);
+                    }
+                }
+                return current;
+            }
+
+            // f/ x where f is dyadic and x is scalar: return x unchanged
+            if (isDyadic && leftSentinel && !(x is VectorValue))
+            {
+                return x;
+            }
+
+            // f/ x — fixed-point over for monadic functions
+            {
+                var prev = x;
+                K3Value current;
+                try
+                {
+                    current = ExecuteFunction(funcVerb, new List<K3Value> { prev });
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Fixed-point over failed at initial call: {ex.Message}", ex);
+                }
+                const int maxIter = 1000000;
+                for (int i = 0; i < maxIter; i++)
+                {
+                    try
+                    {
+                        if (ValuesMatch(current, prev))
+                            return prev;
+                        prev = current;
+                        current = ExecuteFunction(funcVerb, new List<K3Value> { prev });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Fixed-point over failed at iteration {i + 1}: {ex.Message}", ex);
+                    }
+                }
+                return prev;
+            }
+        }
+
         internal K3Value ScanMonad(string verbName, K3Value left, K3Value x)
         {
             bool leftSentinel = left is NullValue;
@@ -383,6 +652,7 @@ namespace K3CSharp
                         : ApplyMonadicVerb((left as SymbolValue)!.Value, current);
                     if (condition is IntegerValue cv && cv.Value == 0) break;
                     if (condition is LongValue lv && lv.Value == 0L) break;
+                    if (condition is FloatValue fv && fv.Value == 0.0) break;
                     current = ApplyMonadicVerb(verbName, current);
                     results.Add(current);
                 }
@@ -416,6 +686,28 @@ namespace K3CSharp
             bool rightSentinel = right is NullValue;
 
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
+
+            // Route function verbs (FunctionValue or SymbolValue referring to function) to ScanMonadForFunction
+            FunctionValue? funcVerb = null;
+            if (verb is FunctionValue fv)
+            {
+                funcVerb = fv;
+            }
+            else if (verb is SymbolValue verbSym)
+            {
+                var symbolValue = GetVariableValue(verbSym.Value);
+                if (symbolValue is FunctionValue symbolFunc)
+                {
+                    funcVerb = symbolFunc;
+                }
+            }
+
+            if (funcVerb != null)
+            {
+                if (leftSentinel && rightSentinel)
+                    return new AdverbProjectedFunctionValue("scan", funcVerb.BodyText, 1);
+                return ScanMonadForFunction(funcVerb, left, right);
+            }
 
             // Scan Monad dispatch: verb is monadic (ends with ':' or registry says monadic-only)
             if (IsMonadicOnlyVerb(verbName))
@@ -699,6 +991,18 @@ namespace K3CSharp
             // Handle scalar case
             if (IsScalar(data))
             {
+                // If initialization is provided, apply verb once with init and data
+                if (!(initialization is NullValue))
+                {
+                    if (verb is SymbolValue verbSym)
+                    {
+                        return ApplySymbolVerb(verbSym.Value, initialization, data);
+                    }
+                    else
+                    {
+                        return ApplySymbolVerbWithOperator(verb, initialization, data);
+                    }
+                }
                 return data;
             }
             

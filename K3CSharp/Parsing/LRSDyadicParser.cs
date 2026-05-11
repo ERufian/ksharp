@@ -285,6 +285,78 @@ namespace K3CSharp.Parsing
                 else if (tokens[i].Type == TokenType.RIGHT_PAREN || tokens[i].Type == TokenType.RIGHT_BRACKET || tokens[i].Type == TokenType.RIGHT_BRACE)
                     adverbScanDepth--;
                 
+                // Handle IDENTIFIER + ADVERB pattern (e.g., pt\1 for scan monad)
+                // This must be checked at depth 0 to avoid matching inside groups
+                // Only match when the identifier is the first token OR when the tokens
+                // before it form a simple operand (no unresolved dyadic operators).
+                // This prevents over-matching in expressions like ,/sa'(il y) where
+                // ,/ is an adverb-modified verb, not a left operand. Also matches system
+                // function tokens (e.g., _sv').
+                if (adverbScanDepth == 0 && i + 1 < tokens.Count &&
+                    (tokens[i].Type == TokenType.IDENTIFIER || OperatorDetector.IsFunction(tokens[i].Type)) &&
+                    IsAdverbToken(tokens[i + 1].Type) &&
+                    HasSimpleLeftOperand(tokens, i) &&
+                    // Don't match two-glyph adverbs followed by COLON (e.g., \:\:) - let the outer parser handle those
+                    !(tokens[i + 1].Type == TokenType.ADVERB_BACKSLASH_COLON && i + 2 < tokens.Count && tokens[i + 2].Type == TokenType.COLON) &&
+                    // Don't match if immediately preceded by an adverb — the adverb belongs to a modified verb to the left
+                    !(i > 0 && IsAdverbToken(tokens[i - 1].Type)))
+                {
+                    var verbToken = tokens[i];
+                    
+                    // Find all consecutive adverbs starting at position i+1
+                    int adverbStart = i + 1;
+                    int adverbEnd = adverbStart;
+                    while (adverbEnd < tokens.Count && IsAdverbToken(tokens[adverbEnd].Type))
+                        adverbEnd++;
+                    
+                    var adverbTokens = tokens.GetRange(adverbStart, adverbEnd - adverbStart);
+                    if (adverbTokens.Count == 0)
+                        continue;
+                    
+                    var lastAdverbToken = adverbTokens[adverbTokens.Count - 1];
+                    
+                    // Parse tokens before the identifier as left operand
+                    var leftTokens = tokens.GetRange(0, i);
+                    // Parse tokens after all adverbs as right operand
+                    var rightTokens = tokens.GetRange(adverbEnd, tokens.Count - adverbEnd);
+                    
+                    // Create verb node from identifier or system function
+                    ASTNode? verbNode;
+                    if (tokens[i].Type == TokenType.IDENTIFIER)
+                        verbNode = ASTNode.MakeVariable(verbToken.Lexeme);
+                    else
+                        verbNode = CreateNodeFromToken(tokens[i]);
+                    
+                    if (verbNode == null)
+                        continue;
+                    
+                    // Build nested verb node for multiple adverbs (inner adverbs are 1-child)
+                    ASTNode innerVerbNode = verbNode;
+                    for (int a = 0; a < adverbTokens.Count - 1; a++)
+                    {
+                        var innerAdverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                        innerAdverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(adverbTokens[a].Type));
+                        innerAdverbNode.Children.Add(innerVerbNode);
+                        innerVerbNode = innerAdverbNode;
+                    }
+                    
+                    // Create top-level adverb node with the last (outermost) adverb
+                    var adverbNode = new ASTNode(ASTNodeType.DyadicOp);
+                    adverbNode.Value = new SymbolValue(VerbRegistry.GetAdverbType(lastAdverbToken.Type));
+                    adverbNode.Children.Add(innerVerbNode);
+                    
+                    // Add left and right operands
+                    var leftNode = leftTokens.Count > 0 ? BuildParseTreeFromTokens(leftTokens) : null;
+                    var rightNode = rightTokens.Count > 0 ? BuildParseTreeFromTokens(rightTokens) : null;
+                    
+                    if (leftNode != null) adverbNode.Children.Add(leftNode);
+                    if (rightNode != null) adverbNode.Children.Add(rightNode);
+                    if (adverbNode.Children.Count == 1)
+                        adverbNode.Children.Add(ASTNode.MakeLiteral(new NullValue()));
+                    
+                    return adverbNode;
+                }
+                
                 // Handle parenthesized or braced verb + adverb: (expr)/ or {lambda}/ etc.
                 // When ) or } brings depth to 0 and next token is adverb, treat the group as verb
                 if (adverbScanDepth == 0 && 
@@ -383,6 +455,16 @@ namespace K3CSharp.Parsing
                     int adverbEnd = adverbStart;
                     while (adverbEnd < tokens.Count && IsAdverbToken(tokens[adverbEnd].Type))
                         adverbEnd++;
+                    
+                    // Skip two-glyph adverbs followed by COLON (e.g., _di\:\: 0 2)
+                    // These are composite adverbs that should be handled by the outer parser
+                    if (adverbEnd < tokens.Count && tokens[adverbEnd].Type == TokenType.COLON &&
+                        (tokens[adverbStart].Type == TokenType.ADVERB_BACKSLASH_COLON ||
+                         tokens[adverbStart].Type == TokenType.ADVERB_SLASH_COLON ||
+                         tokens[adverbStart].Type == TokenType.ADVERB_TICK_COLON))
+                    {
+                        continue;
+                    }
                     
                     var adverbTokens = tokens.GetRange(adverbStart, adverbEnd - adverbStart);
                     if (adverbTokens.Count == 0) continue; // No adverbs found

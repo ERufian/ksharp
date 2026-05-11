@@ -471,6 +471,27 @@ namespace K3CSharp.Parsing
                 return projNode;
             }
             
+            // Merge MINUS followed by numeric literal at expression start into a single negative literal.
+            // The lexer sometimes splits -1 into MINUS + INTEGER when preceded by a value-producing
+            // character (e.g., after ]})). Inside a new expression context (grouping), -1 should
+            // always be a negative literal.
+            if (exprTokens.Count >= 2 && exprTokens[0].Type == TokenType.MINUS)
+            {
+                Token? negativeToken = exprTokens[1].Type switch
+                {
+                    TokenType.INTEGER => new Token(TokenType.INTEGER, "-" + exprTokens[1].Lexeme, exprTokens[1].Position),
+                    TokenType.FLOAT => new Token(TokenType.FLOAT, "-" + exprTokens[1].Lexeme, exprTokens[1].Position),
+                    TokenType.LONG => new Token(TokenType.LONG, "-" + exprTokens[1].Lexeme, exprTokens[1].Position),
+                    _ => null
+                };
+
+                if (negativeToken != null)
+                {
+                    exprTokens[0] = negativeToken;
+                    exprTokens.RemoveAt(1);
+                }
+            }
+
             // Delegate to parent LRS parser for proper expression parsing
             // Parent parser will handle nested parentheses recursively
             ASTNode? result = null;

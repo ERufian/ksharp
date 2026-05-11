@@ -5716,12 +5716,12 @@ namespace K3CSharp
                 // Special handling for scan adverb
                 if (verbWithAdverbs.Adverbs.Contains("scan"))
                 {
-                    // If verb is monadic (either by colon suffix or monadic-only), use Scan Monad
+                    // Original scan handling without identifier-based verb routing
                     if ((isMonadicVerb || isMonadicOnly) && arguments.Length >= 2)
                     {
-                        string verbToUse = isMonadicVerb ? verbWithAdverbs.BaseVerb : monadicVariant;
                         var left = arguments[0];
                         var x = arguments[1];
+                        string verbToUse = isMonadicVerb ? verbWithAdverbs.BaseVerb : monadicVariant;
                         return evaluator.ScanMonad(verbToUse, left, x);
                     }
 
@@ -6262,6 +6262,9 @@ namespace K3CSharp
                 }
                 return null;
             }
+            
+            // Don't handle Variable nodes here - let them fall through to legacy evaluation
+            // where the verb will be evaluated to a FunctionValue before reaching the adverb handler
             
             if (node.Type != ASTNodeType.DyadicOp || node.Value == null)
                 return null;

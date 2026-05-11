@@ -319,7 +319,12 @@ namespace K3CSharp.Tests
 
                 ("adverb_scan_monad_fixedpoint_first.k", "((((0 1;2 3);(4 5;6 7));((0 1;2 3);(4 5;6 7)));((0 1;2 3);(4 5;6 7));(0 1;2 3);0 1;0)"),
 
-                
+                // Scan with dyadic function tests
+                ("scan_dyadic_function_with_seed.k", "10 11 13 16"),
+                ("scan_dyadic_function_scalar.k", "5"),
+
+                // System function with adverb tests
+                ("system_function_adverb.k", "0i 0i 0i"),
 
                 // Anonymous Function tests
 
@@ -3010,7 +3015,7 @@ namespace K3CSharp.Tests
                 ("idioms_17_477_square_retain_sign.k", "0 -1 4 -9 16"),
                 ("idioms_17_142_number_of_combinations.k", "210.0"),
                 ("idioms_17_135_number_of_permutations.k", "60.0"),
-                ("idioms_17_136_pascals_triangle.k", "(1;(1 1);(1 2 1);(1 3 3 1);(1 4 6 4 1))"),
+                ("idioms_17_136_pascals_triangle.k", "(1;1 1;1 2 1;1 3 3 1;1 4 6 4 1)"),
 
                 // Chapter 18 idioms: Geometry and trigonometry
                 ("idioms_18_133_degrees_from_radians.k", "28.64789"),
