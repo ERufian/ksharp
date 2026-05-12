@@ -1666,11 +1666,17 @@ namespace K3CSharp
                 return new VectorValue(result, vectorType);
             }
             
-            // Handle scalar + scalar case (legacy)
+            // Handle scalar + scalar case
             if (IsScalar(verb) && IsScalar(data))
             {
                 if (verb is SymbolValue verbSymbol)
                 {
+                    var verbInfo = VerbRegistry.GetVerb(verbSymbol.Value);
+                    // Monadic-only system verbs: apply monadically
+                    if (verbInfo != null && verbInfo.SupportedArities.Length == 1 && verbInfo.SupportedArities[0] == 1)
+                    {
+                        return ApplyMonadicVerb(verbSymbol.Value, data);
+                    }
                     return ApplySymbolVerb(verbSymbol.Value, verb, data);
                 }
                 else

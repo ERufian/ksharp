@@ -5778,7 +5778,13 @@ namespace K3CSharp
                     "_" => arguments.Length == 1 ? evaluator.Floor(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("_", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     "?" => arguments.Length == 1 ? evaluator.Unique(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("?", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     "$" => arguments.Length == 1 ? evaluator.Format(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("$", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
-                    _ => throw new Exception($"Unknown verb: {verb}")
+                    _ => VerbRegistry.HasVerb(verb) && VerbRegistry.GetVerb(verb) is { } vInfo
+                        ? (arguments.Length == 1
+                            ? evaluator.ApplyMonadicVerb(verb, arguments[0])
+                            : vInfo.SupportedArities.Contains(2)
+                                ? evaluator.EvaluateDyadicOperatorWithRegistry(verb, arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments)))
+                                : evaluator.ApplyMonadicVerb(verb, arguments[1] ?? arguments[0]))
+                        : throw new Exception($"Unknown verb: {verb}")
                 };
             }
 
@@ -5929,7 +5935,8 @@ namespace K3CSharp
                         }
                     }
                 }
-                return verbResult;
+                // Scalar data: apply verb with initialization once
+                return ApplyBaseVerb(GetVerbFromContext(originalArguments), new[] { initialization, verbResult });
             }
 
             private K3Value ApplyScanAdverb(K3Value verbResult, K3Value[] originalArguments)
@@ -5937,6 +5944,11 @@ namespace K3CSharp
                 // Scan adverb (\) - cumulative application
                 if (verbResult is VectorValue vector)
                 {
+                    if (vector.Elements.Count == 0)
+                    {
+                        return new VectorValue(new List<K3Value>());
+                    }
+
                     var results = new List<K3Value>();
                     K3Value cumulative = vector.Elements[0];
                     results.Add(cumulative);
@@ -5967,7 +5979,8 @@ namespace K3CSharp
                     }
                     return new VectorValue(results);
                 }
-                return verbResult;
+                // Scalar data: apply verb with initialization once
+                return ApplyBaseVerb(GetVerbFromContext(originalArguments), new[] { initialization, verbResult });
             }
 
             private K3Value ApplyEachAdverb(K3Value verbResult, K3Value[] originalArguments)
@@ -6065,8 +6078,8 @@ namespace K3CSharp
                 {
                     "*" => new IntegerValue(1),        // Multiplication identity
                     "+" => new IntegerValue(0),        // Addition identity
-                    "&" => new IntegerValue(int.MaxValue), // Min identity (for now, use max int)
-                    "|" => new IntegerValue(int.MinValue), // Max identity (for now, use min int)
+                    "&" => new IntegerValue(1),        // Min identity (matches k.exe)
+                    "|" => new IntegerValue(0),        // Max identity (matches k.exe)
                     "^" => new IntegerValue(1),        // Power identity
                     "%" => new IntegerValue(1),        // Divide identity
                     "-" => new IntegerValue(0),        // Subtract identity (monadic case)

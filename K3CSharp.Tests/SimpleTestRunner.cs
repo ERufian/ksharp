@@ -3119,6 +3119,28 @@ namespace K3CSharp.Tests
                 ("reverse_monadic_atom.k", "5"),
                 ("reverse_monadic_empty_list.k", "()"),
                 ("reverse_monadic_one_item_list.k", ",5"),
+
+                // Adverb edge case tests
+                ("each_monadic_atom.k", "148.4132"),
+                ("each_monadic_empty.k", "()"),
+                ("each_dyadic_left_empty.k", "()"),
+                ("each_dyadic_right_empty.k", "()"),
+                ("each_left_empty_right.k", "()"),
+                ("each_right_empty_right.k", "()"),
+                ("each_prior_empty_right.k", "()"),
+                ("over_monadic_atom.k", "5"),
+                ("over_dyadic_atom.k", "8"),
+                ("over_empty_plus.k", "0"),
+                ("over_empty_multiply.k", "1"),
+                ("over_empty_max.k", "0"),
+                ("over_empty_min.k", "1"),
+                ("over_dyadic_empty.k", "3"),
+                ("over_one_item.k", "5"),
+                ("scan_monadic_atom.k", "5"),
+                ("scan_dyadic_atom.k", "8"),
+                ("scan_one_item.k", ",5"),
+                ("scan_empty.k", "()"),
+                ("scan_dyadic_empty.k", ",3"),
             };
 
             // Filter tests if a pattern was provided
@@ -3442,8 +3464,6 @@ namespace K3CSharp.Tests
                             // Handle regular K expressions
                             var lexer = new Lexer(accumulatedLine);
                             var tokens = lexer.Tokenize();
-                            
-                            // Preprocess for implicit indexing/apply
                             tokens = lexer.PreprocessImplicitIndexing(tokens);
 
                             // Set current test name for failure tracking

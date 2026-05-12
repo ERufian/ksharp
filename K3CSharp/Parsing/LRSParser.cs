@@ -3173,13 +3173,21 @@ namespace K3CSharp.Parsing
                 }
                 else if (allAtomic && !hasIdentifier)
                 {
-                    // Create a vector node from the atomic literal tokens
-                    var argNodes = new List<ASTNode>();
-                    foreach (var token in argTokens)
+                    if (argTokens.Count == 1)
                     {
-                        argNodes.Add(LRSAtomicParser.ParseAtomicToken(token, this));
+                        // Single atomic argument: create literal node, not a vector
+                        argNode = LRSAtomicParser.ParseAtomicToken(argTokens[0], this);
                     }
-                    argNode = new ASTNode(ASTNodeType.Vector, null, argNodes);
+                    else
+                    {
+                        // Create a vector node from the atomic literal tokens
+                        var argNodes = new List<ASTNode>();
+                        foreach (var token in argTokens)
+                        {
+                            argNodes.Add(LRSAtomicParser.ParseAtomicToken(token, this));
+                        }
+                        argNode = new ASTNode(ASTNodeType.Vector, null, argNodes);
+                    }
                 }
                 else
                 {

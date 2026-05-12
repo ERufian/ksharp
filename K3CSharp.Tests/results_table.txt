@@ -2120,6 +2120,26 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ reverse_monadic_atom.k                                           │ |5                   │ 5                    │                      ║
 ║ reverse_monadic_empty_list.k                                     │ |()                  │ ()                   │                      ║
 ║ reverse_monadic_one_item_list.k                                  │ |,5                  │ ,5                   │                      ║
+║ each_monadic_atom.k                                              │ _exp'5               │ 148.4132             │                      ║
+║ each_monadic_empty.k                                             │ _exp'()              │ ()                   │                      ║
+║ each_dyadic_left_empty.k                                         │ ()+5                 │ ()                   │                      ║
+║ each_dyadic_right_empty.k                                        │ 5+()                 │ ()                   │                      ║
+║ each_left_empty_right.k                                          │ 1+\:()               │ ()                   │                      ║
+║ each_right_empty_right.k                                         │ 1+/:()               │ ()                   │                      ║
+║ each_prior_empty_right.k                                         │ -':()                │ ()                   │                      ║
+║ over_monadic_atom.k                                              │ +/5                  │ 5                    │                      ║
+║ over_dyadic_atom.k                                               │ 3+/5                 │ 8                    │                      ║
+║ over_empty_plus.k                                                │ +/()                 │ 0                    │                      ║
+║ over_empty_multiply.k                                            │ */()                 │ 1                    │                      ║
+║ over_empty_max.k                                                 │ |/()                 │ 0                    │                      ║
+║ over_empty_min.k                                                 │ &/()                 │ 1                    │                      ║
+║ over_dyadic_empty.k                                              │ 3+/()                │ 3                    │                      ║
+║ over_one_item.k                                                  │ +/,5                 │ 5                    │                      ║
+║ scan_monadic_atom.k                                              │ +\5                  │ 5                    │                      ║
+║ scan_dyadic_atom.k                                               │ 3+\5                 │ 8                    │                      ║
+║ scan_one_item.k                                                  │ +\,5                 │ ,5                   │                      ║
+║ scan_empty.k                                                     │ +\()                 │ ()                   │                      ║
+║ scan_dyadic_empty.k                                              │ 3+\()                │ ,3                   │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1459/1459 tests passed (100.0%)                                                                                          ║
+║ SUMMARY: 1479/1479 tests passed (100.0%)                                                                                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
