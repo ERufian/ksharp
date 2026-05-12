@@ -2108,6 +2108,18 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ ssr_function_multi_char_longer.k                                 │ _ssr["abc";"ab";{"XYZ"}] │ "XYZc"               │                      ║
 ║ ssr_function_multi_char_shorter.k                                │ _ssr["abc";"ab";{"X"}] │ "Xc"                 │                      ║
 ║ ssr_function_single_char_class.k                                 │ _ssr["test";"[aeiou]";{x}] │ "test"               │                      ║
+║ null_index_number.k                                              │ _n@5                 │ 5                    │                      ║
+║ null_find_number.k                                               │ _n?5                 │ 5                    │                      ║
+║ null_dict_index.k                                                │ _n`v                 │                      │                      ║
+║ reciprocal_zero_int_null.k                                       │ %0i                  │ 0.0                  │                      ║
+║ reciprocal_zero_int_pos_inf.k                                    │ %0I                  │ 0.0                  │                      ║
+║ reciprocal_zero_int_neg_inf.k                                    │ %0Ij                 │ 0.0                  │                      ║
+║ reciprocal_neg_zero_int_null.k                                   │ %-0i                 │ -0.0                 │                      ║
+║ reciprocal_neg_zero_int_pos_inf.k                                │ %-0I                 │ -0.0                 │                      ║
+║ reciprocal_neg_zero_int_neg_inf.k                                │ %-0Ij                │ -0.0                 │                      ║
+║ reverse_monadic_atom.k                                           │ |5                   │ 5                    │                      ║
+║ reverse_monadic_empty_list.k                                     │ |()                  │ ()                   │                      ║
+║ reverse_monadic_one_item_list.k                                  │ |,5                  │ ,5                   │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1447/1447 tests passed (100.0%)                                                                                          ║
+║ SUMMARY: 1459/1459 tests passed (100.0%)                                                                                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝

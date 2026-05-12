@@ -3101,6 +3101,24 @@ namespace K3CSharp.Tests
                 ("ssr_function_multi_char_longer.k", "\"XYZc\""),
                 ("ssr_function_multi_char_shorter.k", "\"Xc\""),
                 ("ssr_function_single_char_class.k", "\"test\""),
+
+                // Null semantics tests
+                ("null_index_number.k", "5"),
+                ("null_find_number.k", "5"),
+                ("null_dict_index.k", ""),
+
+                // Reciprocal special values tests
+                ("reciprocal_zero_int_null.k", "0.0"),
+                ("reciprocal_zero_int_pos_inf.k", "0.0"),
+                ("reciprocal_zero_int_neg_inf.k", "0.0"),
+                ("reciprocal_neg_zero_int_null.k", "-0.0"),
+                ("reciprocal_neg_zero_int_pos_inf.k", "-0.0"),
+                ("reciprocal_neg_zero_int_neg_inf.k", "-0.0"),
+
+                // Reverse monadic identity tests
+                ("reverse_monadic_atom.k", "5"),
+                ("reverse_monadic_empty_list.k", "()"),
+                ("reverse_monadic_one_item_list.k", ",5"),
             };
 
             // Filter tests if a pattern was provided

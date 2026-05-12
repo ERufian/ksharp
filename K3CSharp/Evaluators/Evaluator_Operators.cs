@@ -1564,9 +1564,28 @@ namespace K3CSharp
         private K3Value Reciprocal(K3Value a)
         {
             if (a is IntegerValue intA)
+            {
+                // Special handling for integer infinity values
+                if (intA.IsSpecial)
+                {
+                    return intA.SpecialName switch
+                    {
+                        "0I" => new FloatValue(0.0),
+                        "-0I" => new FloatValue(-0.0),
+                        _ => new FloatValue(1.0 / intA.Value)
+                    };
+                }
                 return new FloatValue(1.0 / intA.Value);
+            }
             if (a is LongValue longA)
+            {
+                // Special handling for long infinity values
+                if (longA.Value == long.MaxValue)
+                    return new FloatValue(0.0);
+                if (longA.Value == -long.MaxValue)
+                    return new FloatValue(-0.0);
                 return new FloatValue(1.0 / longA.Value);
+            }
             if (a is FloatValue floatA)
                 return new FloatValue(1.0 / floatA.Value);
             if (a is VectorValue vecA)
