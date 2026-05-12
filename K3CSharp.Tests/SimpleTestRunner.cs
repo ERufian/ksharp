@@ -3146,6 +3146,10 @@ namespace K3CSharp.Tests
                 // Verb assignment as projection
                 ("dyadic_verb_assignment_sum.k", "3"),
                 ("monadic_verb_assignment_count.k", "3"),
+
+                // Execution at context
+                ("execute_at_context_bracket.k", ".,(`b;.,(`foo;7;);)"),
+                ("execute_at_context_at.k", ".,(`b;.,(`foo;7;);)"),
             };
 
             // Filter tests if a pattern was provided

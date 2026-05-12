@@ -3502,6 +3502,32 @@ namespace K3CSharp
 
         private K3Value AtIndexOperation(K3Value data, K3Value index)
         {
+            // d@s / d[s] - execution at context when index is a character vector
+            if (index is VectorValue charVec && charVec.Elements.Count > 0 && charVec.Elements.All(e => e is CharacterValue))
+            {
+                var str = string.Join("", charVec.Elements.Select(e => ((CharacterValue)e).Value));
+                string? branchPath = null;
+
+                if (data is SymbolValue symData)
+                {
+                    var symValue = symData.Value;
+                    branchPath = symValue.StartsWith(".") ? symValue : (kTree.CurrentBranch?.Value ?? ".k") + "." + symValue;
+                }
+                else if (data is DictionaryValue dictData)
+                {
+                    branchPath = kTree.FindPath(dictData);
+                }
+
+                if (!string.IsNullOrEmpty(branchPath))
+                {
+                    var dictAtPath = kTree.GetValue(branchPath);
+                    if (dictAtPath is DictionaryValue)
+                    {
+                        return ExecuteAtContext(branchPath, str);
+                    }
+                }
+            }
+
             // Handle symbol as path to a dictionary or function
             if (data is SymbolValue sym)
             {
@@ -4543,6 +4569,21 @@ namespace K3CSharp
             catch (Exception ex)
             {
                 throw new Exception($"Error evaluating string expression '{expression}': {ex.Message}");
+            }
+        }
+
+        private K3Value ExecuteAtContext(string branchPath, string expression)
+        {
+            // Save current branch, switch to target branch, execute, then restore
+            var savedBranch = kTree.CurrentBranch;
+            kTree.CurrentBranch = new SymbolValue(branchPath);
+            try
+            {
+                return ExecuteStringExpression(expression);
+            }
+            finally
+            {
+                kTree.CurrentBranch = savedBranch;
             }
         }
 

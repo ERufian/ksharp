@@ -273,6 +273,33 @@ namespace K3CSharp
             return false;
         }
         /// <summary>
+        /// Finds the K-tree branch path for a given DictionaryValue using reference equality.
+        /// Returns null if the dictionary is not found in the K-tree.
+        /// </summary>
+        public string? FindPath(DictionaryValue target)
+        {
+            return FindPathRecursive(root, target, ".");
+        }
+
+        private string? FindPathRecursive(DictionaryValue current, DictionaryValue target, string currentPath)
+        {
+            if (ReferenceEquals(current, target))
+                return currentPath;
+
+            foreach (var entry in current.Entries)
+            {
+                if (entry.Value.Value is DictionaryValue childDict)
+                {
+                    var childPath = currentPath == "." ? "." + entry.Key.Value : currentPath + "." + entry.Key.Value;
+                    var result = FindPathRecursive(childDict, target, childPath);
+                    if (result != null)
+                        return result;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Ensures that each component along the given branch path is a DictionaryValue,
         /// promoting NullValue entries to empty dictionaries as needed.
         /// </summary>
