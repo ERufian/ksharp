@@ -3142,6 +3142,10 @@ namespace K3CSharp.Tests
                 ("scan_one_item.k", ",5"),
                 ("scan_empty.k", "()"),
                 ("scan_dyadic_empty.k", ",3"),
+
+                // Verb assignment as projection
+                ("dyadic_verb_assignment_sum.k", "3"),
+                ("monadic_verb_assignment_count.k", "3"),
             };
 
             // Filter tests if a pattern was provided

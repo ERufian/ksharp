@@ -59,6 +59,7 @@ namespace K3CSharp.Parsing
                 TokenType.RAM => ParseSystemVariable(token, "_r"),
                 TokenType.MACHID => ParseSystemVariable(token, "_m"),
                 TokenType.STACK => ParseSystemVariable(token, "_y"),
+                _ when VerbRegistry.IsVerbToken(token.Type) => ParseVerbProjection(token),
                 _ => throw new Exception($"Unsupported atomic token type: {token.Type}({token.Lexeme})")
             };
         }
@@ -261,6 +262,22 @@ namespace K3CSharp.Parsing
         private static ASTNode ParseNull(Token token)
         {
             return ASTNode.MakeLiteral(new NullValue());
+        }
+
+        /// <summary>
+        /// Parse verb token as a projection (function reference)
+        /// A standalone verb like + or # represents a projected function
+        /// </summary>
+        private static ASTNode ParseVerbProjection(Token token)
+        {
+            var verbName = VerbRegistry.TokenTypeToVerbName(token.Type);
+            var verb = VerbRegistry.GetVerb(verbName);
+            int arity = verb?.SupportedArities?.Max() ?? 2;
+
+            var projectedNode = new ASTNode(ASTNodeType.ProjectedFunction);
+            projectedNode.Value = new SymbolValue(verbName);
+            projectedNode.Children.Add(ASTNode.MakeLiteral(new IntegerValue(arity)));
+            return projectedNode;
         }
 
         /// <summary>

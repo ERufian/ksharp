@@ -2812,6 +2812,10 @@ namespace K3CSharp
                     if (arguments.Count >= 2) return Join(arguments[0], arguments[1]);
                     if (arguments.Count == 1) return Enlist(arguments[0]);
                     throw new Exception(", operator requires 1 or 2 arguments");
+                case "#":
+                    if (arguments.Count >= 2) return Take(arguments[0], arguments[1]);
+                    if (arguments.Count == 1) return Count(arguments[0]);
+                    throw new Exception("# operator requires 1 or 2 arguments");
                 // Mathematical functions
                 case "_abs":
                     if (arguments.Count == 1) return MathAbs(arguments[0]);
@@ -2894,6 +2898,11 @@ namespace K3CSharp
                 var tempFunctionNode = new ASTNode(ASTNodeType.Function);
                 tempFunctionNode.Value = userFunction;
                 return CallDirectFunction(tempFunctionNode, arguments);
+            }
+            else if (functionValue is ProjectedFunctionValue pfv)
+            {
+                // Handle ProjectedFunctionValue (e.g., count:#: storing monadic count)
+                return CallProjectedFunction(pfv, arguments);
             }
             else if (functionValue is AdverbProjectedFunctionValue apfv)
             {

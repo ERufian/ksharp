@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace K3CSharp
 {
@@ -1883,6 +1885,42 @@ namespace K3CSharp
                     keys.Add(key);
                 }
                 return new VectorValue(keys, -4); // Symbol vector
+            }
+            else if (a is CharacterValue charAtom)
+            {
+                // Character atom: treat as potential directory path
+                string path = charAtom.Value;
+                if (Directory.Exists(path))
+                {
+                    var entries = Directory.GetFileSystemEntries(path)
+                        .Select(entry =>
+                        {
+                            string name = Path.GetFileName(entry);
+                            var chars = name.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList();
+                            return new VectorValue(chars, -3);
+                        })
+                        .ToList<K3Value>();
+                    return new VectorValue(entries, 0); // Mixed list of character vectors
+                }
+                return new NullValue(); // Not a directory
+            }
+            else if (a is VectorValue charVec && charVec.VectorType == -3)
+            {
+                // Character vector: treat as potential directory path
+                string path = string.Concat(charVec.Elements.OfType<CharacterValue>().Select(c => c.Value));
+                if (Directory.Exists(path))
+                {
+                    var entries = Directory.GetFileSystemEntries(path)
+                        .Select(entry =>
+                        {
+                            string name = Path.GetFileName(entry);
+                            var chars = name.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList();
+                            return new VectorValue(chars, -3);
+                        })
+                        .ToList<K3Value>();
+                    return new VectorValue(entries, 0); // Mixed list of character vectors
+                }
+                return new NullValue(); // Not a directory
             }
             else if (a is FunctionValue func)
             {
