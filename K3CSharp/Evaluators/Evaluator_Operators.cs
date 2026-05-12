@@ -648,7 +648,21 @@ namespace K3CSharp
                 return new LongValue(Math.Min(longA.Value, longB.Value));
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new FloatValue(Math.Min(floatA.Value, floatB.Value));
-            
+
+            // Mixed numeric types: promote to wider type
+            if (a is IntegerValue intA2 && b is LongValue longB2)
+                return new LongValue(Math.Min(intA2.Value, longB2.Value));
+            if (a is LongValue longA2 && b is IntegerValue intB2)
+                return new LongValue(Math.Min(longA2.Value, intB2.Value));
+            if (a is IntegerValue intA3 && b is FloatValue floatB3)
+                return new FloatValue(Math.Min(intA3.Value, floatB3.Value));
+            if (a is FloatValue floatA3 && b is IntegerValue intB3)
+                return new FloatValue(Math.Min(floatA3.Value, intB3.Value));
+            if (a is LongValue longA4 && b is FloatValue floatB4)
+                return new FloatValue(Math.Min(longA4.Value, floatB4.Value));
+            if (a is FloatValue floatA4 && b is LongValue longB4)
+                return new FloatValue(Math.Min(floatA4.Value, longB4.Value));
+
             // Handle vector operations
             if (a is VectorValue vecA)
             {
@@ -681,7 +695,21 @@ namespace K3CSharp
                 return new LongValue(Math.Max(longA.Value, longB.Value));
             if (a is FloatValue floatA && b is FloatValue floatB)
                 return new FloatValue(Math.Max(floatA.Value, floatB.Value));
-            
+
+            // Mixed numeric types: promote to wider type
+            if (a is IntegerValue intA2 && b is LongValue longB2)
+                return new LongValue(Math.Max(intA2.Value, longB2.Value));
+            if (a is LongValue longA2 && b is IntegerValue intB2)
+                return new LongValue(Math.Max(longA2.Value, intB2.Value));
+            if (a is IntegerValue intA3 && b is FloatValue floatB3)
+                return new FloatValue(Math.Max(intA3.Value, floatB3.Value));
+            if (a is FloatValue floatA3 && b is IntegerValue intB3)
+                return new FloatValue(Math.Max(floatA3.Value, intB3.Value));
+            if (a is LongValue longA4 && b is FloatValue floatB4)
+                return new FloatValue(Math.Max(longA4.Value, floatB4.Value));
+            if (a is FloatValue floatA4 && b is LongValue longB4)
+                return new FloatValue(Math.Max(floatA4.Value, longB4.Value));
+
             // Handle vector operations
             if (a is VectorValue vecA)
             {

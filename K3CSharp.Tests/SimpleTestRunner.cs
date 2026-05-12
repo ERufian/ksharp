@@ -3134,6 +3134,7 @@ namespace K3CSharp.Tests
                 ("over_empty_multiply.k", "1"),
                 ("over_empty_max.k", "0"),
                 ("over_empty_min.k", "1"),
+                ("max_over_mixed_types.k", "25.0"),
                 ("over_dyadic_empty.k", "3"),
                 ("over_one_item.k", "5"),
                 ("scan_monadic_atom.k", "5"),

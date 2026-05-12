@@ -672,6 +672,19 @@ namespace K3CSharp
                     result.Add(new LongValue(Math.Min(longA.Value, longB.Value)));
                 else if (Elements[i] is FloatValue floatA && other.Elements[i] is FloatValue floatB)
                     result.Add(new FloatValue(Math.Min(floatA.Value, floatB.Value)));
+                // Mixed numeric types: promote to wider type
+                else if (Elements[i] is IntegerValue intA2 && other.Elements[i] is LongValue longB2)
+                    result.Add(new LongValue(Math.Min(intA2.Value, longB2.Value)));
+                else if (Elements[i] is LongValue longA2 && other.Elements[i] is IntegerValue intB2)
+                    result.Add(new LongValue(Math.Min(longA2.Value, intB2.Value)));
+                else if (Elements[i] is IntegerValue intA3 && other.Elements[i] is FloatValue floatB3)
+                    result.Add(new FloatValue(Math.Min(intA3.Value, floatB3.Value)));
+                else if (Elements[i] is FloatValue floatA3 && other.Elements[i] is IntegerValue intB3)
+                    result.Add(new FloatValue(Math.Min(floatA3.Value, intB3.Value)));
+                else if (Elements[i] is LongValue longA4 && other.Elements[i] is FloatValue floatB4)
+                    result.Add(new FloatValue(Math.Min(longA4.Value, floatB4.Value)));
+                else if (Elements[i] is FloatValue floatA4 && other.Elements[i] is LongValue longB4)
+                    result.Add(new FloatValue(Math.Min(floatA4.Value, longB4.Value)));
                 else
                     throw new InvalidOperationException("Cannot find minimum of mixed types");
             }
@@ -694,6 +707,19 @@ namespace K3CSharp
                     result.Add(new LongValue(Math.Min(longA.Value, longB.Value)));
                 else if (element is FloatValue floatA && scalar is FloatValue floatB)
                     result.Add(new FloatValue(Math.Min(floatA.Value, floatB.Value)));
+                // Mixed numeric types: promote to wider type
+                else if (element is IntegerValue intA2 && scalar is LongValue longB2)
+                    result.Add(new LongValue(Math.Min(intA2.Value, longB2.Value)));
+                else if (element is LongValue longA2 && scalar is IntegerValue intB2)
+                    result.Add(new LongValue(Math.Min(longA2.Value, intB2.Value)));
+                else if (element is IntegerValue intA3 && scalar is FloatValue floatB3)
+                    result.Add(new FloatValue(Math.Min(intA3.Value, floatB3.Value)));
+                else if (element is FloatValue floatA3 && scalar is IntegerValue intB3)
+                    result.Add(new FloatValue(Math.Min(floatA3.Value, intB3.Value)));
+                else if (element is LongValue longA4 && scalar is FloatValue floatB4)
+                    result.Add(new FloatValue(Math.Min(longA4.Value, floatB4.Value)));
+                else if (element is FloatValue floatA4 && scalar is LongValue longB4)
+                    result.Add(new FloatValue(Math.Min(floatA4.Value, longB4.Value)));
                 else
                     throw new InvalidOperationException("Cannot find minimum of mixed types");
             }
@@ -719,6 +745,19 @@ namespace K3CSharp
                     result.Add(new LongValue(Math.Max(longA.Value, longB.Value)));
                 else if (Elements[i] is FloatValue floatA && other.Elements[i] is FloatValue floatB)
                     result.Add(new FloatValue(Math.Max(floatA.Value, floatB.Value)));
+                // Mixed numeric types: promote to wider type
+                else if (Elements[i] is IntegerValue intA2 && other.Elements[i] is LongValue longB2)
+                    result.Add(new LongValue(Math.Max(intA2.Value, longB2.Value)));
+                else if (Elements[i] is LongValue longA2 && other.Elements[i] is IntegerValue intB2)
+                    result.Add(new LongValue(Math.Max(longA2.Value, intB2.Value)));
+                else if (Elements[i] is IntegerValue intA3 && other.Elements[i] is FloatValue floatB3)
+                    result.Add(new FloatValue(Math.Max(intA3.Value, floatB3.Value)));
+                else if (Elements[i] is FloatValue floatA3 && other.Elements[i] is IntegerValue intB3)
+                    result.Add(new FloatValue(Math.Max(floatA3.Value, intB3.Value)));
+                else if (Elements[i] is LongValue longA4 && other.Elements[i] is FloatValue floatB4)
+                    result.Add(new FloatValue(Math.Max(longA4.Value, floatB4.Value)));
+                else if (Elements[i] is FloatValue floatA4 && other.Elements[i] is LongValue longB4)
+                    result.Add(new FloatValue(Math.Max(floatA4.Value, longB4.Value)));
                 else
                     throw new InvalidOperationException("Cannot find maximum of mixed types");
             }
@@ -741,6 +780,19 @@ namespace K3CSharp
                     result.Add(new LongValue(Math.Max(longA.Value, longB.Value)));
                 else if (element is FloatValue floatA && scalar is FloatValue floatB)
                     result.Add(new FloatValue(Math.Max(floatA.Value, floatB.Value)));
+                // Mixed numeric types: promote to wider type
+                else if (element is IntegerValue intA2 && scalar is LongValue longB2)
+                    result.Add(new LongValue(Math.Max(intA2.Value, longB2.Value)));
+                else if (element is LongValue longA2 && scalar is IntegerValue intB2)
+                    result.Add(new LongValue(Math.Max(longA2.Value, intB2.Value)));
+                else if (element is IntegerValue intA3 && scalar is FloatValue floatB3)
+                    result.Add(new FloatValue(Math.Max(intA3.Value, floatB3.Value)));
+                else if (element is FloatValue floatA3 && scalar is IntegerValue intB3)
+                    result.Add(new FloatValue(Math.Max(floatA3.Value, intB3.Value)));
+                else if (element is LongValue longA4 && scalar is FloatValue floatB4)
+                    result.Add(new FloatValue(Math.Max(longA4.Value, floatB4.Value)));
+                else if (element is FloatValue floatA4 && scalar is LongValue longB4)
+                    result.Add(new FloatValue(Math.Max(floatA4.Value, longB4.Value)));
                 else
                     throw new InvalidOperationException("Cannot find maximum of mixed types");
             }
