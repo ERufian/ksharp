@@ -13,6 +13,7 @@ namespace K3CSharp
 
         // Sentinel used in --mcp mode for reliable output framing.
         public const string McpSentinel = "\x01\x02";
+        public const string Version = "0.9.000";
 
         private sealed class RuntimeOptions
         {

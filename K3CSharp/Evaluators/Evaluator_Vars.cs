@@ -115,10 +115,10 @@ namespace K3CSharp
         private K3Value VersionFunction(K3Value operand)
         {
             // _k - version
-            // Return version of K# as a character vector
-            var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
-            var chars = version.Split('.').Select(c => (K3Value)new CharacterValue(c.ToString())).ToList();
-            return new VectorValue(chars);
+            // Return version of K# as a character vector: "3.33." + Program.Version
+            var version = "3.33." + Program.Version;
+            var chars = version.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList();
+            return new VectorValue(chars, -3);
         }
         
         private K3Value OsFunction(K3Value operand)
