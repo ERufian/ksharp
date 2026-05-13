@@ -16,7 +16,14 @@ namespace K3CSharp
         
         // K Tree for global namespace management
         private KTree kTree = new KTree();
-        
+
+        // Dependency and trigger tracking
+        private long _globalChangeCounter = 1;
+        private readonly Dictionary<string, long> _variableChangeVersion = new();
+        private readonly Dictionary<string, long> _dependencyLastVersion = new();
+        private readonly HashSet<string> _evaluatingDependencies = new();
+        private readonly HashSet<string> _executingTriggers = new();
+
         // Reference to the current function being executed (for AST caching)
         public FunctionValue? currentFunctionValue = null;
 
@@ -420,6 +427,7 @@ namespace K3CSharp
                         "_d" => DirFunction(operand),
                         "_getenv" => GetenvFunction(operand),
                         "_size" => SizeFunction(operand),
+                        "_host" => HostDnsFunction(operand),
                         "_not" => MathNot(operand),
                         "_parse" => Verbs.ParseVerbHandler.Parse(new[] { operand }),
                         "_eval" => EvaluateEvalVerb(operand),
@@ -462,14 +470,74 @@ namespace K3CSharp
             return value is SymbolValue symbol && symbol.Value == ":";
         }
         
+        private bool TryParseAttributeAccess(string name, out string varPath, out string attrName)
+        {
+            varPath = "";
+            attrName = "";
+            if (!name.Contains(".."))
+                return false;
+            var parts = name.Split(new[] { ".." }, StringSplitOptions.None);
+            if (parts.Length != 2)
+                return false;
+            var baseName = parts[0];
+            attrName = parts[1];
+            if (string.IsNullOrEmpty(baseName) || string.IsNullOrEmpty(attrName))
+                return false;
+            var branch = kTree.CurrentBranch?.Value ?? "";
+            varPath = baseName.StartsWith(".") ? baseName : (string.IsNullOrEmpty(branch) ? baseName : branch + "." + baseName);
+            return true;
+        }
+
+        private K3Value? GetAttributeValue(string variableName)
+        {
+            if (!TryParseAttributeAccess(variableName, out var varPath, out var attrName))
+                return null;
+            var attrDict = kTree.GetAttribute(varPath);
+            if (attrDict == null)
+                return new DictionaryValue();
+            if (attrDict.Entries.TryGetValue(new SymbolValue(attrName), out var entry))
+                return entry.Value;
+            return new NullValue();
+        }
+
+        private bool SetAttributeValue(string variableName, K3Value value)
+        {
+            if (!TryParseAttributeAccess(variableName, out var varPath, out var attrName))
+                return false;
+            var (dict, key) = kTree.ResolvePath(varPath);
+            if (dict == null || key == null)
+                return false;
+            bool existed = dict.Entries.TryGetValue(key, out var entry);
+            if (!existed)
+            {
+                // Create the variable if it doesn't exist
+                dict.Entries[key] = (new NullValue(), null!);
+                entry = dict.Entries[key];
+            }
+            var attrDict = entry.Attribute ?? new DictionaryValue();
+            attrDict.Entries[new SymbolValue(attrName)] = (value, null!);
+            dict.Entries[key] = (entry.Value, attrDict);
+            return true;
+        }
+
         private K3Value? GetVariableValue(string variableName)
         {
+            // Handle attribute access: v..d
+            if (variableName.Contains(".."))
+            {
+                var attrValue = GetAttributeValue(variableName);
+                if (attrValue != null)
+                    return attrValue;
+            }
+
             K3Value? kTreeValue;
             // Check if this is an absolute path (starts with dot)
             if (variableName.StartsWith("."))
             {
                 // Absolute path - look up directly from root
                 kTreeValue = kTree.GetValue(variableName);
+                if (kTreeValue != null)
+                    return ResolveDependency(variableName, kTreeValue);
                 return kTreeValue;
             }
             // Check local variables first
@@ -477,15 +545,15 @@ namespace K3CSharp
             {
                 return localValue;
             }
-            // Relative path 
+            // Relative path
             var currentBranch = kTree.CurrentBranch?.Value ?? "";
             var relativePath = currentBranch + "." + variableName;
             kTreeValue = kTree.GetValue(relativePath);
             if (kTreeValue != null)
             {
-                return kTreeValue;
+                return ResolveDependency(relativePath, kTreeValue);
             }
-                        
+
             return new NullValue(); // Variable not found
         }
 
@@ -504,17 +572,25 @@ namespace K3CSharp
             {
                 return localValue;
             }
-            
+
+            // Handle attribute access: v..d
+            if (variableName.Contains(".."))
+            {
+                var attrValue = GetAttributeValue(variableName);
+                if (attrValue != null)
+                    return attrValue;
+            }
+
             // Check if this is a K tree dotted notation variable
             if (variableName.Contains('.'))
             {
                 var kTreeValue = kTree.GetValue(variableName);
                 if (kTreeValue != null)
                 {
-                    return kTreeValue;
+                    return ResolveDependency(variableName, kTreeValue);
                 }
             }
-            
+
             // Check if this is a relative path in the current K tree branch
             if (!variableName.Contains('.'))
             {
@@ -526,7 +602,7 @@ namespace K3CSharp
                     var kTreeValue = kTree.GetValue(relativePath);
                     if (kTreeValue != null)
                     {
-                        return kTreeValue;
+                        return ResolveDependency(relativePath, kTreeValue);
                     }
                 }
                 else
@@ -581,11 +657,20 @@ namespace K3CSharp
         
         private K3Value SetVariable(string variableName, K3Value value)
         {
+            // Handle attribute assignment: v..d
+            if (variableName.Contains(".."))
+            {
+                if (SetAttributeValue(variableName, value))
+                    return value;
+            }
+
             // Check if this is a K tree dotted notation variable
             if (variableName.Contains('.'))
             {
                 if (kTree.SetValue(variableName, value))
                 {
+                    _variableChangeVersion[variableName] = _globalChangeCounter++;
+                    FireTriggerIfNeeded(variableName);
                     return value;
                 }
                 // If K tree assignment fails, fall back to local assignment
@@ -598,6 +683,8 @@ namespace K3CSharp
                 var branch = kTree.CurrentBranch?.Value ?? "";
                 var path = string.IsNullOrEmpty(branch) ? variableName : branch + "." + variableName;
                 kTree.SetValue(path, value);
+                _variableChangeVersion[path] = _globalChangeCounter++;
+                FireTriggerIfNeeded(path);
                 return value;
             }
 
@@ -614,7 +701,7 @@ namespace K3CSharp
                 // Handle K tree dotted notation: set in current branch
                 return SetVariable(variableName, value);
             }
-            
+
             // Set in global scope (main branch)
             if (parentEvaluator != null)
             {
@@ -625,15 +712,17 @@ namespace K3CSharp
             {
                 // Set in current evaluator's global scope
                 globalVariables[variableName] = value;
-                
+
                 // Also use kTree so GetVariable finds the new value via kTree lookup
                 var branch = kTree.CurrentBranch?.Value ?? ".k"; // Default branch is .k
                 var path = string.IsNullOrEmpty(branch) ? variableName : branch + "." + variableName;
                 kTree.SetValue(path, value);
-                
+                _variableChangeVersion[path] = _globalChangeCounter++;
+                FireTriggerIfNeeded(path);
+
                 // Also set variable in EvalVerbHandler for _eval operations
                 K3CSharp.Verbs.EvalVerbHandler.SetVariable(variableName, value);
-                
+
                 return value;
             }
         }
@@ -962,6 +1051,7 @@ namespace K3CSharp
                     "while" => WhileFunction(operand),
                     "if" => IfFunction(operand),
                     "_exit" => ExitFunction(operand),
+                    "_host" => HostDnsFunction(operand),
                     "_getenv" => GetenvFunction(operand),
                     "_size" => SizeFunction(operand),
                     "_not" => MathNot(operand),
@@ -2649,6 +2739,8 @@ namespace K3CSharp
                     return GetenvFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_size":
                     return SizeFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                case "_host":
+                    return HostDnsFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_gethint":
                     return GetHintFunction(arguments);
                 case "_sethint":
@@ -4585,6 +4677,146 @@ namespace K3CSharp
             {
                 kTree.CurrentBranch = savedBranch;
             }
+        }
+
+        private K3Value ResolveDependency(string variablePath, K3Value currentValue)
+        {
+            var attrDict = kTree.GetAttribute(variablePath);
+            if (attrDict == null)
+                return currentValue;
+
+            if (!attrDict.Entries.TryGetValue(new SymbolValue("d"), out var depEntry))
+                return currentValue;
+
+            if (!(depEntry.Value is VectorValue depExprVec) || depExprVec.Elements.Count == 0)
+                return currentValue;
+
+            if (!depExprVec.Elements.All(e => e is CharacterValue))
+                return currentValue;
+
+            var depExpr = string.Join("", depExprVec.Elements.Select(e => ((CharacterValue)e).Value));
+
+            if (!_evaluatingDependencies.Add(variablePath))
+                return currentValue;
+
+            try
+            {
+                var referencedVars = ExtractVariableNames(depExpr);
+                var dirPath = GetDirectoryPath(variablePath);
+
+                long maxRefVersion = 0;
+                foreach (var varName in referencedVars)
+                {
+                    string refPath;
+                    if (varName.StartsWith("."))
+                        refPath = varName;
+                    else
+                        refPath = string.IsNullOrEmpty(dirPath) || dirPath == "." ? varName : dirPath + "." + varName;
+
+                    if (_variableChangeVersion.TryGetValue(refPath, out var version))
+                    {
+                        if (version > maxRefVersion)
+                            maxRefVersion = version;
+                    }
+                }
+
+                long lastEvaluated = _dependencyLastVersion.GetValueOrDefault(variablePath, 0);
+
+                if (maxRefVersion <= lastEvaluated && lastEvaluated > 0)
+                    return currentValue;
+
+                var savedBranch = kTree.CurrentBranch;
+                kTree.CurrentBranch = new SymbolValue(dirPath);
+                try
+                {
+                    var newValue = ExecuteStringExpression(depExpr);
+                    kTree.SetValue(variablePath, newValue);
+                    _dependencyLastVersion[variablePath] = _globalChangeCounter;
+                    return newValue;
+                }
+                finally
+                {
+                    kTree.CurrentBranch = savedBranch;
+                }
+            }
+            finally
+            {
+                _evaluatingDependencies.Remove(variablePath);
+            }
+        }
+
+        private void FireTriggerIfNeeded(string variablePath)
+        {
+            if (_executingTriggers.Contains(variablePath) || _evaluatingDependencies.Contains(variablePath))
+                return;
+
+            var attrDict = kTree.GetAttribute(variablePath);
+            if (attrDict == null)
+                return;
+
+            if (!attrDict.Entries.TryGetValue(new SymbolValue("t"), out var trigEntry))
+                return;
+
+            if (!(trigEntry.Value is VectorValue trigExprVec) || trigExprVec.Elements.Count == 0)
+                return;
+
+            if (!trigExprVec.Elements.All(e => e is CharacterValue))
+                return;
+
+            var trigExpr = string.Join("", trigExprVec.Elements.Select(e => ((CharacterValue)e).Value));
+
+            if (!_executingTriggers.Add(variablePath))
+                return;
+
+            try
+            {
+                var dirPath = GetDirectoryPath(variablePath);
+                var savedBranch = kTree.CurrentBranch;
+                kTree.CurrentBranch = new SymbolValue(dirPath);
+                try
+                {
+                    ExecuteStringExpression(trigExpr);
+                }
+                finally
+                {
+                    kTree.CurrentBranch = savedBranch;
+                }
+            }
+            finally
+            {
+                _executingTriggers.Remove(variablePath);
+            }
+        }
+
+        private static string GetDirectoryPath(string variablePath)
+        {
+            if (string.IsNullOrEmpty(variablePath) || variablePath == ".")
+                return ".";
+
+            int lastDot = variablePath.LastIndexOf('.');
+            if (lastDot <= 0)
+                return ".";
+
+            return variablePath.Substring(0, lastDot);
+        }
+
+        private static HashSet<string> ExtractVariableNames(string expression)
+        {
+            var names = new HashSet<string>();
+            var matches = Regex.Matches(expression, @"[a-zA-Z_][a-zA-Z0-9_.]*");
+            foreach (Match match in matches)
+            {
+                var name = match.Value;
+                if (name == "do" || name == "if" || name == "while" ||
+                    name == "_in" || name == "_ci" || name == "_val" || name == "_abs" ||
+                    name == "_sv" || name == "_vs" || name == "_dv" || name == "_di" ||
+                    name == "_bd" || name == "_db" || name == "_bin" || name == "_ts" ||
+                    name == "_t" || name == "_d" || name == "_n" || name == "_i" || name == "_f" ||
+                    name == "_T" || name == "_D")
+                    continue;
+                names.Add(name);
+            }
+            return names;
         }
 
         private K3Value EvaluateDoStatement(List<ASTNode> args)

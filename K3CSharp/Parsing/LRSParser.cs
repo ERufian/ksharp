@@ -68,6 +68,28 @@ namespace K3CSharp.Parsing
             
             while (i < tokens.Count)
             {
+                // Check for IDENTIFIER followed by DOT_APPLY DOT_APPLY followed by IDENTIFIER
+                // This is attribute access: v..d
+                if (tokens[i].Type == TokenType.IDENTIFIER &&
+                    i + 3 < tokens.Count &&
+                    tokens[i + 1].Type == TokenType.DOT_APPLY &&
+                    tokens[i + 2].Type == TokenType.DOT_APPLY &&
+                    (tokens[i + 3].Type == TokenType.IDENTIFIER || tokens[i + 3].Type == TokenType.SYMBOL))
+                {
+                    // Check adjacency - tokens must be consecutive (no spaces between them)
+                    bool dot1Adjacent = (tokens[i].Position + tokens[i].Lexeme.Length) == tokens[i + 1].Position;
+                    bool dot2Adjacent = (tokens[i + 1].Position + tokens[i + 1].Lexeme.Length) == tokens[i + 2].Position;
+                    bool idAdjacent = (tokens[i + 2].Position + tokens[i + 2].Lexeme.Length) == tokens[i + 3].Position;
+
+                    if (dot1Adjacent && dot2Adjacent && idAdjacent)
+                    {
+                        var attrPath = tokens[i].Lexeme + ".." + tokens[i + 3].Lexeme;
+                        result.Add(new Token(TokenType.IDENTIFIER, attrPath, tokens[i].Position));
+                        i += 4;
+                        continue;
+                    }
+                }
+
                 // Check for DOT_APPLY followed by UNDERSCORE + IDENTIFIER (e.g., ._dotnet)
                 if (tokens[i].Type == TokenType.DOT_APPLY && 
                     i + 2 < tokens.Count &&

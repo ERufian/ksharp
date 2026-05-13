@@ -402,6 +402,7 @@ namespace K3CSharp
                 TokenType.PARSE => "_parse",
                 TokenType.EVAL => "_eval",
                 TokenType.INV => "_inv",
+                TokenType.HOST_DNS => "_host",
                 _ => tokenType.ToString()
             };
             

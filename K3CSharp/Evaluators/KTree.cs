@@ -143,6 +143,33 @@ namespace K3CSharp
         }
         
         /// <summary>
+        /// Gets the attribute dictionary for a path
+        /// </summary>
+        public DictionaryValue? GetAttribute(string path)
+        {
+            var (dict, key) = ResolvePath(path);
+            if (dict != null && key != null && dict.Entries.TryGetValue(key, out var entry))
+            {
+                return entry.Attribute;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Sets the attribute dictionary for a path
+        /// </summary>
+        public bool SetAttribute(string path, DictionaryValue? attribute)
+        {
+            var (dict, key) = ResolvePath(path);
+            if (dict != null && key != null && dict.Entries.TryGetValue(key, out var entry))
+            {
+                dict.Entries[key] = (entry.Value, attribute);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Sets a value in the K tree using dotted notation
         /// </summary>
         /// <param name="path">The path where to set the value</param>
@@ -154,7 +181,19 @@ namespace K3CSharp
             var (dict, key) = ResolvePath(path);
             if (dict != null && key != null)
             {
-                dict.Entries[key] = (value, attribute!);
+                if (attribute != null)
+                {
+                    dict.Entries[key] = (value, attribute);
+                }
+                else if (dict.Entries.TryGetValue(key, out var existingEntry))
+                {
+                    // Preserve existing attribute
+                    dict.Entries[key] = (value, existingEntry.Attribute);
+                }
+                else
+                {
+                    dict.Entries[key] = (value, null!);
+                }
                 return true;
             }
             return false;

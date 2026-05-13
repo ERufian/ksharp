@@ -537,8 +537,8 @@ namespace K3CSharp
                     hasAlphabetic = true;
                 }
                 
-                // If character is not alphanumeric, underscore, or period, it's invalid
-                if (!char.IsLetterOrDigit(c) && c != '_' && c != '.')
+                // If character is not alphanumeric, underscore, period, or hyphen, it's invalid
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '.' && c != '-')
                 {
                     return false;
                 }

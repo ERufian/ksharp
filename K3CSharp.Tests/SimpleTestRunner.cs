@@ -3150,6 +3150,16 @@ namespace K3CSharp.Tests
                 // Execution at context
                 ("execute_at_context_bracket.k", ".,(`b;.,(`foo;7;);)"),
                 ("execute_at_context_at.k", ".,(`b;.,(`foo;7;);)"),
+
+                // Dependencies and triggers
+                ("dependency_basic.k", "110"),
+                ("dependency_reeval.k", "120"),
+                ("dependency_vector.k", "110 120 130"),
+                ("trigger_basic.k", "1"),
+
+                // DNS host lookup
+                ("test_host_forward.k", "2130706433"),
+                ("test_host_reverse.k", "`rufeu01-hx.rufian.zilbermann.com"),
             };
 
             // Filter tests if a pattern was provided

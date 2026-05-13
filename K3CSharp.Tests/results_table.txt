@@ -2145,6 +2145,12 @@ x[&0=x!y] │ 3 6 9                │                      ║
 ║ monadic_verb_assignment_count.k                                  │ count:#:;count 3 3 3 │ 3                    │                      ║
 ║ execute_at_context_bracket.k                                     │ b:.();b["foo:7"];.k  │ .,(`b;.,(`foo;7...   │                      ║
 ║ execute_at_context_at.k                                          │ b:.();b@"foo:7";.k   │ .,(`b;.,(`foo;7...   │                      ║
+║ dependency_basic.k                                               │ b:10;c:100;v..d:"b+c";v │ 110                  │                      ║
+║ dependency_reeval.k                                              │ b:10;c:100;v..d:"b+c";b:20;v │ 120                  │                      ║
+║ dependency_vector.k                                              │ b:10 20 30;c:100;v..d:"b+c";v │ 110 120 130          │                      ║
+║ trigger_basic.k                                                  │ a:0;x..t:"a:1";x:5;a │ 1                    │                      ║
+║ test_host_forward.k                                              │ _host "127.0.0.1"    │ 2130706433           │                      ║
+║ test_host_reverse.k                                              │ _host 2130706433     │ `rufeu01-hx.ruf...   │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1484/1484 tests passed (100.0%)                                                                                          ║
+║ SUMMARY: 1490/1490 tests passed (100.0%)                                                                                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝

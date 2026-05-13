@@ -143,6 +143,7 @@ namespace K3CSharp
         FUNCTION,       // _f current function
         SPACE,          // _s memory info
         HOST,           // _h hostname
+        HOST_DNS,       // _host DNS lookup
         PORT,           // _p IPC port
         PID,            // _P process ID
         WHO,            // _w calling port

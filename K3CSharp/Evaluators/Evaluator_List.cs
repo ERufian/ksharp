@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using K3CSharp;
 
@@ -1365,6 +1367,57 @@ namespace K3CSharp
             
             RequestExit(exitCode);
             throw new K3ExitException(exitCode);
+        }
+
+        private K3Value HostDnsFunction(K3Value operand)
+        {
+            // _host i  -> IPv4 int32 to hostname symbol (reverse DNS)
+            // _host s  -> hostname symbol/charvec to IPv4 int32 (forward DNS)
+            if (operand is IntegerValue iv || operand is LongValue lv)
+            {
+                long val = operand is IntegerValue i ? i.Value : ((LongValue)operand).Value;
+                var bytes = BitConverter.GetBytes((int)val);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(bytes);
+                try
+                {
+                    var entry = Dns.GetHostEntry(new IPAddress(bytes));
+                    return new SymbolValue(entry.HostName.ToLowerInvariant());
+                }
+                catch
+                {
+                    return new SymbolValue("");
+                }
+            }
+
+            string name = operand switch
+            {
+                SymbolValue sym => sym.Value,
+                VectorValue vec when vec.Elements.All(e => e is CharacterValue) =>
+                    string.Concat(vec.Elements.Cast<CharacterValue>().Select(e => e.Value)),
+                CharacterValue ch => ch.Value.ToString(),
+                _ => throw new Exception("_host: argument must be an integer (reverse lookup) or symbol/charvec (forward lookup)")
+            };
+
+            try
+            {
+                var addresses = Dns.GetHostAddresses(name);
+                foreach (var addr in addresses)
+                {
+                    if (addr.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        var bytes = addr.GetAddressBytes();
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(bytes);
+                        return new IntegerValue(BitConverter.ToInt32(bytes, 0));
+                    }
+                }
+                throw new Exception($"_host: no IPv4 address found for '{name}'");
+            }
+            catch (Exception ex) when (!(ex.Message.StartsWith("_host:")))
+            {
+                throw new Exception($"_host: could not resolve '{name}'");
+            }
         }
 
         // Helper methods for list operations

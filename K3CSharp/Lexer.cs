@@ -256,7 +256,7 @@ namespace K3CSharp
                             var systemFunction = ReadSystemFunction();
                             if (systemFunction != null)
                             {
-                                                                tokens.Add(systemFunction);
+                                tokens.Add(systemFunction!);
                             }
                             else
                             {
@@ -965,6 +965,7 @@ namespace K3CSharp
                 "_dvl" => new Token(TokenType.DVL, opName, start),
                 "_di" => new Token(TokenType.DI, opName, start),
                 "_exit" => new Token(TokenType.EXIT, opName, start),
+                "_host" => new Token(TokenType.HOST_DNS, opName, start),
                 "_parse" => new Token(TokenType.PARSE, opName, start),
                 "_eval" => new Token(TokenType.EVAL, opName, start),
                 "_gethint" => new Token(TokenType.GETHINT, opName, start),
