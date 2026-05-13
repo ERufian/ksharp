@@ -3160,6 +3160,16 @@ namespace K3CSharp.Tests
                 // DNS host lookup
                 ("test_host_forward.k", "2130706433"),
                 ("test_host_reverse.k", "`rufeu01-hx.rufian.zilbermann.com"),
+
+                // Exit verb
+                ("test_exit_zero.k", "exit:0"),
+                ("test_exit_five.k", "exit:5"),
+
+                // System variables _v and _i
+                ("test_v_empty.k", "`"),
+                ("test_v_script.k", "`myscript"),
+                ("test_i_empty.k", "()"),
+                ("test_i_args.k", "(\"--var1\";\"val0\")"),
             };
 
             // Filter tests if a pattern was provided
@@ -3365,6 +3375,16 @@ namespace K3CSharp.Tests
 
                     evaluator.ResetKTree();
 
+                    // Set up script name and command-line args for specific tests
+                    if (fileName == "test_v_script.k")
+                    {
+                        evaluator.ScriptName = "myscript";
+                    }
+                    else if (fileName == "test_i_args.k")
+                    {
+                        evaluator.CommandLineArgs = new List<string> { "--var1", "val0" };
+                    }
+
 
 
                     K3Value? lastResult = null;
@@ -3531,15 +3551,20 @@ namespace K3CSharp.Tests
                     testResults.Add(new TestResult { FileName = fileName, ActualOutput = actualOutput, Expected = expected, Passed = passed });
 
                 }
-
-                catch (Exception ex)
-
+                catch (K3ExitException ex)
                 {
-
+                    var exitOutput = $"exit:{ex.ExitCode}";
+                    var exitPassed = exitOutput == expected;
+                    if (exitPassed)
+                        Console.WriteLine($"✓ {fileName}: {exitOutput}");
+                    else
+                        Console.WriteLine($"✗ {fileName}: Expected '{expected}', got '{exitOutput}'");
+                    testResults.Add(new TestResult { FileName = fileName, ActualOutput = exitOutput, Expected = expected, Passed = exitPassed });
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine($"✗ {fileName}: Error - {ex.Message}");
-
                     testResults.Add(new TestResult { FileName = fileName, ActualOutput = $"Error: {ex.Message}", Expected = expected, Passed = false });
-
                 }
 
             }

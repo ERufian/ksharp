@@ -25,13 +25,20 @@ namespace K3CSharp
         
         private K3Value VarFunction(K3Value operand)
         {
-            throw new Exception("_v (variable) operation reserved for future use");
+            // _v - script name (without extension), or empty symbol if no script
+            return new SymbolValue(ScriptName);
         }
-        
+
         private K3Value IndexFunction(K3Value operand)
         {
-            // _i - IPC listening port
-            return new IntegerValue(GetListeningPort());
+            // _i - command-line arguments as list of character vectors
+            if (CommandLineArgs.Count == 0)
+                return new VectorValue(new List<K3Value>());
+
+            var elements = CommandLineArgs.Select(arg =>
+                (K3Value)new VectorValue(arg.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList(), -3)
+            ).ToList();
+            return new VectorValue(elements);
         }
         
         private K3Value FunctionFunction(K3Value operand)

@@ -20,6 +20,7 @@ namespace K3CSharp
             public bool McpMode { get; init; }
             public int? IpcPort { get; init; }
             public string? ScriptPath { get; init; }
+            public List<string> CommandLineArgs { get; init; } = new List<string>();
         }
 
         static int Main(string[] args)
@@ -43,7 +44,7 @@ namespace K3CSharp
 
                 if (options.ScriptPath != null)
                 {
-                    RunScriptMode(options.ScriptPath, evaluator, keepServing: options.IpcPort.HasValue);
+                    RunScriptMode(options.ScriptPath, evaluator, keepServing: options.IpcPort.HasValue, options.CommandLineArgs);
                     return evaluator.ExitCode;
                 }
 
@@ -72,6 +73,7 @@ namespace K3CSharp
             bool mcpMode = false;
             int? ipcPort = null;
             string? scriptPath = null;
+            var commandLineArgs = new List<string>();
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -84,17 +86,20 @@ namespace K3CSharp
                     case "-i":
                         if (i + 1 >= args.Length || !int.TryParse(args[++i], out int port))
                         {
-                            throw new ArgumentException("Usage: ksharp [-i PORT] [--mcp] [script.k]");
+                            throw new ArgumentException("Usage: ksharp [-i PORT] [--mcp] [script.k] [args...]");
                         }
                         ipcPort = port;
                         break;
 
                     default:
-                        if (scriptPath != null)
+                        if (scriptPath == null)
                         {
-                            throw new ArgumentException("Only one script path may be provided.");
+                            scriptPath = args[i];
                         }
-                        scriptPath = args[i];
+                        else
+                        {
+                            commandLineArgs.Add(args[i]);
+                        }
                         break;
                 }
             }
@@ -109,13 +114,18 @@ namespace K3CSharp
                 McpMode = mcpMode,
                 IpcPort = ipcPort,
                 ScriptPath = scriptPath,
+                CommandLineArgs = commandLineArgs,
             };
         }
 
-        private static void RunScriptMode(string scriptPath, Evaluator evaluator, bool keepServing)
+        private static void RunScriptMode(string scriptPath, Evaluator evaluator, bool keepServing, List<string> commandLineArgs)
         {
             try
             {
+                // Set _v (script name without extension) and _i (command-line args)
+                evaluator.ScriptName = Path.GetFileNameWithoutExtension(scriptPath);
+                evaluator.CommandLineArgs = commandLineArgs;
+
                 string normalizedPath = scriptPath;
                 if (!Path.HasExtension(normalizedPath))
                 {

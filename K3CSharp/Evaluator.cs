@@ -13,7 +13,11 @@ namespace K3CSharp
         private readonly Dictionary<string, int> symbolTable = new Dictionary<string, int>();
         public bool isInFunctionCall = false; // Track if we're evaluating a function call
         public static int floatPrecision = 7; // Default precision for floating point display
-        
+
+        // Script name (without extension) for _v, and command-line args for _i
+        public string ScriptName { get; set; } = "";
+        public List<string> CommandLineArgs { get; set; } = new List<string>();
+
         // K Tree for global namespace management
         private KTree kTree = new KTree();
 
@@ -113,6 +117,7 @@ namespace K3CSharp
                 "_n" => NullFunction(new NullValue()),
                 "_t" => TimeFunction(new NullValue()),
                 "_T" => TFunction(new NullValue()),
+                "_v" => VarFunction(new NullValue()),
                 "_i" => IndexFunction(new NullValue()),
                 "_f" => FunctionFunction(new NullValue()),
                 "_s" => SpaceFunction(new NullValue()),
@@ -428,6 +433,7 @@ namespace K3CSharp
                         "_getenv" => GetenvFunction(operand),
                         "_size" => SizeFunction(operand),
                         "_host" => HostDnsFunction(operand),
+                        "_exit" => ExitFunction(operand),
                         "_not" => MathNot(operand),
                         "_parse" => Verbs.ParseVerbHandler.Parse(new[] { operand }),
                         "_eval" => EvaluateEvalVerb(operand),
@@ -5689,8 +5695,12 @@ namespace K3CSharp
                 return variableName switch
                 {
                     "_d" => kTree.CurrentBranch ?? new SymbolValue(""), // Current K-Tree branch
-                    "_v" => new IntegerValue(1), // K3 version placeholder
-                    "_i" => new IntegerValue(1), // Session ID placeholder
+                    "_v" => new SymbolValue(ScriptName), // Script name (without extension)
+                    "_i" => CommandLineArgs.Count == 0
+                        ? new VectorValue(new List<K3Value>())
+                        : new VectorValue(CommandLineArgs.Select(arg =>
+                            (K3Value)new VectorValue(arg.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList(), -3)
+                        ).ToList()), // Command-line args as list of character vectors
                     "_f" => GetCurrentFunctionValue(), // Current function for self-reference
                     "_n" => new IntegerValue(0), // Null placeholder
                     "_s" => new IntegerValue(0), // Seconds placeholder
