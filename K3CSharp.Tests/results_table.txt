@@ -2189,6 +2189,26 @@ t/0 1 2 │ 0                    │                      ║
 t\0 1 2 │ 0 1 0                │                      ║
 ║ state_transition_each_prior.k                                    │ t:(0 1 2;1 2 0;2 0 1)
 t':0 1 2 │ 1 0                  │                      ║
+║ tolerance_equal_accumulated.k                                    │ x:0.9999999999999062; x=1 │ 1                    │                      ║
+║ tolerance_match_accumulated.k                                    │ x:0.9999999999999062; x~1 │ 1                    │                      ║
+║ tolerance_equal_boundary_inside.k                                │ 3.0 = 3.000000000000339 │ 1                    │                      ║
+║ tolerance_equal_boundary_outside.k                               │ 3.0 = 3.0000000000004 │ 0                    │                      ║
+║ tolerance_equal_zero.k                                           │ 1e-20 = 0            │ 0                    │                      ║
+║ tolerance_find_float.k                                           │ 3.4 8.123123 5.123123 8.23423424 3.00000000000022 5.90123212 ? 3.0 │ 4                    │                      ║
+║ tolerance_find_integer.k                                         │ 3.4 8.123123 4.0 5.123123 8.23423424 3.00000000000022 5.90123212 ? 4 │ 7                    │                      ║
+║ tolerance_floor_not_equal.k                                      │ _ 1.999999999999     │ 1                    │                      ║
+║ tolerance_floor_equal.k                                          │ _ 1.9999999999999    │ 2                    │                      ║
+║ tolerance_more_left_outside.k                                    │ 3.0 > 3.0000000000004 │ 0                    │                      ║
+║ tolerance_more_left_inside.k                                     │ 3.0 > 3.0000000000003 │ 0                    │                      ║
+║ tolerance_more_right_outside.k                                   │ 3.0000000000004 > 3.0 │ 1                    │                      ║
+║ tolerance_more_right_inside.k                                    │ 3.0000000000003 > 3.0 │ 0                    │                      ║
+║ tolerance_less_left_outside.k                                    │ 3.0 < 2.9999999999996 │ 0                    │                      ║
+║ tolerance_less_left_inside.k                                     │ 3.0 < 2.9999999999997 │ 0                    │                      ║
+║ tolerance_less_right_outside.k                                   │ 2.9999999999996 < 3.0 │ 1                    │                      ║
+║ tolerance_less_right_inside.k                                    │ 2.9999999999997 < 3.0 │ 0                    │                      ║
+║ tolerance_in.k                                                   │ 3.0 _in 3.4 8.123123 5.123123 8.23423424 3.00000000000022 5.90123212 │ 1                    │                      ║
+║ tolerance_dv.k                                                   │ 3.4 8.123123 5.123123 8.23423424 -3.00000000000022 5.90123212 _dv -3.0 │ 3.4 8.123123 5....   │                      ║
+║ tolerance_dvl.k                                                  │ 3.4 8.123123 5.123123 8.23423424 -3.00000000000022 5.90123212 4.00005 _dvl -3.0 4.0 │ 3.4 8.123123 5....   │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1512/1512 tests passed (100.0%)                                                                                          ║
+║ SUMMARY: 1532/1532 tests passed (100.0%)                                                                                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝

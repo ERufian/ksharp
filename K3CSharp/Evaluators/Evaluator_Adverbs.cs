@@ -256,7 +256,11 @@ namespace K3CSharp
             if (a.Type != b.Type) return false;
             if (a is IntegerValue ia && b is IntegerValue ib) return ia.Value == ib.Value;
             if (a is LongValue la && b is LongValue lb) return la.Value == lb.Value;
-            if (a is FloatValue fa && b is FloatValue fb) return fa.Value == fb.Value;
+            if (a is FloatValue fa && b is FloatValue fb)
+            {
+                var matchResult = Match(a, b);
+                return matchResult is IntegerValue iv && iv.Value == 1;
+            }
             if (a is CharacterValue ca && b is CharacterValue cb) return ca.Value == cb.Value;
             if (a is SymbolValue sa && b is SymbolValue sb) return sa.Value == sb.Value;
             if (a is VectorValue va && b is VectorValue vb)

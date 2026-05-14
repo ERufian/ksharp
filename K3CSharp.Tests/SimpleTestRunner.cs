@@ -3192,6 +3192,28 @@ namespace K3CSharp.Tests
                 ("state_transition_over_basic.k", "0"),
                 ("state_transition_scan_basic.k", "0 1 0"),
                 ("state_transition_each_prior.k", "1 0"),
+
+                // Comparison tolerance tests
+                ("tolerance_equal_accumulated.k", "1"),
+                ("tolerance_match_accumulated.k", "1"),
+                ("tolerance_equal_boundary_inside.k", "1"),
+                ("tolerance_equal_boundary_outside.k", "0"),
+                ("tolerance_equal_zero.k", "0"),
+                ("tolerance_find_float.k", "4"),
+                ("tolerance_find_integer.k", "7"),
+                ("tolerance_floor_not_equal.k", "1"),
+                ("tolerance_floor_equal.k", "2"),
+                ("tolerance_more_left_outside.k", "0"),
+                ("tolerance_more_left_inside.k", "0"),
+                ("tolerance_more_right_outside.k", "1"),
+                ("tolerance_more_right_inside.k", "0"),
+                ("tolerance_less_left_outside.k", "0"),
+                ("tolerance_less_left_inside.k", "0"),
+                ("tolerance_less_right_outside.k", "1"),
+                ("tolerance_less_right_inside.k", "0"),
+                ("tolerance_in.k", "1"),
+                ("tolerance_dv.k", "3.4 8.123123 5.123123 8.234234 5.901232"),
+                ("tolerance_dvl.k", "3.4 8.123123 5.123123 8.234234 5.901232 4.00005"),
             };
 
             // Filter tests if a pattern was provided

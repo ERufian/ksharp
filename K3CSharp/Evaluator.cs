@@ -3161,9 +3161,19 @@ namespace K3CSharp
             if (left is VectorValue leftVec)
             {
                 // Search for right in left vector
+                // Find does not promote arguments; comparison tolerance only applies
+                // when both element and search value are floats
                 for (int i = 0; i < leftVec.Elements.Count; i++)
                 {
-                    var matchResult = Match(leftVec.Elements[i], right);
+                    var element = leftVec.Elements[i];
+                    bool elementIsFloat = element is FloatValue;
+                    bool rightIsFloat = right is FloatValue;
+                    
+                    // No type promotion: float vs non-float never matches
+                    if (elementIsFloat != rightIsFloat)
+                        continue;
+                    
+                    var matchResult = Match(element, right);
                     if (matchResult is IntegerValue intVal && intVal.Value == 1)
                     {
                         return new IntegerValue(i); // 0-based indexing (K3 standard)
@@ -3175,10 +3185,17 @@ namespace K3CSharp
             else
             {
                 // Handle scalar case: d is an atom
-                var matchResult = Match(left, right);
-                if (matchResult is IntegerValue intVal2 && intVal2.Value == 1)
+                // Find does not promote arguments
+                bool leftIsFloat = left is FloatValue;
+                bool rightIsFloat = right is FloatValue;
+                
+                if (leftIsFloat == rightIsFloat)
                 {
-                    return new IntegerValue(0); // Found at index 0 (K3 0-based)
+                    var matchResult = Match(left, right);
+                    if (matchResult is IntegerValue intVal2 && intVal2.Value == 1)
+                    {
+                        return new IntegerValue(0); // Found at index 0 (K3 0-based)
+                    }
                 }
                 // Not found, return #d (count of scalar is 1)
                 return new IntegerValue(1);

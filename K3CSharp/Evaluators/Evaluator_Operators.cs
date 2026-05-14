@@ -743,11 +743,23 @@ namespace K3CSharp
             if (a is LongValue longA && b is LongValue longB)
                 return new IntegerValue(longA.Value < longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
+            {
+                if (AreTolerantlyEqual(floatA.Value, floatB.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(floatA.Value < floatB.Value ? 1 : 0);
+            }
             if (a is IntegerValue intA2 && b is FloatValue floatB2)
+            {
+                if (AreTolerantlyEqual(intA2.Value, floatB2.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(intA2.Value < floatB2.Value ? 1 : 0);
+            }
             if (a is FloatValue floatA2 && b is IntegerValue intB2)
+            {
+                if (AreTolerantlyEqual(floatA2.Value, intB2.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(floatA2.Value < intB2.Value ? 1 : 0);
+            }
             
             // Handle character comparisons based on ASCII values
             if (a is CharacterValue charA && b is CharacterValue charB)
@@ -805,11 +817,23 @@ namespace K3CSharp
             if (a is LongValue longA && b is LongValue longB)
                 return new IntegerValue(longA.Value > longB.Value ? 1 : 0);
             if (a is FloatValue floatA && b is FloatValue floatB)
+            {
+                if (AreTolerantlyEqual(floatA.Value, floatB.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(floatA.Value > floatB.Value ? 1 : 0);
+            }
             if (a is IntegerValue intA2 && b is FloatValue floatB2)
+            {
+                if (AreTolerantlyEqual(intA2.Value, floatB2.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(intA2.Value > floatB2.Value ? 1 : 0);
+            }
             if (a is FloatValue floatA2 && b is IntegerValue intB2)
+            {
+                if (AreTolerantlyEqual(floatA2.Value, intB2.Value))
+                    return new IntegerValue(0);
                 return new IntegerValue(floatA2.Value > intB2.Value ? 1 : 0);
+            }
             
             // Handle character comparisons based on ASCII values
             if (a is CharacterValue charA && b is CharacterValue charB)
@@ -908,9 +932,13 @@ namespace K3CSharp
                 if (numA == numB)
                     return new IntegerValue(1);
 
+                // Infinities do not match finite numbers (tolerance formula breaks with inf)
+                if (double.IsInfinity(numA) || double.IsInfinity(numB))
+                    return new IntegerValue(0);
+
                 double maxAbs = Math.Max(Math.Abs(numA), Math.Abs(numB));
-                double threshold = maxAbs * 0.00001; // 0.001 percent
-                return new IntegerValue(Math.Abs(numA - numB) < threshold ? 1 : 0);
+                double threshold = maxAbs * 1.13e-13;
+                return new IntegerValue(Math.Abs(numA - numB) <= threshold ? 1 : 0);
             }
 
             // Handle same-type comparisons for non-numeric types
@@ -932,6 +960,14 @@ namespace K3CSharp
         private bool IsNumericValue(K3Value value)
         {
             return value is IntegerValue or LongValue or FloatValue;
+        }
+
+        private bool AreTolerantlyEqual(double a, double b)
+        {
+            if (a == b) return true;
+            double maxAbs = Math.Max(Math.Abs(a), Math.Abs(b));
+            double threshold = maxAbs * 1.13e-13;
+            return Math.Abs(a - b) <= threshold;
         }
 
         public K3Value Equal(K3Value a, K3Value b)
@@ -1995,7 +2031,12 @@ namespace K3CSharp
                 else if (double.IsNaN(floatA.Value))
                     return new IntegerValue("0N");
                 else
-                    return new IntegerValue((int)Math.Floor(floatA.Value));
+                {
+                    int floor = (int)Math.Floor(floatA.Value);
+                    if (AreTolerantlyEqual(floatA.Value, floor + 1))
+                        return new IntegerValue(floor + 1);
+                    return new IntegerValue(floor);
+                }
             }
             
             throw new Exception($"Cannot floor {a.Type}");
