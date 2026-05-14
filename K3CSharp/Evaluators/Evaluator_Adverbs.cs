@@ -752,6 +752,25 @@ namespace K3CSharp
                 return HandleAdverbTick(innerVerbSymbol, left, right);
             }
 
+            // Scatter selection adnoun: matrix/tensor'[i;j;...]
+            // When verb evaluates to a vector (matrix/tensor) and left/right contain index vectors
+            if (verb is VectorValue matrix)
+            {
+                var allIndices = new List<K3Value>();
+                if (left is VectorValue leftVec)
+                    allIndices.AddRange(leftVec.Elements);
+                else if (left is not NullValue)
+                    allIndices.Add(left);
+
+                if (right is VectorValue rightVec)
+                    allIndices.AddRange(rightVec.Elements);
+                else if (right is not NullValue)
+                    allIndices.Add(right);
+
+                if (allIndices.Count >= 2)
+                    return ScatterSelection(matrix, allIndices);
+            }
+
             // Handle FunctionValue verb: apply function to each element (monadic each)
             if (verb is FunctionValue fvVerb)
             {

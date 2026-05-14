@@ -32,6 +32,7 @@ namespace K3CSharp.Parsing
                 ASTNodeType.ApplyAndAssign => ConvertApplyAndAssign(node),
                 ASTNodeType.Block => ConvertBlock(node),
                 ASTNodeType.ProjectedFunction => ConvertProjectedFunction(node),
+                ASTNodeType.Adnoun => ConvertDyadicOp(node),
                 _ => throw new NotSupportedException($"Node type {node.Type} not supported in parse tree conversion")
             };
         }

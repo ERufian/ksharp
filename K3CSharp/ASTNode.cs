@@ -25,6 +25,7 @@ namespace K3CSharp
         TriadicOp,               // 3-argument operations
         TetradicOp,              // 4-argument operations  
         VariadicOp,              // Variadic operations
+        Adnoun,                  // Noun-bound adverb forms (scatter, transitive closure, state transition)
         NotImplemented           // For "not yet implemented" operations
     }
 

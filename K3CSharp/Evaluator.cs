@@ -451,6 +451,9 @@ namespace K3CSharp
                 case ASTNodeType.VariadicOp:
                     return EvaluateVariadicOp(node);
 
+                case ASTNodeType.Adnoun:
+                    return EvaluateAdnoun(node);
+
                 case ASTNodeType.NotImplemented:
                     var message = node.Value is CharacterValue charVal ? charVal.Value : node.Value?.ToString() ?? "Not implemented";
                     throw new Exception($"Not yet implemented: {message}");
@@ -4282,7 +4285,34 @@ namespace K3CSharp
                     left = resolvedValue;
                 }
             }
-            
+
+            // Scatter selection adnoun: matrix/tensor'[i;j;...]
+            // Intercept encoded EACH functions before unpacking arguments
+            if (left is FunctionValue func && func.BodyText.StartsWith("EACH:"))
+            {
+                var innerVerbText = func.BodyText.Substring("EACH:".Length);
+                bool innerIsEncodedAdverb = innerVerbText.StartsWith("OVER:") || innerVerbText.StartsWith("SCAN:") ||
+                                           innerVerbText.StartsWith("EACH:") || innerVerbText.StartsWith("EACH_RIGHT:") ||
+                                           innerVerbText.StartsWith("EACH_LEFT:") || innerVerbText.StartsWith("EACH_PRIOR:");
+                K3Value innerVerb;
+                if (innerIsEncodedAdverb)
+                {
+                    innerVerb = new FunctionValue(innerVerbText, new List<string> { "x", "y" });
+                }
+                else
+                {
+                    var lexer = new Lexer(innerVerbText);
+                    var tokens = lexer.Tokenize();
+                    var ast = ParserConfig.ParseWithConfig(tokens, innerVerbText);
+                    innerVerb = ast != null ? (Evaluate(ast) ?? new NullValue()) : new SymbolValue(innerVerbText);
+                }
+
+                if (innerVerb is VectorValue matrix && right is VectorValue indices && indices.Elements.Count >= 2)
+                {
+                    return ScatterSelection(matrix, new List<K3Value>(indices.Elements));
+                }
+            }
+
             // Check if this is Amend operation: .[d; i; f; y] or .[d; i; f]
             // This happens when left is null (from bracket notation) or when left is the dot symbol
             if (left is NullValue || (left is SymbolValue sym && sym.Value == "."))
@@ -5791,6 +5821,115 @@ namespace K3CSharp
             {
                 RightArgument = projectionInfo
             };
+        }
+
+        private K3Value EvaluateAdnoun(ASTNode node)
+        {
+            var adnounType = node.Value is SymbolValue sym ? sym.Value : "";
+            if (adnounType == "scatter")
+                return EvaluateScatterSelection(node);
+            throw new Exception($"Unknown adnoun type: {adnounType}");
+        }
+
+        private K3Value EvaluateScatterSelection(ASTNode node)
+        {
+            if (node.Children.Count < 3)
+                throw new Exception("Scatter selection requires a matrix and at least two index arguments");
+
+            var matrixValue = Evaluate(node.Children[0]);
+            if (matrixValue == null)
+                throw new Exception("Type error: scatter selection target is null");
+
+            var indexValues = new List<K3Value>();
+            for (int i = 1; i < node.Children.Count; i++)
+            {
+                var idx = Evaluate(node.Children[i]);
+                if (idx == null)
+                    throw new Exception("Type error: scatter selection index is null");
+                indexValues.Add(idx);
+            }
+
+            return ScatterSelection(matrixValue, indexValues);
+        }
+
+        private K3Value ScatterSelection(K3Value matrixValue, List<K3Value> indexValues)
+        {
+            // Determine result length from vector indices; scalars are implicitly replicated
+            int resultLength = 1;
+            bool hasVectorIndex = false;
+            foreach (var iv in indexValues)
+            {
+                if (iv is VectorValue ivv)
+                {
+                    if (!hasVectorIndex)
+                    {
+                        resultLength = ivv.Elements.Count;
+                        hasVectorIndex = true;
+                    }
+                    else if (ivv.Elements.Count != resultLength)
+                    {
+                        throw new Exception("Length error: scatter selection index vectors must have equal length");
+                    }
+                }
+            }
+
+            // Validate all indices are integers and determine per-element index
+            var perElementIndices = new List<List<int>>();
+            for (int pos = 0; pos < resultLength; pos++)
+            {
+                var elementIndices = new List<int>();
+                foreach (var iv in indexValues)
+                {
+                    int idx;
+                    if (iv is VectorValue ivv)
+                    {
+                        var elem = ivv.Elements[pos];
+                        if (elem is IntegerValue ivi)
+                            idx = (int)ivi.Value;
+                        else if (elem is LongValue ivl)
+                            idx = (int)ivl.Value;
+                        else
+                            throw new Exception("Type error: scatter selection indices must be integers");
+                    }
+                    else if (iv is IntegerValue ii)
+                    {
+                        idx = (int)ii.Value;
+                    }
+                    else if (iv is LongValue il)
+                    {
+                        idx = (int)il.Value;
+                    }
+                    else
+                    {
+                        throw new Exception("Type error: scatter selection indices must be integers");
+                    }
+                    elementIndices.Add(idx);
+                }
+                perElementIndices.Add(elementIndices);
+            }
+
+            // Extract elements by repeated indexing
+            var results = new List<K3Value>();
+            foreach (var elementIndices in perElementIndices)
+            {
+                K3Value current = matrixValue;
+                foreach (int idx in elementIndices)
+                {
+                    if (current is VectorValue vec)
+                    {
+                        if (idx < 0 || idx >= vec.Elements.Count)
+                            throw new Exception($"Index error: index {idx} out of bounds for vector of length {vec.Elements.Count}");
+                        current = vec.Elements[idx];
+                    }
+                    else
+                    {
+                        throw new Exception("Type error: cannot index into atomic value during scatter selection");
+                    }
+                }
+                results.Add(current);
+            }
+
+            return new VectorValue(results);
         }
 
         private K3Value EvaluateTriadicOp(ASTNode node)

@@ -3170,6 +3170,11 @@ namespace K3CSharp.Tests
                 ("test_v_script.k", "`myscript"),
                 ("test_i_empty.k", "()"),
                 ("test_i_args.k", "(\"--var1\";\"val0\")"),
+
+                // Scatter selection (matrix/tensor')
+                ("test_scatter_basic.k", "2 9"),
+                ("test_scatter_diag.k", "1 5 9"),
+                ("test_scatter_3d.k", "1 8"),
             };
 
             // Filter tests if a pattern was provided
