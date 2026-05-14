@@ -3175,6 +3175,23 @@ namespace K3CSharp.Tests
                 ("test_scatter_basic.k", "2 9"),
                 ("test_scatter_diag.k", "1 5 9"),
                 ("test_scatter_3d.k", "1 8"),
+
+                // Transitive closure (vector/ vector\)
+                ("transitive_closure_over_basic.k", "4"),
+                ("transitive_closure_scan_basic.k", "0 2 4"),
+                ("transitive_closure_over_cycle.k", "3"),
+                ("transitive_closure_scan_cycle.k", "1 3"),
+                ("transitive_closure_over_self_loop.k", "2"),
+                ("transitive_closure_scan_self_loop.k", ",2"),
+                ("transitive_closure_over_2cycle.k", "1"),
+                ("transitive_closure_scan_2cycle.k", "0 1"),
+                ("transitive_closure_scan_long.k", "5 6 9 12 14 16 18 20"),
+                ("transitive_closure_scan_atomic_right.k", "(1 5 15;4 6 18;7 9 20;9 12 20;12 14 20;14 16 20;16 18 20;18 20 20;20 20 20)"),
+
+                // State transition (matrix/ matrix\ matrix':)
+                ("state_transition_over_basic.k", "0"),
+                ("state_transition_scan_basic.k", "0 1 0"),
+                ("state_transition_each_prior.k", "1 0"),
             };
 
             // Filter tests if a pattern was provided

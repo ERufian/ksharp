@@ -280,6 +280,16 @@ namespace K3CSharp
             bool leftSentinel = left is NullValue;
             bool rightSentinel = right is NullValue;
 
+            // Check for adnouns: noun-bound adverbs (vector/ or matrix/)
+            if (verb is VectorValue vecVerb)
+            {
+                bool isMatrix = vecVerb.Elements.Count > 0 && vecVerb.Elements.All(e => e is VectorValue);
+                if (isMatrix && right is VectorValue stateVec)
+                    return StateTransitionOver(vecVerb, stateVec);
+                if (!isMatrix)
+                    return TransitiveClosureOver(vecVerb, right);
+            }
+
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
 
             // Route function verbs (FunctionValue or SymbolValue referring to function) to OverMonadForFunction
@@ -685,6 +695,16 @@ namespace K3CSharp
             bool leftSentinel = left is NullValue;
             bool rightSentinel = right is NullValue;
 
+            // Check for adnouns: noun-bound adverbs (vector\ or matrix\)
+            if (verb is VectorValue vecVerb)
+            {
+                bool isMatrix = vecVerb.Elements.Count > 0 && vecVerb.Elements.All(e => e is VectorValue);
+                if (isMatrix && right is VectorValue stateVec)
+                    return StateTransitionScan(vecVerb, stateVec);
+                if (!isMatrix)
+                    return TransitiveClosureScan(vecVerb, right);
+            }
+
             string verbName = verb is SymbolValue vs1 ? vs1.Value : verb.ToString() ?? "";
 
             // Route function verbs (FunctionValue or SymbolValue referring to function) to ScanMonadForFunction
@@ -975,6 +995,14 @@ namespace K3CSharp
         
         private K3Value ApplyAdverbTickColon(K3Value verb, K3Value left, K3Value right)
         {
+            // Check for state transition each-prior adnoun (matrix':)
+            if (verb is VectorValue vecVerb)
+            {
+                bool isMatrix = vecVerb.Elements.Count > 0 && vecVerb.Elements.All(e => e is VectorValue);
+                if (isMatrix && right is VectorValue stateVec)
+                    return StateTransitionEachPrior(vecVerb, stateVec);
+            }
+
             // Tacit composition: when right is a ProjectedFunctionValue, create a composition function
             // e.g., >':0, means "prepend 0, then apply each-prior greater-than"
             if (right is ProjectedFunctionValue projectedRight && left is NullValue)

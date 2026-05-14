@@ -3072,11 +3072,14 @@ namespace K3CSharp.Parsing
             
             // Case 2: Generic verb + adverb pattern (handles all adverbs uniformly)
             // Pattern: verb/ args, verb\ args, verb' args, verb/: args, verb\: args, verb': args
-            // Note: verb must be at position 0, adverb at position 1
+            // Also handles noun-bound adverbs: identifier/ args, identifier': args, etc.
+            // Note: verb/noun must be at position 0, adverb at position 1
             if (expressionTokens.Count >= 2)
             {
-                // Check for verb followed by adverb at positions 0 and 1
-                if (IsVerbToken(expressionTokens[0].Type) &&
+                // Check for verb or identifier followed by adverb at positions 0 and 1
+                bool isVerbOrNoun = IsVerbToken(expressionTokens[0].Type) ||
+                                     expressionTokens[0].Type == TokenType.IDENTIFIER;
+                if (isVerbOrNoun &&
                     VerbRegistry.IsAdverbToken(expressionTokens[1].Type))
                 {
                     return ParseGenericVerbAdverb(expressionTokens);
