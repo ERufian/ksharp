@@ -3214,6 +3214,19 @@ namespace K3CSharp.Tests
                 ("tolerance_in.k", "1"),
                 ("tolerance_dv.k", "3.4 8.123123 5.123123 8.234234 5.901232"),
                 ("tolerance_dvl.k", "3.4 8.123123 5.123123 8.234234 5.901232 4.00005"),
+                ("io_load_text_fields_basic.k", "(1 2;(\"hello\";\"world\"))"),
+                ("io_load_text_fields_skip.k", "(1 2;(;);(\"hello\";\"world\"))"),
+                ("io_load_text_fields_float.k", "(1.5 3.5;2.5 4.5)"),
+                ("io_load_binary_fields_basic.k", "(1 3;2 4)"),
+                ("io_load_binary_fields_float.k", "(5 6;4.0 8.0)"),
+                ("io_load_binary_special_char.k", "\"Hello\""),
+                ("io_load_binary_special_int.k", "10 20 30 40"),
+                ("io_load_binary_special_float.k", "1.5 2.5"),
+                ("io_read_csv_basic.k", "(\"name,age,city\";\"Alice,30,New York\";\"Bob,25,Los Angeles\";\"Charlie,35,Chicago\")"),
+                ("io_read_csv_empty.k", "(\"a,b,c\";\"1,,3\";\",2,\";\",,\")"),
+                ("io_read_csv_quotes.k", "(\"product,price,description\";\"Apple,1.50,\\\"\\\"Fresh, organic apple\\\"\\\"\";\"Banana,0.75,\\\"\\\"Ripe banana\\\"\\\"\")"),
+                ("io_read_tsv_basic.k", "(\"name\\tage\\tcity\";\"Alice\\t30\\tNew York\";\"Bob\\t25\\tLos Angeles\")"),
+                ("io_read_tsv_empty.k", "(\"a\\tb\\tc\";\"1\\t\\t3\";\"\\t2\\t\";\"\\t\\t\")"),
             };
 
             // Filter tests if a pattern was provided

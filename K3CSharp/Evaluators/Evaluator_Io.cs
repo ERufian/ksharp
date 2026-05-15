@@ -33,8 +33,15 @@ public partial class Evaluator
     {
         return digit switch
         {
-            0 => WriteText(left, right),          // WRITE TEXT
-            1 => WriteData(left, right),          // WRITE K DATA
+            0 => left is VectorValue { Elements.Count: 2, VectorType: 0 }
+                ? LoadTextFileAsFields(left, right)
+                : WriteText(left, right),
+            1 => left switch
+            {
+                VectorValue { Elements.Count: 2, VectorType: 0 } => LoadBinaryFileAsFields(left, right),
+                CharacterValue { Value: "c" or "i" or "d" } => LoadBinaryFileSpecial(left, right),
+                _ => WriteData(left, right)
+            },
             2 => WriteMemoryMappedKData(left, right), // WRITE MEMORY MAPPED K DATA (and FFI dynamic load)
             3 => IpcSet(left, right),            // IPC SET
             4 => IpcGet(left, right),            // IPC GET
@@ -911,5 +918,470 @@ public partial class Evaluator
         }
         
         return path;
+    }
+
+    // ===================== Load Text File as Fields =====================
+
+    /// <summary>
+    /// (s;w) 0: f  or  (s;w) 0: (f;b;n)
+    /// Load a text file with fixed-width fields.
+    /// s = type codes (I=integer, F=float, C=char vector, S=symbol, space=skip)
+    /// w = field widths
+    /// </summary>
+    private K3Value LoadTextFileAsFields(K3Value left, K3Value right)
+    {
+        try
+        {
+            // Parse left argument (s;w)
+            var (typeCodes, widths) = ParseTextFieldSpec(left);
+
+            // Parse right argument (f or (f;b;n))
+            var (path, offset, length) = GetFilePathAndRange(right);
+
+            // Read file content
+            byte[] fileBytes;
+            if (!File.Exists(path))
+                throw new Exception($"The system cannot find the file specified: {path}");
+
+            if (offset.HasValue && length.HasValue)
+            {
+                fileBytes = new byte[length.Value];
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.Seek(offset.Value, SeekOrigin.Begin);
+                int read = fs.Read(fileBytes, 0, length.Value);
+                if (read < length.Value)
+                    Array.Resize(ref fileBytes, read);
+            }
+            else
+            {
+                fileBytes = File.ReadAllBytes(path);
+            }
+
+            // Convert bytes to text (assume UTF-8, but K uses raw bytes for text I/O)
+            string text = System.Text.Encoding.UTF8.GetString(fileBytes);
+
+            // Split into lines (handle both \n and \r\n)
+            var rawLines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var lines = rawLines.Where(l => !string.IsNullOrEmpty(l)).ToList();
+
+            int totalWidth = widths.Sum();
+            int fieldCount = typeCodes.Length;
+
+            // Validate line lengths (all lines must equal total width)
+            foreach (var line in lines)
+            {
+                if (line.Length != totalWidth)
+                    throw new Exception($"length error: file line length {line.Length} != total field width {totalWidth}");
+            }
+
+            // Parse each line into fields and collect by column
+            var columns = new List<List<K3Value>>();
+            for (int f = 0; f < fieldCount; f++)
+                columns.Add(new List<K3Value>());
+
+            foreach (var line in lines)
+            {
+                int pos = 0;
+                for (int f = 0; f < fieldCount; f++)
+                {
+                    string fieldText = line.Substring(pos, widths[f]);
+                    columns[f].Add(ParseTextField(fieldText, typeCodes[f]));
+                    pos += widths[f];
+                }
+            }
+
+            // Build result: list of field vectors
+            var resultElements = new List<K3Value>();
+            for (int f = 0; f < fieldCount; f++)
+            {
+                int vectorType = typeCodes[f] switch
+                {
+                    'I' => -1,
+                    'F' => -2,
+                    'C' => 0,  // list of character vectors (one per row)
+                    'S' => -4,
+                    ' ' => 0,
+                    _ => 0
+                };
+                resultElements.Add(new VectorValue(columns[f], vectorType));
+            }
+
+            return new VectorValue(resultElements, 0);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"0: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Parse the left argument (s;w) for text file loading.
+    /// Returns type codes string and widths array.
+    /// </summary>
+    private (char[] typeCodes, int[] widths) ParseTextFieldSpec(K3Value left)
+    {
+        if (left is not VectorValue vec || vec.Elements.Count != 2)
+            throw new Exception("left argument must be a 2-item list (s;w)");
+
+        // Extract s (type codes)
+        var sElement = vec.Elements[0];
+        string typeCodesStr;
+        if (sElement is CharacterValue charVal)
+        {
+            typeCodesStr = charVal.Value;
+        }
+        else if (sElement is VectorValue charVec && charVec.VectorType == -3)
+        {
+            typeCodesStr = string.Concat(charVec.Elements.OfType<CharacterValue>().Select(c => c.Value));
+        }
+        else
+        {
+            throw new Exception("s must be a character vector");
+        }
+
+        // Extract w (widths)
+        var wElement = vec.Elements[1];
+        int[] widths;
+        if (wElement is IntegerValue intVal)
+        {
+            widths = new[] { intVal.Value };
+        }
+        else if (wElement is VectorValue intVec && intVec.VectorType == -1)
+        {
+            widths = intVec.Elements.OfType<IntegerValue>().Select(iv => iv.Value).ToArray();
+        }
+        else if (wElement is VectorValue mixedVec)
+        {
+            widths = mixedVec.Elements.Select(e => e switch
+            {
+                IntegerValue iv => iv.Value,
+                LongValue lv => (int)lv.Value,
+                _ => throw new Exception("widths must be integers")
+            }).ToArray();
+        }
+        else
+        {
+            throw new Exception("w must be an integer vector");
+        }
+
+        if (typeCodesStr.Length != widths.Length)
+            throw new Exception($"length error: type codes count {typeCodesStr.Length} != widths count {widths.Length}");
+
+        return (typeCodesStr.ToCharArray(), widths);
+    }
+
+    /// <summary>
+    /// Parse a single text field according to its type code.
+    /// </summary>
+    private K3Value ParseTextField(string fieldText, char typeCode)
+    {
+        // Trim trailing whitespace for most types (except character which keeps padding)
+        string trimmed = fieldText.TrimEnd();
+
+        return typeCode switch
+        {
+            'I' => ParseIntegerField(trimmed),
+            'F' => ParseFloatField(trimmed),
+            'C' => new VectorValue(fieldText.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList(), -3),
+            'S' => new SymbolValue(trimmed.Trim()),
+            ' ' => new NullValue(), // skip field
+            _ => throw new Exception($"unknown type code: {typeCode}")
+        };
+    }
+
+    private K3Value ParseIntegerField(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return new IntegerValue(0);
+        if (int.TryParse(text, out int intVal))
+            return new IntegerValue(intVal);
+        throw new Exception($"domain error: invalid integer '{text}'");
+    }
+
+    private K3Value ParseFloatField(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return new FloatValue(0.0);
+        // K format: 1e+50, 1.234, etc.
+        string normalized = text.Replace("e+", "E").Replace("e-", "E-");
+        if (double.TryParse(normalized, System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out double dblVal))
+            return new FloatValue(dblVal);
+        throw new Exception($"domain error: invalid float '{text}'");
+    }
+
+    // ===================== Load Binary File as Fields =====================
+
+    /// <summary>
+    /// (s;w) 1: f  or  (s;w) 1: (f;b;n)
+    /// Load a binary file with fixed-width fields.
+    /// s = C type codes (c=char, b=byte, s=short, i=int, f=float, d=double, C=string, S=symbol, space=skip)
+    /// w = field widths in bytes
+    /// </summary>
+    private K3Value LoadBinaryFileAsFields(K3Value left, K3Value right)
+    {
+        try
+        {
+            var (typeCodes, widths) = ParseBinaryFieldSpec(left);
+            var (path, offset, length) = GetFilePathAndRange(right);
+
+            if (!File.Exists(path))
+                throw new Exception($"The system cannot find the file specified: {path}");
+
+            byte[] fileBytes;
+            if (offset.HasValue && length.HasValue)
+            {
+                fileBytes = new byte[length.Value];
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.Seek(offset.Value, SeekOrigin.Begin);
+                int read = fs.Read(fileBytes, 0, length.Value);
+                if (read < length.Value)
+                    Array.Resize(ref fileBytes, read);
+            }
+            else
+            {
+                fileBytes = File.ReadAllBytes(path);
+            }
+
+            int totalWidth = widths.Sum();
+            if (fileBytes.Length % totalWidth != 0)
+                throw new Exception($"length error: file length {fileBytes.Length} is not a multiple of field width {totalWidth}");
+
+            int recordCount = fileBytes.Length / totalWidth;
+            int fieldCount = typeCodes.Length;
+
+            var columns = new List<List<K3Value>>();
+            for (int f = 0; f < fieldCount; f++)
+                columns.Add(new List<K3Value>());
+
+            for (int r = 0; r < recordCount; r++)
+            {
+                int pos = r * totalWidth;
+                for (int f = 0; f < fieldCount; f++)
+                {
+                    columns[f].Add(ParseBinaryField(fileBytes, pos, widths[f], typeCodes[f]));
+                    pos += widths[f];
+                }
+            }
+
+            var resultElements = new List<K3Value>();
+            for (int f = 0; f < fieldCount; f++)
+            {
+                int vectorType = typeCodes[f] switch
+                {
+                    'c' or 'b' or 's' or 'i' => -1,
+                    'f' or 'd' => -2,
+                    'C' => 0,  // list of character vectors (one per row)
+                    'S' => -4,
+                    ' ' => 0,
+                    _ => 0
+                };
+                resultElements.Add(new VectorValue(columns[f], vectorType));
+            }
+
+            return new VectorValue(resultElements, 0);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"1: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Parse the left argument (s;w) for binary file loading.
+    /// </summary>
+    private (char[] typeCodes, int[] widths) ParseBinaryFieldSpec(K3Value left)
+    {
+        if (left is not VectorValue vec || vec.Elements.Count != 2)
+            throw new Exception("left argument must be a 2-item list (s;w)");
+
+        var sElement = vec.Elements[0];
+        string typeCodesStr;
+        if (sElement is CharacterValue charVal)
+        {
+            typeCodesStr = charVal.Value;
+        }
+        else if (sElement is VectorValue charVec && charVec.VectorType == -3)
+        {
+            typeCodesStr = string.Concat(charVec.Elements.OfType<CharacterValue>().Select(c => c.Value));
+        }
+        else
+        {
+            throw new Exception("s must be a character vector");
+        }
+
+        var wElement = vec.Elements[1];
+        int[] widths;
+        if (wElement is IntegerValue intVal)
+        {
+            widths = new[] { intVal.Value };
+        }
+        else if (wElement is VectorValue intVec && intVec.VectorType == -1)
+        {
+            widths = intVec.Elements.OfType<IntegerValue>().Select(iv => iv.Value).ToArray();
+        }
+        else if (wElement is VectorValue mixedVec)
+        {
+            widths = mixedVec.Elements.Select(e => e switch
+            {
+                IntegerValue iv => iv.Value,
+                LongValue lv => (int)lv.Value,
+                _ => throw new Exception("widths must be integers")
+            }).ToArray();
+        }
+        else
+        {
+            throw new Exception("w must be an integer vector");
+        }
+
+        if (typeCodesStr.Length != widths.Length)
+            throw new Exception($"length error: type codes count {typeCodesStr.Length} != widths count {widths.Length}");
+
+        return (typeCodesStr.ToCharArray(), widths);
+    }
+
+    /// <summary>
+    /// Parse a single binary field from a byte array.
+    /// </summary>
+    private K3Value ParseBinaryField(byte[] data, int offset, int width, char typeCode)
+    {
+        return typeCode switch
+        {
+            'c' => new CharacterValue(((char)data[offset]).ToString()),
+            'b' => new IntegerValue((sbyte)data[offset]),
+            's' => new IntegerValue(BitConverter.ToInt16(data, offset)),
+            'i' => new IntegerValue(BitConverter.ToInt32(data, offset)),
+            'f' => new FloatValue(BitConverter.ToSingle(data, offset)),
+            'd' => new FloatValue(BitConverter.ToDouble(data, offset)),
+            'C' => new VectorValue(Enumerable.Range(offset, width).Select(i => new CharacterValue(((char)data[i]).ToString())).Cast<K3Value>().ToList(), -3),
+            'S' => new SymbolValue(System.Text.Encoding.UTF8.GetString(data, offset, width).TrimEnd('\0')),
+            ' ' => new NullValue(),
+            _ => throw new Exception($"unknown binary type code: {typeCode}")
+        };
+    }
+
+    // ===================== Load Binary File Special =====================
+
+    /// <summary>
+    /// c 1: f  or  c 1: (f;b;n)
+    /// Load entire binary file as a single vector.
+    /// c = "c" (character string), "i" (4-byte int vector), "d" (8-byte float vector)
+    /// </summary>
+    private K3Value LoadBinaryFileSpecial(K3Value left, K3Value right)
+    {
+        try
+        {
+            string mode = left is CharacterValue cv ? cv.Value
+                : throw new Exception("left argument must be 'c', 'i', or 'd'");
+
+            var (path, offset, length) = GetFilePathAndRange(right);
+
+            if (!File.Exists(path))
+                throw new Exception($"The system cannot find the file specified: {path}");
+
+            byte[] fileBytes;
+            if (offset.HasValue && length.HasValue)
+            {
+                fileBytes = new byte[length.Value];
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                fs.Seek(offset.Value, SeekOrigin.Begin);
+                int read = fs.Read(fileBytes, 0, length.Value);
+                if (read < length.Value)
+                    Array.Resize(ref fileBytes, read);
+            }
+            else
+            {
+                fileBytes = File.ReadAllBytes(path);
+            }
+
+            return mode switch
+            {
+                "c" => new VectorValue(fileBytes.Select(b => new CharacterValue(((char)b).ToString())).Cast<K3Value>().ToList(), -3),
+                "i" => LoadBinaryAsIntVector(fileBytes),
+                "d" => LoadBinaryAsFloatVector(fileBytes),
+                _ => throw new Exception($"unknown mode: {mode}")
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"1: {ex.Message}");
+        }
+    }
+
+    private K3Value LoadBinaryAsIntVector(byte[] data)
+    {
+        if (data.Length % 4 != 0)
+            throw new Exception($"length error: file length {data.Length} is not a multiple of 4");
+        var elements = new List<K3Value>();
+        for (int i = 0; i < data.Length; i += 4)
+        {
+            elements.Add(new IntegerValue(BitConverter.ToInt32(data, i)));
+        }
+        return new VectorValue(elements, -1);
+    }
+
+    private K3Value LoadBinaryAsFloatVector(byte[] data)
+    {
+        if (data.Length % 8 != 0)
+            throw new Exception($"length error: file length {data.Length} is not a multiple of 8");
+        var elements = new List<K3Value>();
+        for (int i = 0; i < data.Length; i += 8)
+        {
+            elements.Add(new FloatValue(BitConverter.ToDouble(data, i)));
+        }
+        return new VectorValue(elements, -2);
+    }
+
+    // ===================== Helper: Extract path/offset/length from right argument =====================
+
+    /// <summary>
+    /// Parse right argument which can be f (path) or (f;b;n) (path, offset, length).
+    /// Returns (path, optional offset, optional length).
+    /// </summary>
+    private (string path, int? offset, int? length) GetFilePathAndRange(K3Value right)
+    {
+        if (right is SymbolValue sym)
+            return (sym.Value, null, null);
+
+        if (right is CharacterValue charVal)
+            return (charVal.Value, null, null);
+
+        if (right is VectorValue vec && vec.VectorType == -3)
+        {
+            // Character vector path
+            string path = string.Concat(vec.Elements.OfType<CharacterValue>().Select(c => c.Value));
+            return (path, null, null);
+        }
+
+        if (right is VectorValue list && list.Elements.Count >= 3)
+        {
+            // (f;b;n) form
+            var pathElement = list.Elements[0];
+            string path = pathElement switch
+            {
+                SymbolValue s => s.Value,
+                CharacterValue c => c.Value,
+                VectorValue cv when cv.VectorType == -3 => string.Concat(cv.Elements.OfType<CharacterValue>().Select(c => c.Value)),
+                _ => throw new Exception("path must be symbol or character vector")
+            };
+
+            int offset = list.Elements[1] switch
+            {
+                IntegerValue iv => iv.Value,
+                LongValue lv => (int)lv.Value,
+                _ => throw new Exception("offset must be an integer")
+            };
+
+            int length = list.Elements[2] switch
+            {
+                IntegerValue iv => iv.Value,
+                LongValue lv => (int)lv.Value,
+                _ => throw new Exception("length must be an integer")
+            };
+
+            return (path, offset, length);
+        }
+
+        throw new Exception("right argument must be a path or a list (path;offset;length)");
     }
 }

@@ -1,0 +1,3 @@
+product,price,description
+Apple,1.50,""Fresh, organic apple""
+Banana,0.75,""Ripe banana""
