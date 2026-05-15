@@ -50,13 +50,11 @@ Highlighted details: This Software is provided "AS IS". You are responsible for 
   - [Core Components](#core-components)
 - [🛠️ Building and Running](#️-building-and-running)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+  - [Install and Run](#install-and-run)
     - [Windows](#windows)
     - [Linux (Ubuntu/Debian)](#linux-ubuntudebian)
     - [Linux (Fedora/CentOS)](#linux-fedoracentos)
     - [macOS](#macos)
-  - [Build](#build)
-  - [Run](#run)
   - [Troubleshooting](#troubleshooting)
 - [🤝 Contributing](#-contributing)
 - [👨‍💻 Authorship](#-authorship)
@@ -552,13 +550,13 @@ sudo dnf install -y dotnet-sdk-8.0
 #### **macOS**
 ```bash
 # Install .NET 8.0 SDK using Homebrew
-brew install dotnet-sdk
+brew install dotnet-sdk@8
 
 # Or download installer from:
 # https://dotnet.microsoft.com/download/dotnet/8.0
 ```
 
-### **Installation**
+### **Install and Run**
 
 #### **Windows**
 ```powershell
@@ -566,12 +564,14 @@ brew install dotnet-sdk
 git clone https://github.com/ERufian/ksharp.git
 cd ksharp\K3CSharp
 
-# Restore dependencies
+# Restore dependencies (optional)
 dotnet restore
 
-# Build solution
+# Build solution (optional)
 dotnet build
 
+# Run 
+dotnet run
 ```
 
 #### **Linux (Ubuntu/Debian)**
@@ -580,11 +580,14 @@ dotnet build
 git clone https://github.com/ERufian/ksharp.git
 cd ksharp/K3Csharp
 
-# Restore dependencies
+# Restore dependencies (optional)
 dotnet restore
 
-# Build solution
+# Build solution (optional)
 dotnet build
+
+# Run 
+dotnet run
 ```
 
 #### **Linux (Fedora/CentOS)**
@@ -593,12 +596,14 @@ dotnet build
 git clone https://github.com/ERufian/ksharp.git
 cd ksharp/K3CSharp
 
-# Restore dependencies
+# Restore dependencies (optional)
 dotnet restore
 
-# Build solution
+# Build solution (optional)
 dotnet build
 
+# Run 
+dotnet run
 ```
 
 #### **macOS**
@@ -607,44 +612,16 @@ dotnet build
 git clone https://github.com/ERufian/ksharp.git
 cd ksharp/K3CSharp
 
-# Restore dependencies
+# Restore dependencies (optional)
 dotnet restore
 
-# Build solution
+# Build solution (optional)
 dotnet build
 
 # Run 
 dotnet run
 ```
 
-### **Build**
-
-```bash
-# Build the entire solution
-dotnet build
-
-# Build in Release mode
-dotnet build -c Release
-```
-
-### **Run**
-
-```bash
-# Run the interpreter (starting from a bash or zsh prompt at the root directory)
-cd K3CSharp
-dotnet run
-
-# Run with script file
-dotnet run -- script.k
-
-# Run tests (starting from a bash prompt at the root directory)
-cd K3CSharp.Tests
-dotnet run
-
-# Run comparison (starting from a bash prompt at the root directory)
-cd K3CSharp.Comparison
-dotnet run
-```
 
 ### **Troubleshooting**
 
