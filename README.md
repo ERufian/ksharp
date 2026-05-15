@@ -1,60 +1,53 @@
-# K3Sharp - K3 Language Interpreter in C#
+# kharp - k version 3 Language Interpreter in C#
 
-A comprehensive C# implementation of the K3 programming language core, a high-performance vector programming language from the APL family.
+A comprehensive implementation of the K programming language, version 3, a vector programming language from the APL family. 
 
-## 🎯 Current Status
+---
 
-**K3CSharp is now at 96.8% K3 specification compliance** with comprehensive core language implementation, complete serialization system, robust .NET Foreign Function Interface, statement parsing support, Pure LRS parser with variable tracking, comprehensive I/O system, and K3 IPC (Inter-Process Communication) contributed by Michal Wallace.
+### **LEGAL TERMS**: 
+ksharp
 
-### 📈 Latest Test Results
-- **Test Suite**: 1291/1334 tests passing (96.8% success rate)
-- **K3 Compatibility**: TBD (comparison running)
-- **Differed**: See comparison results
-- **Skipped**: See comparison results
-- **Errors**: See comparison results
-- **Dictionary Indexing**: ✅ All dictionary indexing tests now pass
-- **Operator Precedence**: ✅ K's Long Right Scope properly implemented
-- **Parser Stability**: ✅ No special cases or workarounds in ParsePrimary
-- **One-Adverb-at-a-Time**: ✅ Clean adverb evaluation without complex chaining
-- **Parse Tree Verbs**: ✅ _parse and _eval verbs fully implemented and functional
-- **Statement Parsing**: ✅ Assignment, conditional evaluation, and control flow statements
-- ✅ **I/O System**: ✅ 9/12 file handle operations fully implemented
-- ✅ **K3 IPC System**: ✅ Complete inter-process communication with 3: and 4: verbs (contributed by Michal Wallace)
+Copyright (c) 2026 Eusebio Rufian-Zilbermann et al.
+
+This software is licensed under the terms of the  **MIT License with Commons Clause**.  
+You are free to use, modify, and distribute it (including in commercial products), provided you include attribution and do not sell the software (or a product whose value derives substantially from this software) itself.
+
+Full license text: [LICENSE](LICENSE.txt)
+
+Highlighted details: This Software is provided "AS IS". You are responsible for (a) Maintaining appropriate backup copies of any data file that this software is expected to modify, (b) Ensuring that data written to a storage system using this software can be read back in its entirety and with integrity. The author(s) of this product cannot be held responsible for any data loss resulting directly or indirectly from the use of this product. 
+---
 
 ## 📚 **Table of Contents**
 
-- [🎯 Current Status](#-current-status-823-kexe-compatibility)
-- [📊 Project Structure](#-project-structure)
-- [🚀 Quick Start](#-quick-start)
-- [📈 Compatibility Results](#-compatibility-results)
-- [🏗️ Architecture](#️-architecture)
-  - [Core Components](#core-components)
-  - [Comparison Framework](#comparison-framework-)
+- [🎯 Current Status](#-current-status)
+  - [Latest Test Results](#-latest-test-results)
+  - [Recent Major Improvements](#-recent-major-improvements)
+- [ Quick Start](#-quick-start)
 - [✅ Implemented Features](#-implemented-features)
   - [Core Data Types](#core-data-types)
-  - [Core Operator System](#core-operator-system)
+  - [Native Operators](#native-operators)
   - [Core Adverb System](#core-adverb-system)
+  - [Adverbs for Verbialized Nouns](#adverbs-for-verbialized-nouns)
+  - [Amend, Index, Apply, Assign](#amend-index-apply-assign)
   - [Core Function System](#core-function-system)
-  - [Basic Mathematical Functions](#basic-mathematical-functions)
-  - [Dictionary System](#dictionary-system-)
-- [� .NET Integration](#-net-integration)
+  - [Attributes](#attributes)
+  - [Conditionals](#conditionals)
+  - [I/O and Communication](#io-and-communication)
+  - [System Variables and Functions](#system-variables-and-functions)
+- [📡 IPC Operations](#-ipc-operations)
+- [⚙ Statement Parsing System](#-statement-parsing-system)
+- [🔧 K 3 Features Not Available in K#](#-k-3-features-not-available-in-k)
+- [🎉 ksharp Enhancements Over k version 3](#-ksharp-enhancements-over-k-version-3)
   - [Foreign Function Interface (FFI)](#foreign-function-interface-ffi)
-  - [Dyadic 2: Assembly Loading](#dyadic-2-assembly-loading)
   - [Hint System with _gethint and _sethint](#hint-system-with-_gethint-and-_sethint)
-  - [Object Management and Disposal](#object-management-and-disposal)
+  - [Object Instantiation and Disposal](#object-instantiation-and-disposal)
   - [The _dotnet Tree](#the-_dotnet-tree)
-  - [Object Instantiation](#object-instantiation)
   - [Method Invocation](#method-invocation)
-- [� Advanced Features](#-advanced-features)
-  - [Smart Division Rules](#smart-division-rules)
-  - [Type Promotion](#type-promotion)
-  - [Enhanced Operators](#enhanced-operators)
-  - [Underscore Ambiguity Resolution](#underscore-ambiguity-resolution-)
-- [🧪 Testing](#-testing)
-  - [Unit Tests](#unit-tests)
-  - [Comparison Testing](#comparison-testing-)
-  - [Test Results and Areas with Failures](#test-results-and-areas-with-failures)
-- [📚 Documentation](#-documentation)
+  - [Error Handling](#error-handling)
+  - [Performance Considerations](#performance-considerations)
+- [🏗️ Architecture](#️-architecture)
+  - [Project Structure](#-project-structure)
+  - [Core Components](#core-components)
 - [🛠️ Building and Running](#️-building-and-running)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -64,38 +57,23 @@ A comprehensive C# implementation of the K3 programming language core, a high-pe
     - [macOS](#macos)
   - [Build](#build)
   - [Run](#run)
-- [🎯 Recent Major Improvements](#-recent-major-improvements)
-  - **🔥 LRS Parser EOF Fix (Mar 2026)** - Dramatically reduced LRS parser fallbacks from 976 to 40 (95.3% reduction) by fixing incomplete token consumption. The parser now properly handles EOF tokens.
-    - **Before**: 976 "Incomplete Token Consumption" fallbacks to legacy parser
-    - **After**: 40 fallbacks remaining (multi-statement scripts only)
-    - **Root Cause**: `ReadExpressionTokens` stopped AT EOF token instead of past it
-    - **Fix**: Added EOF skip in `LRSParserWrapper.cs` Safe LRS mode path
-  - **🎯 Dictionary Indexing and Precedence Problems Fixed (Mar 2026)** - Successfully resolved critical parsing issues that were causing dictionary indexing failures and operator precedence problems. The fixes eliminate special cases from ParsePrimary and restore proper Long Right Scope (LRS) parsing behavior.
-    - **Dictionary Indexing**: All dictionary indexing tests now pass (`(.((`a;1);(`b;2))) @ `a` → `1`)
-    - **Operator Precedence**: K's Long Right Scope properly implemented (`- 1 + 2` → `-3`)
-    - **Parser Stability**: No special cases or workarounds in ParsePrimary
-- [🔮 Next Steps](#-next-steps)
+  - [Troubleshooting](#troubleshooting)
 - [🤝 Contributing](#-contributing)
 - [👨‍💻 Authorship](#-authorship)
-- [Note regarding project name](#-note-regarding-project-name)
-- [Development Approach](#-development-approach)
+- [Note Regarding Project Name](#note-regarding-project-name)
 
----
+## 🎯 Current Status
 
-## 📊 **Project Structure**
+**ksharp has now reached beta status.** The core language in the K Reference Manual is fully implemented: native verbs, adverbs, amend, index, apply and assign, functions, conditionals, I/O and communication, system variables and system functions. The Foreign Function Interface is designed to interoperate with Microsoft's .NET and .NET Framework.
 
-```
-K3CSharp/
-├── K3CSharp/                    # Core interpreter implementation
-├── K3CSharp.Tests/              # Unit tests (1334 test scenarios)
-├── K3CSharp.Comparison/         # k.exe comparison framework
-│   ├── ComparisonRunner.cs      # Main comparison engine
-│   ├── KInterpreterWrapper.cs   # k.exe execution wrapper
-│   ├── comparison_table.txt     # Latest compatibility report
-├── run_tests.bat                # Quick test runner
-├── run_comparison.bat           # Quick comparison runner
-└── known_differences.txt        # Known differences configuration
-```
+### 📈 Latest Test Results
+- **Test Suite**: 1545/1545 tests passing (100% success rate)
+
+### 🎯 Recent Major Improvements
+  - **📂 Support for delimited file I/O (May 2026)** - Enhanced `0:` and `1:` functionality, fixed `5:` functionality
+  - **🚀 Improved comparison tolerance (May 2026)** - Updated comparison tolerance to better match K compatibility 
+  - **🎯 Full test suite passing at 100% (May 2026)** - Successfully resolved parsing issues that were preventing some K idioms from producing correct results 
+  - **🔥 Support for adnouns (May 2026)** - The over, scan, each and each-prior adverbs can now be used with nouns (vectors, matrices and tensors) for scatter indexing, transitive closure and state transitions.
 
 ---
 
@@ -107,104 +85,103 @@ cd K3CSharp
 dotnet run
 ```
 
-### **Run Unit Tests**
-```bash
-./run_tests.bat
-# or
-cd K3CSharp.Tests && dotnet run
-```
-
-### **Run k.exe Comparison** 🆕
-```bash
-./run_comparison.bat
-# or
-cd K3CSharp.Comparison && dotnet run
-```
-
----
-
-## 📈 **Validation Results**
-
-### **Comprehensive Test Suite:**
-- **Total Tests**: 1334 validation scenarios
-- **✅ Passing**: 1291 tests (96.8% success rate)
-- **❌ Failing**: 43 tests (implementation in progress)
-
-### **K.exe Compatibility Analysis:**
-- **Total Comparison Tests**: 929 scenarios
-- **✅ Matched**: 838 scenarios
-- **❌ Differed**: 63 scenarios (6.8% implementation differences)
-- **💥 Errors**: 5 scenarios (0.5% implementation issues)
-- **⚠️ Skipped**: 23 scenarios (2.5% k.exe differences - FFI, parse/eval)
-
-### **K# Enhancements Over K3:**
-- ✅ **Smart Integer Division**: `4 % 2` → `2` (integer, not float)
-- ✅ **64-bit Long Integers**: `123456789012345j` support
-- ✅ **Compact Symbol Vectors**: `` `a`b`c `` (no spaces)
-- ✅ **Compact List and Dictionary Display**: Semicolon-separated format ``.(`a;1;);(`b;2;))``
-- ✅ **Enhanced Function Display**: Literal function body instead of pre-parsed
-- ✅ **Improvements inspired on 64-bit e**: `_P` `_o` `_c` `_r` `_m` `_y`
-- ✅ **No denorm dictionaries**:   ``.((`a;1);(`a;2)) is .,(`a;2;) and not .((`a;1;);(`a;2;))``
-- ✅ **Parse and eval**: `_parse "1 + 2"` ``_eval (`"+";1;2)``
-- ✅ **.NET type loading**: `2:` loads Assemblies into `` ._dotnet`` tree 
-- ✅ **.NET type conversion hints**:`_sethint` and `_gethint`
-
-### **Recently Implemented Features:**
-- ✅ **K3 IPC System (PR #9)**: Complete inter-process communication contributed by Michal Wallace - TCP-based IPC with 3:/4: verbs, K tree hooks (.m.g, .m.s, .m.c), and system values (_i, _h, _w)
-- ✅ **Complete Adverb System**: Full support for two-glyph adverbs (`/:`, `\:`, `':`) and complex patterns
-- ✅ **System Verb Adverb Integration**: Complete support for system verbs with adverbs (`_dot/:`, `_ci'`)
-- ✅ **Advanced Adverb Patterns**: Complex adverb chaining and nesting (e.g., `/:/:`, `/:\:`)
-- ✅ **K Serialization System**: Complete binary format with all data types
-- ✅ **Character Vector Compliance**: `_bd` returns character vectors, not integers
-- ✅ **Dictionary Parsing Fix**: Fixed regression in dictionary entry recognition
-- ✅ **POWER Operator Fix**: Both monadic SHAPE and dyadic POWER working
-- ✅ **Complex Type Serialization**: Lists, dictionaries, functions fully supported
-- ✅ **Round-Trip Validation**: Perfect data preservation through serialize/deserialize
-- ✅ **Zero Divided by Zero "Best Guess"**: K3 standard behavior - vector division with 0%0 uses adjacent elements to determine result, returning infinity (0i/-0i) if neighbors would produce infinity, otherwise returning 0/0.0 based on operand types
-- ✅ **Comparison Tolerance**: K3 standard behavior for floating-point comparisons used in operations like Match (~) and Delete Value (_dv)
-
----
-
-## 🏗️ **Architecture**
-
-### **Core Components**
-- **Lexer.cs**: Tokenizes input into tokens with underscore ambiguity resolution
-- **Parser.cs**: Recursive descent parser building AST with adverb support
-- **Evaluator.cs**: AST traversal and evaluation with complete operator system
-- **K3Value.cs**: Type system and value operations
-
-### **Comparison Framework** 🆕
-- **KInterpreterWrapper**: Robust k.exe execution with output cleaning
-- **ComparisonRunner**: Intelligent comparison with formatting equivalence detection
-- **Batch Processing**: Prevents timeouts with 20-test batches
-- **Long Integer Detection**: Automatically skips unsupported 64-bit tests
-
----
+**[K User Manual](https://nsl.com/k/training/kusrlite.pdf)** - Complete K language guide with tutorials and examples
 
 ## ✅ **Implemented Features**
 
+**[K Reference Manual](https://nsl.com/k/training/kreflite.pdf)** - Detailed reference for all K functions, operators, and concepts
+
 ### **Core Data Types** ✅
-- **Atomic Types**: Integer, Float, Character, Symbol, Timestamp, Function, Dictionary
-- **Collections**: Lists (vectors), mixed-type lists, nested lists
-- **Special Values**: Null (`0n`), infinity (`0i`), negative infinity (`-0i`)
+- **Atomic Types**: Integer, Float, Character, Symbol, Dictionary, Nil/Self-typed Null, Function, 64-bit Integer
+- **Collections**: List, \(complex or mixed-type, including nesting\), Integer vector, Float vector, Character vector, Symbol vector, 64-bit Integer vector
+- **Special Values**: Self-typed Null \(`0n`\), infinity \(`0I`, `0i`, `0Ij`\), negative infinity \(`-0I`, `-0i`, `-0Ij`\), negative zero \(`-0.0`\), integral null/NaN \(`0N`, `0n`, `0Nj`\)
 - **Type System**: Dynamic typing with automatic promotion
 - **Null Handling**: IEEE 754 compliant null propagation
 
-### **Core Operator System** ✅
-- **Arithmetic**: `+` (Plus), `-` (Minus/Negate), `*` (Times), `%` (Divide/Reciprocal)
-- **Comparison**: `<` (Less), `>` (More), `=` (Equal)
-- **Logical**: `&` (Min/And), `|` (Max/Or), `~` (Not/Attribute)
-- **Other**: `^` (Shape), `!` (Enumerate/Key), `#` (Count/Take), `_` (Floor)
-- **Advanced**: `?` (Find/Random), `@` (Atom/Index), `.` (Apply/Execute), `,` (Enlist/Join)
+### **Native Operators, and meaningful glyphs** ✅
+- `!` monadic - enumerate
+- `!` dyadic, atomic right argument - mod \(modulo\)
+- `!` dyadic, vector right argument - rotate
+- `#` monadic - count
+- `#` dyadic - take
+- `$` monadic - format \(simple format\)
+- `$` dyadic, character vector right argument - form
+- `$` dyadic, right argument other than character vector - format \(format with specifier\)
+- `%` monadic - invert
+- `%` dyadic - divide
+- `&` dyadic - min 
+- `(` `)` - grouping separator
+- `,` monadic - enlist
+- `,` dyadic - join
+- `-` monadic, followed by space - change sign
+- `-` dyadic - subtract
+- `.` as last character to variable path - attribute path
+- `.` inside variable path - descend into value
+- `..` in variable path - descend into attribute
+- `.` as index for a dictionary - attribute dictionary
+- `.` monadic, list \(type 0\) argument - make dictionary
+- `.` monadic, character vector argument - execute
+- `.` monadic, dictionary argument - unmake dictionary
+- `.` dyadic, first argument is a function - dot apply
+- `.` dyadic, first argument is a variable - index at depth
+- `.` triadic, third argument is a verb - apply at depth
+- `.` triadic, third argument is `:` - error trap at depth
+- `.` tetradic - apply at depth with arguments
+- `/` with whitespace on the left - comment marker
+- `'` as the single item in an expression - Signal
+- `'` monadic - Signal
+- `:` REPL command - resume
+- `:` monadic - return
+- `::` with variable name to the left - Global Assign \(statement\)
+- `:` with variable name to the left - Assign \(statement\)
+- `:` with monadic verb to the left and no arguments - Monadic apply and assign 
+- `:` with dyadic verb to the left and arguments - Dyadic apply and assign
+- `:[` `]` variadic - conditional execute and assign \(statement\)
+- `<` monadic - grade up
+- `<` dyadic - less
+- `=` monadic - group
+- `=` dyadic - equals
+- `>` monadic - grade down
+- `>` dyadic - more
+- `?` monadic - uniques 
+- `?` dyadic with list or null \(type 6\) on the left - find
+- `?` dyadic with function left argument - inverse function
+- `?` triadic - apply inverse function
+- `@` monadic - Is Atom
+- `@` dyadic, path left argument, character vector right argument - execute at path
+- `@` dyadic, function left argument - shallow apply
+- `@` dyadic, variable left argument - shallow index 
+- `@` triadic, third argument is verb - shallow apply
+- `@` triadic, third argument is `:` - shallow error trap
+- `@` tetradic - shallow apply with arguments
+- `[` `]` with function to the left - Group and dot apply
+- `[` `]` with variable to the left and assignment or apply and assign to the right - Amend
+- `[` `]` with variable to the left with no assignment to the right - Group and index at depth
+- `\` at the start of a line \(whitespace allowed, `^\s*\\`\) - Marker for REPL command
+- `^` monadic - Shape
+- `^` dyadic - Power
+- `_` monadic - Floor
+- `_` as a prefix - system reserved verb or variable
+- `_` dyadic with integer left argument - drop
+- `_` dyadic with integer vector left argument - cut
+- `{` `}` - group and make function
+- `|` monadic - reverse order
+- `|` dyadic - max
+- `~` monadic, with numeric argument - not \(is zero, logical negation\)
+- `~` monadic, with symbol \(variable path\) argument - attribute handle
+- `~` dyadic - match
+- `+` monadic - flip \(transpose\)
+- `+` dyadic - add
+- `*` monadic - first or default
+- `*` dyadic - multiply
+- ` before a name or a string literal - symbol marker
+- `"` `"` (string literal) enclosing a single item - character
+- `"` `"` (string literal) enclosing multiple items - character vector
+- `;` inside grouping \(except enclosing quotes\) - list separator
+- `\n` inside grouping \(except enclosing quotes\) - list separator
+- `\n` in the REPL, outside grouping/enclosing - evaluate
 
-### **Form/Format Operators** ✅
-- **Form Operations**: `0$"123"` (char→int), `0j$"42"` (char→long), `0.0$"3.14"` (char→float)
-- **Format Operations**: `"    1"$42` (width padding), `"*"$1` (character fill), `"3.2"$3.14159` (precision)
-- **Identity Form**: `" "$"abc"` (character vector identity), `` ` `$symbol `` (symbol identity)
-- **Expression Evaluation**: `{}$("a+b";"a*b")` → `(8;15)` (evaluate string expressions with variables)
-- **Expression Form**: `{"x+y"}[2;3]` (dynamic expression evaluation)
-
-### **Core Adverb System** ✅
+### **Core Adverb System \(Iterations\)** ✅
 - **Over (`/`)**: `+/ 1 2 3 4 5` → `15` (fold/reduce)
 - **Scan (`\`)**: `+\ 1 2 3 4 5` → `(1;3;6;10;15)` (cumulative)
 - **Each (`'`)**: `-:' 1 2 3 4` → `(-1;-2;-3;-4)` (element-wise)
@@ -212,144 +189,158 @@ cd K3CSharp.Comparison && dotnet run
 - **Each-Right (`/:`)**: `1 2 3 +/: 4 5` → `(5 6 7;6 7 8)` (apply operation with entire left argument, for each right argument)
 - **Each-Pair (`':`)**: `,': 1 2 3 4` → `(2 1;3 2;4 3)` (apply operation to consecutive pairs, reversing left and right)
 - **Initialization**: `1 +/ 2 3 4 5` → `15` (with initial value)
-- **Adverbs for already modified verbs** 🆕:  `((1 2);(3 4)),/:\:((9 8);(7 6))` → `((1 2 9 8;1 2 7 6);(3 4 9 8;3 4 7 6))`
+- **Adverbs for already modified verbs** 🆕:  `((1 2);(3 4)),/:\:((9 8);(7 6))` → `((1 2 9 8;1 2 7 6);(3 4 9 8;3 4 7 6))` \(adjacent adverbs are nested iterations\)
 
-### **Statement Parsing System** ✅
-- **Assignment Statements**: `x: 42` (pure assignment returns null)
-- **Inline Assignment**: `1 + x: 42` (inline assignment returns value)
-- **Conditional Evaluation**: `:[condition;true_expr;false_expr]` - conditional execution
-- **Control Flow Statements**: 
-  - `do[count;expression]` - loop with count iterations
-  - `if[condition;expression]` - conditional execution
-  - `while[condition;expression]` - conditional loop
-- **Apply and Assign**: `x+:1` (increment and assign), `x-:2` (decrement and assign)
-- **Proper Precedence**: Statements have lower precedence than verbs but higher than separators
-- **LRS Compliance**: Full Long Right Scope statement parsing behavior
+### **Adverbs for Verbialized Nouns \(iterative indexing\)** ✅
+- `'` with matrix/tensor immediately to the left - Scatter Select
+- `/` with vector of indices immediately to the left - Transitive Closure (index traversal iteration with convergence)
+- `/` with transition matrix immediately to the left - State Transition (2D iterative index)
+- `\` with vector of indices immediately to the left - Transitive Closure with trace 
+- `\` with transition matrix immediately to the left - State Transition with trace
+- `':` with transition matrix immediately to the left - 2D Index each prior
 
-### **Pure LRS Parser with Variable Tracking** 🆕
-- **Parser-Time Variable Tracking**: Maintains list of defined variables during AST construction
-- **Multi-Line Script Support**: Variables defined in earlier lines available in subsequent lines
-- **Specification Compliance**: Per K3 spec, tracks assignment targets to allow proper parsing before evaluation
-- **Block Node Generation**: Multi-line scripts wrapped in Block nodes for sequential evaluation
-- **Variable Registration**: Regular assignments (`a:5`) register variables; apply-and-assign (`i+:1`) requires existing variables
-- **Safe Fallback**: Pure LRS mode with fallback to legacy parser for compatibility
+### **Amend, Index, Apply, Assign** ✅
+- **Simple assign**: `a:1 2 3 4`
+- **Slice extraction**: `m[3 4;1 2]`
+- **Sliced assignment**: `m[3 4;1 2]:((8 9);(7 3))`
+- **Modify and assign**: `i+:1` (increment), `x-:2` (decrement), `n*:3` (multiply-assign), etc.
 
 ### **Core Function System** ✅
 - **Anonymous Functions**: `{[x;y] x + y}`
 - **Function Assignment**: `func: {[x] x * 2}`
 - **Function Application**: `func2 . (4;5)`, `func1 @ 5` or `func2[3;5]`
-- **Projections**: `add . 5` creates `{[y] 5 + y}`
-- **Multi-statement**: Functions with semicolon-separated statements
-- **Modified Assignment Operators** 🆕: `i+: 1` (increment), `x-: 2` (decrement), `n*: 3` (multiply-assign)
-- **Parse Tree Verbs** 🆕: 
-  - **_parse**: Converts character vectors to parse tree representations - `_parse "1 + 2"` → `,"1 + 2"`
-  - **_eval**: Evaluates parse tree representations - `_eval ("+", 1, 2)` → `3`
+- **Projections**: `add . 5` creates `{[x] 5 + x}`
+- **Multi-statement**: Functions can have semicolon-separated or newline-separated statements
 
-### **Basic Mathematical Functions** ✅
+### **Attributes** ✅
+- **Dependencies** - Event system for automatic re-calculation
+- **Triggers** - Event system for execute on change
+- **UI Attributes not implemented** ❌ - .NET FFI is available for UI development, implementation of the K UI is not expected to be implemented.
+
+### **Conditionals** ✅
+- `:[]` - Conditional value
+- `do[]` - Fixed iteration
+- `if[]` - Conditional execution
+- `while[]` - Conditional iteration
+
+### **I/O and Communication** ✅
+#### **K Serialization System** ✅
+- **Binary Serialize (`_db`)**: Convert K data structures to binary format
+- **Binary Deserialize (`_bd`)**: Convert binary data back to K data structures
+#### **Numbered I/O verbs** ✅
+- `0:` monadic - read from file as text
+- `0:` dyadic - write to file as text
+- `1:` monadic - read from K data file using memory mapped access
+- `1:` dyadic - write to file as K data
+- `2:` monadic - read whole K data file
+- `2:` dyadic - FFI Load Assembly. See [Foreign Function Interface (FFI)](#foreign-function-interface-ffi)
+- `3:` monadic, list argument - Open IPC Port
+- `3:` monadic, integer argument - Close IPC Port
+- `3:` dyadic - IPC set \(asynchronous IPC\)
+- `4:` monadic - Type \(get variable type\)
+- `4:` dyadic - IPC get \(synchronous IPC\)
+- `5:` monadic - String Representation
+- `5:` dyadic - Append to file as text
+- `6:` monadic - read from file as raw bytes
+- `6:` dyadic - write to file as raw bytes
+
+### **System Variables and Functions** ✅
+- **Internal Info** `_d` (K dir), `_v` (K vars), `_i` (index), `_f` (self-referent function), `_n` (null singleton)
+- **Process Info**`_k` (version), `_p` (port), `_P` (PID), `_w` (who), `_u` (user)
+- **System Info** `_s` (space), `_h` (host), `_a` (address), `_o` (os), `_c` (cores), `_r` (RAM), `_m` (mach id)
 - **Trigonometric**: `_sin`, `_cos`, `_tan`, `_asin`, `_acos`, `_atan`
 - **Hyperbolic**: `_sinh`, `_cosh`, `_tanh`
 - **Exponential**: `_exp`, `_log`, `_sqrt`, `_sqr`
-- **Arithmetic**: `_abs`, `_floor`, `_ceil` (ceiling function)
-- **Bitwise Operations**: `_and`, `_or`, `_xor`, `_rot`, `_shift` (bitwise operators)
+- **Arithmetic**: `_abs`, `_floor`, `_ceil`, `_div` (integer division)
+- **Bitwise Operations**: `_and`, `_or`, `_xor`, `_rot`, `_shift`
 - **Matrix**: `_dot`, `_mul`, `_inv`, `_lsq` (least squares regression)
-- **Time Functions**: Complete time and date manipulation functions (_t, _T, _gtime, _ltime, _jd, _dj, _lt)
-  - **_t**: Niladic function returning current K-time (seconds since 12:00 AM, January 1, 2035 UTC)
-  - **_T**: Niladic function returning current time in Days since base timedate 12:00 AM, January 1, 2035 UTC)
-  - **_gtime**: Converts K-time to date/time vector (year, month, day, hour, minute, second)
+- **Time Functions**: Complete time and date manipulation functions 
+  - **_t**: current K-time in Seconds since 12:00 AM, January 1, 2035 UTC
+  - **_T**: current time in Days since 12:00 AM, January 1, 2035 UTC
+  - **_gtime**: Converts K-time to date/time vector \(\"yyyyMMdd\";\"hhmmss\"\)
   - **_ltime**: Converts K-time to local time vector with timezone offset
-  - **_jd**: Converts date to Julian date (K Julian Date is days since January 1, 2035)
-  - **_dj**: Converts Julian date back to year/month/day format
+  - **_jd**: Converts date to Julian date \(K Julian Date is days since January 1, 2035\)
+  - **_dj**: Converts Julian date back to yyyyMMdd format
   - **_lt**: Adds GMT-to-local-time offset in seconds to a K-time value
+- **Search Functions**: `_in` (search), `_bin` (binary search) 
+- **String Operations**: `_sm` (string match), `_ss` (string search), `_ssr` (string search and replace), `_ci` (character from integer), `_ic` (integer from character)
+- **List Operations**: `_lin` (list intersection indices), `_sv` (scalar from vector), `_vs` (vector from scalar), `_dv` (delete value) `_di` (delete item) 
+- **Pattern Matching**: Advanced regex-like pattern matching for `_sm`, `_ss` and `_ssr` based on .NET regex, with 1000 ms timeout, customizable via `.m.regex.timeout`
 
-### **K Serialization System** ✅
-- **Binary Serialize (`_db`)**: Convert K data structures to binary format
-- **Binary Deserialize (`_bd`)**: Convert binary data back to K data structures
-- **Complete Type Support**: All 11 K data types (atomic, vectors, lists, dictionaries, functions)
-- **K Specification Compliance**: Exact binary format compatibility with other K implementations
-- **Time Functions**: Complete time and date manipulation functions (_t, _T, _gtime, _ltime, _jd, _dj, _lt)
-  - **_t**: Niladic function returning current K-time (seconds since 12:00 AM, January 1, 2035 UTC)
-  - **_T**: Niladic function returning current time as float days since base date
-  - **_gtime**: Converts K-time to date/time vector (year, month, day, hour, minute, second)
-  - **_ltime**: Converts K-time to local time vector with timezone offset
-  - **_jd**: Converts date to Julian date (days since January 1, 2035)
-  - **_dj**: Converts Julian date back to year/month/day format
-  - **_lt**: Adds GMT-to-local-time offset to K-time values
-- **Round-Trip Validation**: Perfect data preservation through serialize/deserialize cycles
+---
+
+## **📡 IPC Operations (Contributed by Michal Wallace @tangentstorm)**
+
+**Operations 3:, 4:** - Complete k version 3 Inter-Process Communication system
+- **3: (IPC Get/Connection)** - Open/close connections and asynchronous messaging
+  - `3:(`host;port)` - Open connection, returns handle
+  - `3:handle` - Close connection
+  - `handle 3:data` - Send asynchronous request
+- **4: (IPC Set/Synchronous)** - Synchronous remote execution
+  - `handle 4:data` - Send sync request, returns remote reply
+  - `(`host;port) 4:data` - Open, send, and close in one step
+
+**IPC-Related System Values:**
+- **_i** - Listening port number (0 when inactive)
+- **_h** - Preferred host for connection tuples
+- **_w** - Current incoming socket handle during .m.g/.m.s/.m.c execution
+
+**K Tree Hooks:**
+- **.m.g** - Handles synchronous requests (default: executes K code, returns (status;result))
+- **.m.s** - Handles asynchronous requests
+- **.m.c** - Runs when connection closes
+
+**Server Startup:**
+```bash
+ksharp -i PORT              # Start IPC listener in REPL mode
+ksharp -i PORT script.k    # Start listener, run script, then serve IPC
+```
+
+---
+
+## **⚙ Statement Parsing System**
+**K LRS Compliant**
+* Left-to-right evaluation of expressions
+* Grouped elements (parentheses, brackets, braces) do have precedence
+* No verb-specific precedence (e.g., no EMDAS), only positional 
+* Adverbs, adnouns and brackets bind to the item on its left
+* Long Right Scope parsing: Everything to the right of a verb is its right argument (resulting in right-to-left precedence within an expression)
+* **Parse Tree Verbs** 🆕: 
+  - **_parse**: Converts character vectors to parse tree representations - `_parse "1 + 2"` → ``(`"+", 1, 2)``
+  - **_eval**: Evaluates parse tree representations - ``_eval (`"+", 1, 2)`` → `3`
+
+---
+
+## 🔧 **K version 3 features not available in ksharp**
+
+- **❌ K UI `` `show`` and `` `hide``**
+- **❌ Attributes related to UI**
+- **❌ Debugging and Tracing**
+- **❌ K runtime (.kr) and execution without console**
+
+---
+
+## **🎉 ksharp Enhancements Over K version 3**
+- ✅ **Smart Integer Division and exponentiation**: `4 % 2` → `2`, `2 ^ 3` → `8` (integer, not float)
+- ✅ **64-bit Long Integers**: `123456789012345j` (modeled on e333j)
+- ✅ **Compact Symbol Vectors**: `` `a`b`c `` (no spaces)
+- ✅ **Compact List and Dictionary Display**: Semicolon-separated format ``.(`a;1;);(`b;2;))``
+- ✅ **Additional system variables and functions inspired on e333j**: `_P` `_o` `_c` `_r` `_m` `_y` `_div` (truncating integer division) `_and` `_or` `_xor` `_not` `_rot` `_shift` (bitwise)
+- ✅ **No denorm dictionaries**:   ``.((`a;1);(`a;2)) is .,(`a;2;) and not .((`a;1;);(`a;2;))``
+- ✅ **Parse and eval**: `_parse "1 + 2"` ``_eval (`"+";1;2)``
+- ✅ **LRS for lists in brackets**: `a:3;+[a+:7;a+4]` evaluates `a+:7` before `a+4` because `a+4` is outside the scope of `a+:7`
+- ✅ **Improved Compatibility with k version 2**: `_n?i` → `i` and execute at context `d@s` or `d[s]` (symbol left argument and character vector right argument)
+- ✅ **.NET type handling**
 
 ### **Foreign Function Interface (FFI)** ✅
-- ✅ **.NET Assembly Loading**: Dynamic loading of .NET libraries and assemblies with `2:` operator
-- ✅ **Method Invocation**: Complete calling of .NET methods from K code with automatic type conversion
-- ✅ **Type Mapping**: Seamless conversion between K data types and .NET types
-- ✅ **Syntax Extensions**: Working assembly loading and type inspection with `_dotnet` tree
-- ✅ **Performance Optimizations**: Type caching and object registry for efficient operations
-- ✅ **Error Handling**: Comprehensive .NET exception handling and propagation to K
+- **Method Invocation**: Complete calling of .NET methods from K code with automatic type conversion
+- **Type Mapping**: Automatic conversion K data types -> .NET types, .NET objects copied to K dictionaries with hints
+- **Static Members**: Loaded into `._dotnet` tree
+- **Performance Optimizations**: Type caching and object registry for efficient operations
+- **Error Handling**: Comprehensive .NET exception handling and propagation to K
 
-### **Advanced List Operations** ✅
-- **Search Functions**: `_in` (search), `_bin` (binary search), `_lin` (linear search)
-- **String Operations**: `_ss` (string search), `_ssr` (string search and replace), `_ci` (character from integer), `_ic` (integer from character)
-- **List Operations**: `_sv` (scalar from vector), `_vs` (vector from scalar), `_dv` (delete value) `_di` (delete item) 
-- **Pattern Matching**: Advanced regex-like pattern matching with `_sm` based on .NET regex, with 1000 ms timeout, customizable via `.m.regex.timeout`
-
-### **Modified Assignment Operators** 🆕
-```k3
-// Increment and assign operators
-i: 0
-i+: 1           // i = i + 1 → i becomes 1
-i+: 5           // i = i + 5 → i becomes 6
-
-// Decrement and assign operators  
-x: 10
-x-: 2           // x = x - 2 → x becomes 8
-x-: 3           // x = x - 3 → x becomes 5
-
-// Multiply and assign operators
-n: 3
-n*: 2           // n = n * 2 → n becomes 6
-n*: 4           // n = n * 4 → n becomes 24
-
-// All modified assignment operators supported:
-i+: 1    // Increment assign (i = i + 1)
-i-: 1    // Decrement assign (i = i - 1)  
-i*: 1    // Multiply assign (i = i * 1)
-i/: 1    // Divide assign (i = i / 1)
-i%: 1    // Modulus assign (i = i % 1)
-i^: 1    // Power assign (i = i ^ 1)
-i&: 1    // Min assign (i = i & 1)
-i|: 1    // Max assign (i = i | 1)
-i<: 1    // Less assign (i = i < 1)
-i>: 1    // Greater assign (i = i > 1)
-i=: 1    // Equal assign (i = i = 1)
-i,: 1    // Join assign (i = i , 1)
-i#: 1    // Count assign (i = i # 1)
-i_: 1    // Floor assign (i = i _ 1)
-i?: 1    // Find assign (i = i ? 1)
-i$: 1    // Format assign (i = i $ 1)
-i@: 1    // Type assign (i = i @ 1)
-
-// Works with control flow
-i: 0; while[i < 10; i+: 1]  // Loop from 0 to 9
-```
-
-### **New Operators** ✅
-```k3
-// Group operator (=) - groups identical values and returns indices
-=3 3 8 7 5 7 3 8 4 4 9 2 7 6 0 7 8 7 0 1
-// Returns: (0 1 6;2 7 16;3 5 12 15 17;,4;8 9;,10;,11;,13;14 18;,19)
-
-// Dictionary operations
-d: .((`a;1);(`b;2))
-!d              // Returns: `a`b (keys)
-.d              // Returns: ((`a;1;);(`b;2;)) (triplets)
-d@_n            // Returns: 1 2 (all values)
-d[]             // Returns: 1 2 (equivalent to @_n)
-
-// Vector null indexing
-v: 1 2 3 4
-v@_n            // Returns: 1 2 3 4 (all elements)
-v[]             // Returns: 1 2 3 4 (equivalent to @_n)
-```
-
-```k3
+**Assembly Loading**
+```k
 // Load System.Private.CoreLib assembly
 "System.Private.CoreLib" 2: `System.String
 
@@ -367,10 +358,10 @@ v[]             // Returns: 1 2 3 4 (equivalent to @_n)
 
 ### **Hint System with _gethint and _sethint**
 
-The `_gethint` and `sethint` verbs provide type marshalling control and object creation hints.
+The `_gethint` and `_sethint` verbs provide type marshalling control and object creation hints.
 
-```k3
-// Create a .NET string object from K3 string
+```k
+// Create a .NET string object from a k string
 s:"hello" 
 s _sethint `string
 
@@ -404,7 +395,7 @@ s _gethint
 
 K3CSharp includes automatic object lifecycle management with explicit disposal capabilities.
 
-```k3
+```k
 // Bind .NET dll
 complex:`System.Runtime.Numerics.dll 2: `System.Numerics.Complex
 
@@ -433,7 +424,7 @@ NOTE: When a .NET Object is instantiated, a copy of its data will be mapped onto
 
 The `._dotnet` global tree stores loaded assemblies and type information for efficient reuse.
 
-```k3
+```k
 // Access static methods for loaded assemblies
 conj_func: ._dotnet.System.Numerics.Complex.Conjugate
 
@@ -452,7 +443,7 @@ conj_func: ._dotnet.System.Numerics.Complex.Conjugate
 
 Call .NET methods on object instances using dot notation.
 
-```k3
+```k
 // Create object
 str: "hello" _hint `object
 
@@ -478,7 +469,7 @@ str.Chars[0]       // Indexer access
 
 The FFI system provides comprehensive error handling:
 
-```k3
+```k
 // Invalid assembly
 "NonExistent.dll" 2: `SomeType  // Error: Assembly not found
 
@@ -505,121 +496,28 @@ obj.NonExistentMethod  // Error: Method not found
 
 ---
 
-## 🔧 **Advanced Features**
+## 🏗️ **Architecture**
 
-### **Enhanced Mathematical Functions** ✅
-Complete implementation of advanced mathematical operators following K3 specifications:
-
-```k3
-// Least squares regression
-(1 2 3.0) _lsq (1 1 1.0;1 2 4.0)  // Returns: 0.5 0.6428571
-
-// Ceiling function
-_ceil 4.7        // Returns: 5.0
-_ceil -3.2       // Returns: -3.0
-
-// Bitwise operations
-7 _and 3         // Returns: 3
-5 _or 3          // Returns: 7
-6 _xor 3         // Returns: 5
-
-// Bit manipulation
-32 _rot 1         // Returns: 64 (rotate left)
-32 _shift 1       // Returns: 64 (shift left)
+###  **Project Structure**
+```
+K3CSharp/
+├── ApplyTweaks/                 # Tool MCP Server for applying known_differences.txt to a result
+├── K3CSharp/                    # Core interpreter implementation
+├── K3CSharp.Comparison/         # k.exe comparison framework
+├── K3CSharp.IPC/                # k.exe Inter-Process Communication (Contributed by Michal Wallace @tangentstorm)
+├── K3CSharp.IPC.Tests/          # k.exe IPC test framework (Contributed by Michal Wallace @tangentstorm)
+├── K3CSharp.MCP/                # Tool MCP Server for running a ksharp session (Contributed by Michal Wallace @tangentstorm)
+├── K3CSharp.Comparison/         # k.exe comparison framework
+├── K3CSharp.Tests/              # Unit tests 
+├── KMCPServer/                  # Tool MCP Server for running an external K/Q interpreter with a command or a script
+└── known_differences.txt        # Known differences configuration
 ```
 
-### **Smart Division Rules** ✅
-```k3
-4 % 2           // Returns 2 (exact division → integer)
-5 % 2           // Returns 2.5 (non-exact → float)
-4 8 % 2         // Returns (2;4) (all exact → integer)
-5 10 % 2        // Returns (2.5;5.0) (any non-exact → float)
-```
-
-### **Type Promotion**
-```k3
-1 + 2L          // Returns 3L (Integer + Long → Long)
-1 + 1.5         // Returns 2.5 (Integer + Float → Float)
-1 2 3 + 1.5     // Returns (2.5;3.5;4.5) (vector promotion)
-```
-
-### **Enhanced Operators**
-```k3
-// ! operator (mod/rotate)
-7!3               // Returns 1 (integer mod)
-1 2 3 4 ! 2      // Returns (1;0;1;0) (vector mod)
-2 ! 1 2 3 4      // Returns (3;4;1;2) (vector rotation)
-
-// _ operator (drop/cut)
-4 _ 0 1 2 3 4 5 6 7    // Returns (4;5;6;7) (drop from start)
--4 _ 0 1 2 3 4 5 6 7   // Returns (0;1;2;3) (drop from end)
-```
-
-### **Underscore Ambiguity Resolution** 🆕
-```k3
-foo_abc          // Single identifier (name precedence)
-16_ abc          // 16 _ abc (unambiguous operator)
-foo16_23b        // Single identifier (complex name)
-a _ b            // a _ b (unambiguous operator)
-```
-
----
-
-## 🧪 **Testing**
-
-### **Comparison Testing** 🆕
-```bash
-cd K3CSharp.Comparison
-dotnet run
-```
-- **853 validation scenarios** compared against k.exe reference
-- **Comprehensive validation** with intelligent formatting detection
-- **Batch processing** to prevent timeouts
-- **Detailed reporting** with `comparison_table.txt`
-
-### **� Key Test Results Achieved**
-- **`$"a"` → `,"a"`** ✅ (1 character, gets comma)
-- **`$42.5` → `"42.5"`** ✅ (4 characters, no comma)
-- **`$(1;2.5;"hello";`symbol)` → `(,"1";"2.5";"hello";"symbol")` ✅ (mixed vector enlistment)
-- **`^ (1 2 3)` → `,3`** ✅ (shape operator single element)
-- **`5:42` → `"42"`** ✅ (string representation, no comma)
-
-### **Strong Foundation Implementation** 
-- **Perfect test organization** with systematic form/format naming
-- **High-quality codebase** with excellent maintainability
-- **Clean repository structure** with no obsolete files
-- **Comprehensive functionality** with solid foundation for remaining features
-
-### **Critical Language Features**
-- **Shape operator specification compliance**: `^ 42` → `!0` (correct empty vector display)
-- **Dictionary null value preservation**: Proper handling of null entries in dictionaries
-- **Float null arithmetic**: IEEE 754 compliance with correct `0n` propagation
-- **Variable scoping improvements**: Enhanced global variable access behavior
-- **Dictionary indexing fixes**: Robust parsing and evaluation
-
-### **Smart Type System Enhancements**
-- **Smart Integer Division**: `4 % 2` → `2` (integer when exact)
-- **64-bit Long Integer Support**: `123456789012345L` for large numbers
-- **Intelligent Type Promotion**: Optimal result types for operations
-- **Enhanced Precision Control**: Configurable floating-point display
-
-### **Test Organization & Quality**
-- **Individual test extraction**: Split complex tests into focused scenarios
-- **Enhanced test coverage**: 50+ new individual tests for special values
-- **Better debugging**: Individual test failures for precise issue identification
-- **Comprehensive validation**: Complete coverage of edge cases and boundary conditions
-
-### **Enhanced User Experience**
-- **Compact Display Formats**: Cleaner output for vectors and dictionaries
-- **Improved Error Messages**: Better feedback for debugging
-
-### **Form and Format Operators Implementation** ✅
-- **Complete $ operator support**: Both monadic (`$value`) and dyadic (`format$value`) operations
-- **Form Operations**: Type conversion with proper left arguments (`0`, `0j`, `0.0`, `` ` ``, `" "`, `{}`)
-- **Format Operations**: Numeric formatting with width, precision, and padding specifiers
-- **Character Vector Identity**: `" "$"abc"` → `"abc"` (proper character vector handling)
-- **Symbol Identity**: `` ` `$symbol `` → `"symbol"` (symbol to string conversion)
-- **Expression Evaluation**: `{"x+y"}[2;3]` → `5` (dynamic expression with variables)
+### **Core Components**
+- **Lexer.cs**: Tokenizes input into tokens with underscore ambiguity resolution
+- **Parser.cs**: Recursive descent parser building AST with adverb support
+- **Evaluator.cs**: AST traversal and evaluation with complete operator system
+- **K3Value.cs**: Type system and value operations
 
 ---
 
@@ -627,7 +525,7 @@ dotnet run
 
 ### **Prerequisites**
 
-**.NET 8.0 SDK** is required to build and run K3CSharp.
+**.NET 8.0 SDK** is required to build and run ksharp.
 
 #### **Windows**
 ```powershell
@@ -796,87 +694,20 @@ source ~/.zshrc
 
 ---
 
-## **Development Plan Status**: **3.2% functionality remaining** for complete K3 specification compliance
-
-Based on comprehensive analysis of current implementation status, K3CSharp has achieved **96.8% K3 specification compliance** with **3.2% functionality remaining**. The addition of K3 IPC functionality by Michal Wallace provides complete inter-process communication capabilities.
-
-### **I/O System Status** 
-**Excellent Progress**: Comprehensive I/O system implementation with most file handle operations fully functional.
-
-#### **✅ Fully Implemented I/O Operations**
-
-**Monadic Operations:**
-- **0: (Read Text)** - ✅ Complete file reading as character vectors with proper encoding
-- **1: (Read Memory Mapped)** - ✅ Optimized file reading for fixed-width vectors  
-- **2: (Read K Data)** - ✅ Complete binary K data file reading with headers
-
-**Dyadic Operations:**
-- **0: (Write Text)** - ✅ Complete file writing with formatting and encoding
-- **1: (Write K Data)** - ✅ Complete binary K data file writing with headers
-- **2: (FFI Assembly Load)** - ✅ Complete .NET assembly loading and type inspection
-- **5: (Append Data)** - ✅ Complete data appending to files
-
-#### **⚠️ Partially Implemented I/O Operations**
-
-**Dyadic Operations:**
-- **4: (Type)** - ⚠️ Partial type information retrieval for K data types
-- **5: (String Representation)** - ⚠️ Partial string representation with proper escaping
-- **6: (Read Bytes)** - ⚠️ Partial binary file operations at byte level
-
-#### **✅ IPC Operations (Contributed by Michal Wallace)**
-
-**Operations 3:, 4:** - Complete K3 Inter-Process Communication system
-- **3: (IPC Get/Connection)** - Open/close connections and asynchronous messaging
-  - `3:(`host;port)` - Open connection, returns handle
-  - `3:handle` - Close connection
-  - `handle 3:data` - Send asynchronous request
-- **4: (IPC Set/Synchronous)** - Synchronous remote execution
-  - `handle 4:data` - Send sync request, returns remote reply
-  - `(`host;port) 4:data` - Open, send, and close in one step
-
-**IPC-Related System Values:**
-- **_i** - Listening port number (0 when inactive)
-- **_h** - Preferred host for connection tuples
-- **_w** - Current incoming socket handle during .m.g/.m.s/.m.c execution
-
-**K Tree Hooks:**
-- **.m.g** - Handles synchronous requests (default: executes K code, returns (status;result))
-- **.m.s** - Handles asynchronous requests
-- **.m.c** - Runs when connection closes
-
-**Server Startup:**
-```bash
-ksharp -i PORT              # Start IPC listener in REPL mode
-ksharp -i PORT script.k    # Start listener, run script, then serve IPC
-```
-
-#### **❌ Reserved for Future Use**
-
-**Operations 7:, 8:, 9:** - Reserved for advanced system operations
-- **7:** Direct memory access and P/Invoke
-- **8:** Shared memory, fork and create process
-- **9:** Threads and fibers
-
-### **Implementation Status Summary**
-- **✅ Complete**: 8 out of 12 I/O operations (67%)
-- **⚠️ Partial**: 3 out of 12 I/O operations (25%)
-- **🎯 Priority**: Complete binary write (6:) and edge cases for full I/O functionality
-
-### **Updated Project Completion**
-With the I/O system mostly implemented and comprehensive adverb support, K3CSharp has comprehensive K3 specification compliance with I/O operations and edge cases remaining for complete functionality. capabilities that set K3CSharp apart from other implementations.
-
-- **[K User Manual](https://nsl.com/k/training/kusrlite.pdf)** - Complete K language guide with tutorials and examples
-- **[K Reference Manual](https://nsl.com/k/training/kreflite.pdf)** - Detailed reference for all K functions, operators, and concepts
-
-These official K documentation resources provide in-depth coverage of:
-- Language syntax and semantics
-- Complete function and operator reference  
-- Programming examples and best practices
-- Advanced features and optimization techniques
-
----
-
 ## 🤝 **Contributing**
+
+### Report issues
+Please include:
+1. Issue Summary 
+2. Description of the problem 
+3. Expected Result 
+4. Steps to reproduce, with a code snippet whenever possible 
+
+Please note: I use a Windows 10 machine for development. OS-specific issues should be very rare, but I will not be able to address issues that can be reproduced only on a different OS
+
+### Contribute code
+
+**VERY IMPORTANT** By submitting a contribution you agree that it will be subject to the terms of the [MIT License](https://mit-license.org/)
 
 1. Fork the repository
 2. Create a feature branch
@@ -889,34 +720,29 @@ These official K documentation resources provide in-depth coverage of:
 
 ## 👨‍💻 **Authorship**
 
-This K3 interpreter implementation was coded initially by **SWE-1.5** with significant contributions from **Kimi K-2.5** and **Claude Opus/Sonnet** based on specifications, direction, prompts, comments and manual fixes provided by **Eusebio Rufian-Zilbermann**.
+This ksharp interpreter implementation was coded originally by **SWE-1.5 and 1.6** with significant contributions from **Kimi K-2.5 and 2.6** and **Claude Opus/Sonnet 4.5, 4.6 and 4.7** based on specifications, direction, prompts, comments and manual fixes provided by **Eusebio Rufian-Zilbermann**.
 
 ### **Major Contributors**
 
-- **Michal Wallace** (@tangentstorm) - Contributed the complete K3 IPC (Inter-Process Communication) system including TCP-based messaging, K tree hooks (.m.g, .m.s, .m.c), and the 3:/4: IPC verbs (PR #9)
+- **Michal Wallace** (@tangentstorm) 
+  * Complete K version 3 IPC (Inter-Process Communication) system including TCP-based messaging, K tree hooks (.m.g, .m.s, .m.c), and the 3:/4: IPC verbs
+  * MCP Server for agent interoperation with a ksharp persistent session
+  * Various bugfixes
 
 ### **Acknowledgements**
 
-The following people have been fundamental to the creation and development of this project. I am very thankful for their influence. Without them, probably this interpreter would not even exist.
+In addition to direct contributors, the following people have been fundamental to the creation and development of this project. I am very thankful for their influence. Without them, it is possible that this interpreter would not exist.
 
 - **Arthur Whitney** - Creator of the K and Q languages
 - **Adam Jacobs** - His comments and insight over the years regarding the K interpreter have provided invaluable inspiration and information.
 - **Joel Kaplan** - He gave me the chance to learn K. His warning over a decade ago "Once you learn K it will change your mind and you will never think about programming the same way" has proven to be remarkably accurate.
 - **Stevan Apter** - His K parser at nsl.com has been a really helpful source of inspiration and reference. Stevan, together with **Sasha Katsman** and **Michael Rosenberg**, greatly helped in my understanding of traditional "idiomatic K".
-- **John Earnest** - His oK (K5 interpreter) was an important inspiration for deciding to develop ksharp. Additionally, his regular questioning of AI assisted development has been an outstanding motivation for pushing the limits and exploring what's possible.
+- **John Earnest** - His oK interpreter was an important inspiration for deciding to develop ksharp. Additionally, his regular questioning of AI assisted development has been an outstanding motivation for pushing the limits and exploring what's possible.
 
 ## Note regarding project name
 
-This repository is named ksharp because it is related to the K language and C#. I am using K3Sharp as the name of the project because it is derived primarily from K version 3.x 
-
-This project however is NOT related or connected to ksharp.org (which is a project that implements a quite different functional programming language, unrelated to the K language)
-
-## Development Approach
-- **Test-Driven Development**: Every feature includes comprehensive test coverage
-- **Iterative Implementation**: Features built incrementally with validation
-- **Code Quality**: Clean, maintainable C# code following best practices
-- **Advanced Features**: Function projections, adverb chaining, and hybrid function storage
+This project is ksharp in all lowercase, because it is an interpreter for the k language written in C sharp. Unfortunately there are other projects with very similar names that differ just in capitalization, like Ksharp kSharp, KSHarp, etc. This project is not related to any of them and the name ksharp is not intended to claim any relationship to any of them, the only implied relationships are the k language (as the model) and C sharp (as the tool)
 
 ---
 
-**🚀 Try it out: `dotnet run` and start exploring K3!**
+**🚀 Try it out: `dotnet run` and start exploring ksharp!**

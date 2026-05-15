@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Michal Wallace
+//
+// Licensed under the MIT License. See the LICENSE.txt file for details.
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using K3CSharp.MCP;

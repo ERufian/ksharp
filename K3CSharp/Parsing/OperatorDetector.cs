@@ -1,3 +1,9 @@
+// Copyright (c) 2026 Eusebio Rufian-Zilbermann
+//
+// This software is licensed under the terms of the  **MIT License with Commons Clause**.
+// You are free to use, modify, and distribute it (including in commercial products), provided you include attribution and do not sell the software (or a product whose value derives substantially from this software) itself.
+//
+// Full license text: [LICENSE.txt](https://github.com/ERufian/ksharp/blob/main/LICENSE.txt)
 using System;
 
 namespace K3CSharp.Parsing

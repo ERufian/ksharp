@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Michal Wallace
+//
+// Licensed under the MIT License. See the LICENSE.txt file for details.
 using System;
 
 namespace K3CSharp.IPC
