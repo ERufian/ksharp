@@ -243,7 +243,13 @@ namespace K3CSharp
                 return list.VectorType ?? 0; // Use stored type, default to mixed list if not set
             }
             
-            // For non-empty vectors, determine from element types
+            // If VectorType is explicitly set, respect it (e.g., forced mixed list)
+            if (list.VectorType.HasValue)
+            {
+                return list.VectorType.Value;
+            }
+            
+            // For non-empty vectors without explicit type, determine from element types
             var firstElement = list.Elements[0];
             if (list.Elements.All(e => e is IntegerValue || e is LongValue))
                 return -1; // Integer vector

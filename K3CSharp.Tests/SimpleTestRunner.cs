@@ -1743,11 +1743,11 @@ namespace K3CSharp.Tests
 
                 // New I/O verb tests for 5: and 6: operations
 
-                ("io_append_simple.k", ""),
+                ("io_append_simple.k", "6"),
 
-                ("io_append_basic.k", ""),
+                ("io_append_basic.k", "(1;2;\"hello\";3;4;\"world\")"),
 
-                ("io_append_multiple.k", ""),
+                ("io_append_multiple.k", "(1;2.0;3;4.0;5;6.0)"),
 
                 ("io_read_bytes_basic.k", "\"\\357\\273\\277hello\\r\\n\""), // \357\273\277 is the BOM
 

@@ -643,43 +643,11 @@ public partial class Evaluator
             // Ensure .l extension
             path = EnsureLExtension(path);
             
-            // Serialize the right argument using _bd function
-            var bdResult = BdFunction(right);
+            // Write K data file using shared helper
+            WriteKDataFile(path, right);
             
-            if (bdResult is VectorValue bdVector && bdVector.VectorType == -3)
-            {
-                // Convert character vector back to bytes
-                var bdBytes = new List<byte>();
-                foreach (var element in bdVector.Elements.OfType<CharacterValue>())
-                {
-                    bdBytes.Add((byte)element.Value[0]);
-                }
-                
-                // Skip first 8 bytes (header and length) to get data portion
-                if (bdBytes.Count < 8)
-                {
-                    throw new Exception("Serialized data too short");
-                }
-                
-                var dataBytes = bdBytes.Skip(8).ToArray();
-                
-                // Create file with standard header: FD FF FF FF 01 00 00 00
-                byte[] fileHeader = new byte[] { 0xFD, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00 };
-                
-                // Write file: header + data
-                var fileBytes = new List<byte>();
-                fileBytes.AddRange(fileHeader);
-                fileBytes.AddRange(dataBytes);
-                
-                File.WriteAllBytes(path, fileBytes.ToArray());
-                
-                // Return null per specification
-                return new NullValue();
-            }
-            else
-            {
-                throw new Exception("_bd function did not return character vector");
-            }
+            // Return null per specification
+            return new NullValue();
         }
         catch (Exception ex)
         {
@@ -741,60 +709,215 @@ public partial class Evaluator
     {
         try
         {
-            string path;
-            
-            // Handle left argument (path): symbol or character vector
-            path = left switch
+            string path = GetPathFromValue(left);
+            path = EnsureLExtension(path);
+
+            // Ensure right argument is treated as a general list of elements to append.
+            // Always extract elements from VectorValue to handle typed vectors that
+            // may have been auto-detected (e.g., (1;2) becoming an integer vector).
+            VectorValue newList;
+            if (right is VectorValue rightVec)
             {
-                SymbolValue sym => sym.Value,
-                CharacterValue charVal => charVal.Value.ToString(),
-                _ => throw new Exception("5: output path must be symbol or character vector")
-            };
-            
-            // Handle standard output (not applicable for append - redirect to WriteText)
-            if (string.IsNullOrEmpty(path))
-            {
-                // For append to standard output, just write to standard output
-                WriteToStandardOutput(right);
-                return new NullValue(); // Return null as specified
-            }
-            
-            // Append to file with UTF-8 encoding and platform-specific line endings
-            using var fileStream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.None);
-            using var streamWriter = new StreamWriter(fileStream, System.Text.Encoding.UTF8);
-            
-            string lineEnding = Environment.NewLine; // Platform-specific line endings
-            
-            // Handle right argument (data to append) - same logic as WriteText
-            if (right is VectorValue vec)
-            {
-                // Check if this is a list of lists (structured data with separator)
-                // Only treat as structured data if elements are actual nested vectors (not character vectors)
-                if (vec.Elements.Count > 0 && vec.Elements[0] is VectorValue nestedVec && nestedVec.VectorType != -3)
-                {
-                    // This is structured data - write as fields with separators
-                    WriteStructuredData(streamWriter, vec, lineEnding);
-                }
-                else
-                {
-                    // This is a simple list - write each item on its own line
-                    WriteSimpleList(streamWriter, vec, lineEnding);
-                }
+                newList = new VectorValue(new List<K3Value>(rightVec.Elements), 0);
             }
             else
             {
-                // Single item - write it and add line ending
-                streamWriter.Write(right.ToString());
-                streamWriter.Write(lineEnding);
+                newList = new VectorValue(new List<K3Value> { right }, 0);
             }
-            
-            streamWriter.Flush();
-            return new NullValue(); // Return null as specified
+
+            // If file does not exist, behave like dyadic 1: but return the count
+            if (!File.Exists(path))
+            {
+                WriteKDataFile(path, newList);
+                return new IntegerValue(newList.Elements.Count);
+            }
+
+            // Try optimized in-place append first; fall back to full re-serialization on failure
+            if (TryOptimizedAppend(path, newList, out int newCount))
+            {
+                return new IntegerValue(newCount);
+            }
+
+            return FullAppend(path, newList);
         }
         catch (Exception ex)
         {
-            // Convert exceptions to K signals with same format as other I/O verbs
             throw new Exception($"5: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Optimized append that updates the list count and appends element data
+    /// without reading/writing the entire file. Only works for general lists.
+    /// </summary>
+    private bool TryOptimizedAppend(string path, VectorValue newList, out int newCount)
+    {
+        newCount = 0;
+
+        try
+        {
+            using var fileStream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+            // Read and verify file header (8 bytes)
+            byte[] fileHeader = new byte[8];
+            if (fileStream.Read(fileHeader, 0, 8) != 8)
+                return false;
+
+            byte[] expectedHeader = new byte[] { 0xFD, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00 };
+            for (int i = 0; i < 8; i++)
+            {
+                if (fileHeader[i] != expectedHeader[i])
+                    return false;
+            }
+
+            // Read list type and count (8 bytes at offset 8)
+            byte[] listHeader = new byte[8];
+            if (fileStream.Read(listHeader, 0, 8) != 8)
+                return false;
+
+            int listType = BitConverter.ToInt32(listHeader, 0);
+            int listCount = BitConverter.ToInt32(listHeader, 4);
+
+            // Only optimize for general lists (type 0)
+            if (listType != 0)
+                return false;
+
+            // Serialize new data using _bd
+            var bdResult = BdFunction(newList);
+            if (!(bdResult is VectorValue bdVector && bdVector.VectorType == -3))
+                return false;
+
+            var bdBytes = new List<byte>();
+            foreach (var element in bdVector.Elements.OfType<CharacterValue>())
+            {
+                bdBytes.Add((byte)element.Value[0]);
+            }
+
+            // Need at least 16 bytes (8-byte message header + 8-byte list header)
+            if (bdBytes.Count < 16)
+                return false;
+
+            // Extract element data: skip _bd message header (8) + list header (8)
+            var elementData = bdBytes.Skip(16).ToArray();
+
+            // Append element data at end of file
+            fileStream.Seek(0, SeekOrigin.End);
+            fileStream.Write(elementData, 0, elementData.Length);
+
+            // Update count in place at offset 12 (file header 8 + type 4)
+            newCount = listCount + newList.Elements.Count;
+            byte[] newCountBytes = BitConverter.GetBytes(newCount);
+            fileStream.Seek(12, SeekOrigin.Begin);
+            fileStream.Write(newCountBytes, 0, 4);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Full append by reading, deserializing, combining, re-serializing, and writing.
+    /// Used as fallback when optimized append cannot be used.
+    /// </summary>
+    private K3Value FullAppend(string path, VectorValue newList)
+    {
+        // Read existing file
+        var fileBytes = File.ReadAllBytes(path);
+
+        // Validate file header
+        byte[] expectedHeader = new byte[] { 0xFD, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00 };
+        if (fileBytes.Length < expectedHeader.Length)
+        {
+            throw new Exception("Invalid K data file");
+        }
+
+        for (int i = 0; i < expectedHeader.Length; i++)
+        {
+            if (fileBytes[i] != expectedHeader[i])
+            {
+                throw new Exception("Invalid K data file");
+            }
+        }
+
+        // Construct _bd message from data portion
+        var dataBytes = fileBytes.Skip(expectedHeader.Length).ToArray();
+        var bdMessage = new List<byte>();
+        bdMessage.AddRange(new byte[] { 0x01, 0x00, 0x00, 0x00 });
+        byte[] lengthBytes = BitConverter.GetBytes(dataBytes.Length);
+        if (!BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(lengthBytes);
+        }
+        bdMessage.AddRange(lengthBytes);
+        bdMessage.AddRange(dataBytes);
+
+        // Convert to character vector for _db
+        var charElements = new List<K3Value>();
+        for (int i = 0; i < bdMessage.Count; i++)
+        {
+            charElements.Add(new CharacterValue(((char)bdMessage[i]).ToString()));
+        }
+
+        // Deserialize existing data
+        var existingValue = DbFunction(new VectorValue(charElements, -3));
+
+        // Combine existing and new data as a general list
+        var combinedElements = new List<K3Value>();
+
+        if (existingValue is VectorValue existingVec && existingVec.VectorType == 0)
+        {
+            combinedElements.AddRange(existingVec.Elements);
+        }
+        else
+        {
+            combinedElements.Add(existingValue);
+        }
+
+        combinedElements.AddRange(newList.Elements);
+
+        var combinedList = new VectorValue(combinedElements, 0);
+
+        // Write combined list to file
+        WriteKDataFile(path, combinedList);
+
+        return new IntegerValue(combinedElements.Count);
+    }
+
+    /// <summary>
+    /// Writes a K value as a K data file (used by both dyadic 1: and 5:)
+    /// </summary>
+    private void WriteKDataFile(string path, K3Value value)
+    {
+        var bdResult = BdFunction(value);
+
+        if (bdResult is VectorValue bdVector && bdVector.VectorType == -3)
+        {
+            var bdBytes = new List<byte>();
+            foreach (var element in bdVector.Elements.OfType<CharacterValue>())
+            {
+                bdBytes.Add((byte)element.Value[0]);
+            }
+
+            if (bdBytes.Count < 8)
+            {
+                throw new Exception("Serialized data too short");
+            }
+
+            var dataBytes = bdBytes.Skip(8).ToArray();
+
+            byte[] fileHeader = new byte[] { 0xFD, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00 };
+            var fileBytes = new List<byte>();
+            fileBytes.AddRange(fileHeader);
+            fileBytes.AddRange(dataBytes);
+
+            File.WriteAllBytes(path, fileBytes.ToArray());
+        }
+        else
+        {
+            throw new Exception("_bd function did not return character vector");
         }
     }
     
