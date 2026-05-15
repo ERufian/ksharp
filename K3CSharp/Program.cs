@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using K3CSharp.Parsing;
 
@@ -249,9 +250,183 @@ namespace K3CSharp
 
         static string? ReadLineOrShutdown(Evaluator evaluator)
         {
-            var readTask = Task.Run(Console.ReadLine);
-            int signaled = WaitHandle.WaitAny(new[] { ((IAsyncResult)readTask).AsyncWaitHandle, evaluator.GetShutdownWaitHandle() });
-            return signaled == 0 ? readTask.Result : null;
+            if (Console.IsInputRedirected)
+            {
+                var readTask = Task.Run(Console.ReadLine);
+                int signaled = WaitHandle.WaitAny(new[] { ((IAsyncResult)readTask).AsyncWaitHandle, evaluator.GetShutdownWaitHandle() });
+                return signaled == 0 ? readTask.Result : null;
+            }
+
+            var keyTask = Task.Run(() => ReadLineWithEditing(evaluator));
+            int sig = WaitHandle.WaitAny(new[] { ((IAsyncResult)keyTask).AsyncWaitHandle, evaluator.GetShutdownWaitHandle() });
+            return sig == 0 ? keyTask.Result : null;
+        }
+
+        static string ReadLineWithEditing(Evaluator evaluator)
+        {
+            var line = new StringBuilder();
+            int cursor = 0;
+            int historyPos = commandHistory.Count;
+
+            while (!evaluator.IsExitRequested)
+            {
+                var key = Console.ReadKey(intercept: true);
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine();
+                    return line.ToString();
+                }
+
+                if (key.Key == ConsoleKey.LeftArrow && cursor > 0)
+                {
+                    cursor--;
+                    Console.Write("\x1b[D");
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.RightArrow && cursor < line.Length)
+                {
+                    cursor++;
+                    Console.Write("\x1b[C");
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.UpArrow)
+                {
+                    if (historyPos > 0)
+                    {
+                        historyPos--;
+                        string item = commandHistory[historyPos];
+                        RedrawLine(line.Length, item, item.Length);
+                        line.Clear();
+                        line.Append(item);
+                        cursor = item.Length;
+                    }
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.DownArrow)
+                {
+                    if (historyPos < commandHistory.Count)
+                    {
+                        historyPos++;
+                        string newContent = historyPos < commandHistory.Count ? commandHistory[historyPos] : "";
+                        RedrawLine(line.Length, newContent, newContent.Length);
+                        line.Clear();
+                        line.Append(newContent);
+                        cursor = newContent.Length;
+                    }
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.Backspace && cursor > 0)
+                {
+                    int oldLength = line.Length;
+                    line.Remove(cursor - 1, 1);
+                    cursor--;
+                    RedrawLine(oldLength, line.ToString(), cursor);
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.Delete && cursor < line.Length)
+                {
+                    int oldLength = line.Length;
+                    line.Remove(cursor, 1);
+                    RedrawLine(oldLength, line.ToString(), cursor);
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.Home)
+                {
+                    if (cursor > 0)
+                    {
+                        Console.Write($"\x1b[{cursor}D");
+                        cursor = 0;
+                    }
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.End)
+                {
+                    int remaining = line.Length - cursor;
+                    if (remaining > 0)
+                    {
+                        Console.Write($"\x1b[{remaining}C");
+                        cursor = line.Length;
+                    }
+                    continue;
+                }
+
+                if ((key.Modifiers & ConsoleModifiers.Control) != 0)
+                {
+                    if (key.Key == ConsoleKey.A && cursor > 0)
+                    {
+                        Console.Write($"\x1b[{cursor}D");
+                        cursor = 0;
+                        continue;
+                    }
+
+                    if (key.Key == ConsoleKey.E)
+                    {
+                        int remaining = line.Length - cursor;
+                        if (remaining > 0)
+                        {
+                            Console.Write($"\x1b[{remaining}C");
+                            cursor = line.Length;
+                        }
+                        continue;
+                    }
+
+                    if (key.Key == ConsoleKey.U)
+                    {
+                        int oldLength = line.Length;
+                        line.Clear();
+                        cursor = 0;
+                        RedrawLine(oldLength, "", 0);
+                        continue;
+                    }
+                }
+
+                if (key.Key == ConsoleKey.Escape)
+                {
+                    int oldLength = line.Length;
+                    line.Clear();
+                    cursor = 0;
+                    RedrawLine(oldLength, "", 0);
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.Tab)
+                {
+                    continue;
+                }
+
+                if (!char.IsControl(key.KeyChar) && key.KeyChar != '\0')
+                {
+                    int oldLength = line.Length;
+                    line.Insert(cursor, key.KeyChar);
+                    cursor++;
+                    RedrawLine(oldLength, line.ToString(), cursor);
+                }
+            }
+
+            return line.ToString();
+        }
+
+        static void RedrawLine(int oldLength, string content, int cursor)
+        {
+            Console.Write("\r  ");
+            Console.Write(content);
+            int extra = oldLength - content.Length;
+            if (extra > 0)
+            {
+                Console.Write(new string(' ', extra));
+                Console.Write($"\x1b[{extra}D");
+            }
+            int fromEnd = content.Length - cursor;
+            if (fromEnd > 0)
+                Console.Write($"\x1b[{fromEnd}D");
         }
 
         public static K3Value ExecuteLine(string input, Evaluator evaluator)
