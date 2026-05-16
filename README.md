@@ -20,9 +20,12 @@ Highlighted details: This Software is provided "AS IS". You are responsible for 
 ## 📚 **Table of Contents**
 
 - [🎯 Current Status](#-current-status)
+  - [Beta Release](#-beta-release)
+  - [Remaining Targets](#-remaining-targets)
+  - [Cuts](#-cuts)
   - [Latest Test Results](#-latest-test-results)
-  - [Recent Major Improvements](#-recent-major-improvements)
-- [ Quick Start](#-quick-start)
+  - [Recent Improvements](#-recent-improvements)
+- [🚀 Quick Start](#-quick-start)
 - [✅ Implemented Features](#-implemented-features)
   - [Core Data Types](#core-data-types)
   - [Native Operators](#native-operators)
@@ -35,7 +38,7 @@ Highlighted details: This Software is provided "AS IS". You are responsible for 
   - [I/O and Communication](#io-and-communication)
   - [System Variables and Functions](#system-variables-and-functions)
 - [📡 IPC Operations](#-ipc-operations)
-- [⚙ Statement Parsing System](#-statement-parsing-system)
+- [⚙️ Statement Parsing System](#-statement-parsing-system)
 - [🔧 K 3 Features Not Available in K#](#-k-3-features-not-available-in-k)
 - [🎉 ksharp Enhancements Over k version 3](#-ksharp-enhancements-over-k-version-3)
   - [Foreign Function Interface (FFI)](#foreign-function-interface-ffi)
@@ -58,20 +61,38 @@ Highlighted details: This Software is provided "AS IS". You are responsible for 
   - [Troubleshooting](#troubleshooting)
 - [🤝 Contributing](#-contributing)
 - [👨‍💻 Authorship](#-authorship)
-- [Note Regarding Project Name](#note-regarding-project-name)
+- [📓 Note Regarding Project Name](#-note-regarding-project-name)
 
 ## 🎯 Current Status
 
-**ksharp has now reached beta status.** The core language in the K Reference Manual is fully implemented: native verbs, adverbs, amend, index, apply and assign, functions, conditionals, I/O and communication, system variables and system functions. The Foreign Function Interface is designed to interoperate with Microsoft's .NET and .NET Framework.
+### 🆎 Beta Status
+The core language in the K Reference Manual is fully implemented: native verbs, adverbs, amend, index, apply and assign, functions, conditionals, I/O and communication, system variables and system functions. The Foreign Function Interface is designed to interoperate with Microsoft's .NET and .NET Framework.
+
+When I started this project, getting to the point where it could run all the idioms in [my book](https://www.nsl.com/papers/idioms_K3.pdf) was only a dream, and actually achieving it in less than 6 months has been an exhilarating experience. This is a milestone that deserves to be released as the beta version of the project.
+
+### 📉 Remaining Targets
+- Debugging: My development has been centered around the unit test framework and I haven't needed debugging so I just de-prioritized it, but is it still part of the 1.0 goals.
+
+- Parsing: The architecture is a simple Tokenize-Parse into AST nodes-Evaluate. It doesn't use a stack or finite state machines, like other interpreters for k and APL-family languages use. The result is not as robust as I'd like. Note: if you run into parsing issues, please report the problem and try to simplify the expression, long and clever one-liners, and even some expressions that aren't that "long and clever", will have a moderate probability of confusing the parser.
+
+- Simplifying: AI-assisted development was fast, but it also accumulated technical debt at a fast pace. In particular the removal of the "legacy parser" was never completely finished \(the original "legacy" parser attempted left-to-right evaluation with backtrack, until that became  was eventually unsustainable and it was replaced with the current Long-Right-Scope parser\). The end result is code that is more complex than necessary and would benefit from simplification
+
+- Optimizing: I don't expect ksharp to compete with native implementations of k in terms of performance. Being based on the .NET VM and using managed memory brings some benefits (garbege collected memory usage, no crashes from memory access problems with malformed data, a rich ecosystem, etc) but those come at a cost in performance. That said, there are some performance improvements that can be implemented: Leveraging a global symbol table hashset, or leveraging Linq-to-objects state-machine optimizations before evaluating results.
+
+### ✂️ Cuts 
+- I eliminated the k UI from the project goals. I think effort is better spent on making things work with .NET (which opens up many UI choices, like WinForms and Unity).
 
 ### 📈 Latest Test Results
-- **Test Suite**: 1545/1545 tests passing (100% success rate)
+- **Test Suite**: 1549/1549 tests passing (100% success rate)
 
-### 🎯 Recent Major Improvements
-  - **📂 Support for delimited file I/O (May 2026)** - Enhanced `0:` and `1:` functionality, fixed `5:` functionality
-  - **🚀 Improved comparison tolerance (May 2026)** - Updated comparison tolerance to better match K compatibility 
-  - **🎯 Full test suite passing at 100% (May 2026)** - Successfully resolved parsing issues that were preventing some K idioms from producing correct results 
-  - **🔥 Support for adnouns (May 2026)** - The over, scan, each and each-prior adverbs can now be used with nouns (vectors, matrices and tensors) for scatter indexing, transitive closure and state transitions.
+### 🎯 Recent Improvements
+  - 🏃 **Publish profiles** - Generate executables for Windows Mac and Linux
+  - 🍏 **Improved support for command-line editing** - Editing now supports Mac and Linux
+  - 🔃 **Improved support for recursions** - Added limits to recursion depth (40) and signal instead of crashing.
+  - 📂 **Support for delimited file I/O (May 2026)** - Enhanced `0:` and `1:` functionality, fixed `5:` functionality
+  - 🚀 **Improved comparison tolerance (May 2026)** - Updated comparison tolerance to better match K compatibility 
+  - 🎯 **Full test suite passing at 100% (May 2026)** - Successfully resolved parsing issues that were preventing some K idioms from producing correct results 
+  - 🔥 **Support for adnouns (May 2026)** - The over, scan, each and each-prior adverbs can now be used with nouns (vectors, matrices and tensors) for scatter indexing, transitive closure and state transitions.
 
 ---
 
@@ -296,7 +317,7 @@ ksharp -i PORT script.k    # Start listener, run script, then serve IPC
 
 ---
 
-## **⚙ Statement Parsing System**
+## ⚙️ **Statement Parsing System**
 **K LRS Compliant**
 * Left-to-right evaluation of expressions
 * Grouped elements (parentheses, brackets, braces) do have precedence
@@ -318,7 +339,7 @@ ksharp -i PORT script.k    # Start listener, run script, then serve IPC
 
 ---
 
-## **🎉 ksharp Enhancements Over K version 3**
+## 🎉 ksharp Enhancements Over k version 3
 - ✅ **Smart Integer Division and exponentiation**: `4 % 2` → `2`, `2 ^ 3` → `8` (integer, not float)
 - ✅ **64-bit Long Integers**: `123456789012345j` (modeled on e333j)
 - ✅ **Compact Symbol Vectors**: `` `a`b`c `` (no spaces)
@@ -716,7 +737,7 @@ In addition to direct contributors, the following people have been fundamental t
 - **Stevan Apter** - His K parser at nsl.com has been a really helpful source of inspiration and reference. Stevan, together with **Sasha Katsman** and **Michael Rosenberg**, greatly helped in my understanding of traditional "idiomatic K".
 - **John Earnest** - His oK interpreter was an important inspiration for deciding to develop ksharp. Additionally, his regular questioning of AI assisted development has been an outstanding motivation for pushing the limits and exploring what's possible.
 
-## Note regarding project name
+## 📓 Note regarding project name
 
 This project is ksharp in all lowercase, because it is an interpreter for the k language written in C sharp. Unfortunately there are other projects with very similar names that differ just in capitalization, like Ksharp kSharp, KSHarp, etc. This project is not related to any of them and the name ksharp is not intended to claim any relationship to any of them, the only implied relationships are the k language (as the model) and C sharp (as the tool)
 
