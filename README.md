@@ -15,6 +15,7 @@ You are free to use, modify, and distribute it (including in commercial products
 Full license text: [LICENSE](LICENSE.txt)
 
 Highlighted details: This Software is provided "AS IS". You are responsible for (a) Maintaining appropriate backup copies of any data file that this software is expected to modify, (b) Ensuring that data written to a storage system using this software can be read back in its entirety and with integrity. The author(s) of this product cannot be held responsible for any data loss resulting directly or indirectly from the use of this product. 
+
 ---
 
 ## 📚 **Table of Contents**
