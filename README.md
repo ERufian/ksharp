@@ -66,7 +66,7 @@ Highlighted details: This Software is provided "AS IS". You are responsible for 
 ## 🎯 Current Status
 
 ### 🆎 Beta Status
-The core language in the K Reference Manual is fully implemented: native verbs, adverbs, amend, index, apply and assign, functions, conditionals, I/O and communication, system variables and system functions. The Foreign Function Interface is designed to interoperate with Microsoft's .NET and .NET Framework.
+The core language in the K Reference Manual is fully implemented: native verbs, adverbs, amend, index, apply and assign, functions, conditionals, I/O and communication, system variables and system functions. The Foreign Function Interface allows using Microsoft .NET objects.
 
 When I started this project, getting to the point where it could run all the idioms in [my book](https://www.nsl.com/papers/idioms_K3.pdf) was only a dream, and actually achieving it in less than 6 months has been an exhilarating experience. This is a milestone that deserves to be released as the beta version of the project.
 
