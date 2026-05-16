@@ -241,7 +241,7 @@ namespace K3CSharp
             // Add basic assembly information
             entries[new SymbolValue("name")] = (CreateCharacterVectorFromString(assembly.GetName().Name ?? ""), null);
             entries[new SymbolValue("fullname")] = (CreateCharacterVectorFromString(assembly.FullName ?? ""), null);
-            entries[new SymbolValue("location")] = (CreateCharacterVectorFromString(assembly.Location ?? ""), null);
+            entries[new SymbolValue("location")] = (CreateCharacterVectorFromString(AppContext.BaseDirectory), null);
             entries[new SymbolValue("version")] = (CreateCharacterVectorFromString(assembly.GetName().Version?.ToString() ?? ""), null);
             
             // Add all defined types

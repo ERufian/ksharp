@@ -202,6 +202,11 @@ publish/
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
+# Allow cross-platform release publish profiles
+!K3CSharp/Properties/PublishProfiles/*.pubxml
+!K3CSharp.MCP/Properties/PublishProfiles/*.pubxml
+!KMCPServer/Properties/PublishProfiles/*.pubxml
+!ApplyTweaks/Properties/PublishProfiles/*.pubxml
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained
