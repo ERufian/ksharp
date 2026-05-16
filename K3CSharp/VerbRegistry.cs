@@ -647,6 +647,7 @@ namespace K3CSharp
             RegisterVerb("MAKE", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb(",:", VerbType.Operator, new[] { 1 }, null);
             RegisterVerb("ENLIST", VerbType.Operator, new[] { 1 }, null);
+            RegisterVerb(":", VerbType.Operator, new[] { 1 }, null); // Return
             RegisterVerb("COLON", VerbType.Operator, new[] { 1 }, null); // Return
 
             // Mathematical functions - register both symbol and token type names

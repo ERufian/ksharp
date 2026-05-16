@@ -584,7 +584,11 @@ namespace K3CSharp.Tests
 
                 ("named_function_scan.k", "(10;0.5;0.01666667)"),
 
-                
+                ("function_recursive_assign_return.k", "20"),
+
+                ("function_recursive_tailcall.k", "20"),
+
+                ("function_recursive_bracket.k", "20"),
 
                 // Where operator
 
@@ -3233,6 +3237,9 @@ namespace K3CSharp.Tests
                 ("io_read_csv_quotes.k", "(\"product,price,description\";\"Apple,1.50,\\\"\\\"Fresh, organic apple\\\"\\\"\";\"Banana,0.75,\\\"\\\"Ripe banana\\\"\\\"\")"),
                 ("io_read_tsv_basic.k", "(\"name\\tage\\tcity\";\"Alice\\t30\\tNew York\";\"Bob\\t25\\tLos Angeles\")"),
                 ("io_read_tsv_empty.k", "(\"a\\tb\\tc\";\"1\\t\\t3\";\"\\t2\\t\";\"\\t\\t\")"),
+
+                // Stack overflow protection
+                ("stack_overflow_self_reference.k", "Error: stack"),
             };
 
             // Filter tests if a pattern was provided
@@ -3626,8 +3633,13 @@ namespace K3CSharp.Tests
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"✗ {fileName}: Error - {ex.Message}");
-                    testResults.Add(new TestResult { FileName = fileName, ActualOutput = $"Error: {ex.Message}", Expected = expected, Passed = false });
+                    var errorOutput = $"Error: {ex.Message}";
+                    var errorPassed = errorOutput == expected;
+                    if (errorPassed)
+                        Console.WriteLine($"✓ {fileName}: {errorOutput}");
+                    else
+                        Console.WriteLine($"✗ {fileName}: Expected '{expected}', got '{errorOutput}'");
+                    testResults.Add(new TestResult { FileName = fileName, ActualOutput = errorOutput, Expected = expected, Passed = errorPassed });
                 }
 
             }

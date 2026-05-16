@@ -163,7 +163,7 @@ namespace K3CSharp
 
         private static void RunRepl(Evaluator evaluator)
         {
-            Console.WriteLine("K3 Interpreter - Version 1.0");
+            Console.WriteLine($"ksharp interpreter - Version 3.33.{Version}");
             Console.WriteLine("Type \\\\ to quit, \\ to cancel input, or \\help for help");
             Console.WriteLine("Use arrow keys for history, Ctrl+C to clear line");
             Console.WriteLine();

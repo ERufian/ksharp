@@ -20,6 +20,10 @@ namespace K3CSharp
         public bool isInFunctionCall = false; // Track if we're evaluating a function call
         public static int floatPrecision = 7; // Default precision for floating point display
 
+        // Stack depth tracking to prevent unrecoverable StackOverflowException
+        private int callDepth = 0;
+        private const int MaxCallDepth = 40;
+
         // Script name (without extension) for _v, and command-line args for _i
         public string ScriptName { get; set; } = "";
         public List<string> CommandLineArgs { get; set; } = new List<string>();
@@ -64,7 +68,8 @@ namespace K3CSharp
             // Inherit currentFunctionValue from parent for _f recursion support
             currentFunctionValue = parent?.currentFunctionValue;
             adverbAwareEvaluator = new AdverbAwareEvaluator(this);
-            
+            // Inherit stack depth from parent to track recursion
+            callDepth = (parent?.callDepth ?? -1) + 1;
         }
 
                 
@@ -2003,11 +2008,16 @@ namespace K3CSharp
 
         private K3Value EvaluateFunctionCall(ASTNode node)
         {
+            if (callDepth >= MaxCallDepth)
+            {
+                throw new Exception("stack");
+            }
+
             if (node.Children.Count < 1)
             {
                 throw new Exception("Function call requires a function");
             }
-
+            
             var functionNode = node.Children[0];
             var fnName = functionNode.Value is SymbolValue fs ? fs.Value : functionNode.Value?.ToString() ?? "";
             
@@ -2431,7 +2441,10 @@ namespace K3CSharp
             }
             catch (Exception ex)
             {
-                                throw new Exception($"Function execution error: {ex.Message}");
+                // Don't double-wrap already-wrapped function errors or stack errors
+                if (ex.Message == "stack" || ex.Message.StartsWith("Function execution error:"))
+                    throw;
+                throw new Exception($"Function execution error: {ex.Message}");
             }
         }
         
@@ -2694,9 +2707,18 @@ namespace K3CSharp
             
             // Use the original switch-based evaluation for backwards compatibility
             // Check if it's a system variable first
+            K3Value? sysVarResult = null;
             try
             {
-                var sysVarResult = GetSystemVariable(functionName);
+                sysVarResult = GetSystemVariable(functionName);
+            }
+            catch (Exception ex) when (ex.Message.StartsWith("Not a system variable"))
+            {
+                // Not a system variable, continue with regular function evaluation
+            }
+
+            if (sysVarResult != null)
+            {
                 // If the system variable returns a FunctionValue (like _f), call it with arguments
                 if (sysVarResult is FunctionValue sysFunc)
                 {
@@ -2706,10 +2728,6 @@ namespace K3CSharp
                     return result ?? new NullValue();
                 }
                 return sysVarResult ?? new NullValue();
-            }
-            catch (Exception)
-            {
-                // Not a system variable, continue with regular function evaluation
             }
             
             // Handle dyadic system functions called via bracket notation (e.g., _lsq[y;x])

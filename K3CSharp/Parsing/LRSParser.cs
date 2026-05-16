@@ -238,6 +238,7 @@ namespace K3CSharp.Parsing
             // But NOT for DOT_APPLY/APPLY with 3+ args — those are amend/triadic, not projections
             if (expressionTokens.Count >= 3 &&
                 IsVerbToken(expressionTokens[0].Type) &&
+                expressionTokens[0].Type != TokenType.COLON &&
                 expressionTokens[1].Type == TokenType.LEFT_BRACKET)
             {
                 var bracketEnd = FindMatchingBracket(expressionTokens, 1);
@@ -995,8 +996,8 @@ namespace K3CSharp.Parsing
                 var monadicOp = monadicParser.ParseMonadicOperator(tokens);
                 if (monadicOp != null)
                     return monadicOp;
-                // Identifier followed by atom/identifier: function application (e.g., log10 x)
-                if (tokens[0].Type == TokenType.IDENTIFIER && !IsVerbToken(tokens[1].Type))
+                // Identifier or _f followed by atom/identifier: function application (e.g., log10 x, _f x)
+                if ((tokens[0].Type == TokenType.IDENTIFIER || tokens[0].Type == TokenType.FUNCTION) && !IsVerbToken(tokens[1].Type))
                 {
                     var fnNode = CreateNodeFromToken(tokens[0]);
                     var argNode = CreateNodeFromToken(tokens[1]);
@@ -1140,7 +1141,7 @@ namespace K3CSharp.Parsing
         /// <returns>FunctionCall AST node, or null if pattern doesn't match</returns>
         internal ASTNode? TryParseIdentifierLedFunctionApplication(List<Token> tokens)
         {
-            if (tokens.Count <= 2 || tokens[0].Type != TokenType.IDENTIFIER)
+            if (tokens.Count <= 2 || (tokens[0].Type != TokenType.IDENTIFIER && tokens[0].Type != TokenType.FUNCTION))
                 return null;
             if (VerbRegistry.IsVerbToken(tokens[0].Type) || OperatorDetector.SupportsDyadic(tokens[0].Type))
                 return null;
@@ -1595,6 +1596,16 @@ namespace K3CSharp.Parsing
                 {
                     return CreateNodeFromToken(expressionTokens[1]);
                 }
+                // Identifier or _f followed by atom/identifier: function application (e.g., log10 x, _f x)
+                if ((expressionTokens[0].Type == TokenType.IDENTIFIER || expressionTokens[0].Type == TokenType.FUNCTION) && !IsVerbToken(expressionTokens[1].Type))
+                {
+                    var fnNode = CreateNodeFromToken(expressionTokens[0]);
+                    var argNode = CreateNodeFromToken(expressionTokens[1]);
+                    if (fnNode != null && argNode != null)
+                    {
+                        return ASTNode.MakeFunctionCall(fnNode, new List<ASTNode> { argNode });
+                    }
+                }
             }
 
             // Postfix projection pattern: expr+ (last token is dyadic verb, prefix has no top-level verbs)
@@ -1605,6 +1616,19 @@ namespace K3CSharp.Parsing
             {
                 var lastVerbToken = expressionTokens[expressionTokens.Count - 1];
                 var prefixTokens2 = expressionTokens.GetRange(0, expressionTokens.Count - 1);
+                
+                // Skip postfix projection if prefix contains assignment pattern (e.g., sum:+)
+                bool prefixHasAssignment = false;
+                for (int i = 0; i < prefixTokens2.Count - 1; i++)
+                {
+                    if (prefixTokens2[i].Type == TokenType.IDENTIFIER &&
+                        prefixTokens2[i + 1].Type == TokenType.COLON)
+                    {
+                        prefixHasAssignment = true;
+                        break;
+                    }
+                }
+                
                 bool prefixHasDyadic2 = false;
                 int pd2 = 0;
                 foreach (var lt in prefixTokens2)
@@ -1613,7 +1637,7 @@ namespace K3CSharp.Parsing
                     else if (lt.Type == TokenType.RIGHT_PAREN || lt.Type == TokenType.RIGHT_BRACKET || lt.Type == TokenType.RIGHT_BRACE) pd2--;
                     else if (pd2 == 0 && IsVerbToken(lt.Type)) { prefixHasDyadic2 = true; break; }
                 }
-                if (!prefixHasDyadic2)
+                if (!prefixHasDyadic2 && !prefixHasAssignment)
                 {
                     ASTNode? leftOperand2 = prefixTokens2.Count == 1
                         ? CreateNodeFromToken(prefixTokens2[0])

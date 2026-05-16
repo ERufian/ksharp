@@ -142,6 +142,9 @@ foo - 12 │ 20                   │                      ║
 ║ lambda_symbol_literal.k                                          │ {`abc}[]             │ `abc                 │                      ║
 ║ named_function_over.k                                            │ f:{x*%y};f/10 20 30  │ 0.01666667           │                      ║
 ║ named_function_scan.k                                            │ f:{x*%y};f\10 20 30  │ (10;0.5;0.01666...   │                      ║
+║ function_recursive_assign_return.k                               │ f:{r: :[20>x;_f x+1;x];:r};f 20 │ 20                   │                      ║
+║ function_recursive_tailcall.k                                    │ f:{r: :[20>x;_f x+1;x];:r};f 10 │ 20                   │                      ║
+║ function_recursive_bracket.k                                     │ f:{r: :[20>x;_f[x+1];x];:r};f 10 │ 20                   │                      ║
 ║ where_generate_scalar.k                                          │ &4                   │ 0 0 0 0              │                      ║
 ║ grade_down_operator.k                                            │ > (3 11 9 9 4)       │ 1 2 3 4 0            │                      ║
 ║ grade_up_operator.k                                              │ < (3 11 9 9 4)       │ 0 4 2 3 1            │                      ║
@@ -2222,6 +2225,8 @@ t':0 1 2 │ 1 0                  │                      ║
 ║ io_read_csv_quotes.k                                             │ 0:`data_csv_quotes.txt │ ("product,price...   │                      ║
 ║ io_read_tsv_basic.k                                              │ 0:`data_tsv_basic.txt │ ("name\tage\tci...   │                      ║
 ║ io_read_tsv_empty.k                                              │ 0:`data_tsv_empty.txt │ ("a\tb\tc";"1\t...   │                      ║
+║ stack_overflow_self_reference.k                                  │ f:{r:_f x;:r}
+f 12   │ Error: stack         │                      ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SUMMARY: 1545/1545 tests passed (100.0%)                                                                                          ║
+║ SUMMARY: 1549/1549 tests passed (100.0%)                                                                                          ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
