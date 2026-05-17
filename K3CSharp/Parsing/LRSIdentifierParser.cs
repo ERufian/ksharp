@@ -109,51 +109,5 @@ namespace K3CSharp.Parsing
         {
             return VerbRegistry.GetVerb(identifierName);
         }
-        
-        /// <summary>
-        /// Parse identifier with context-aware classification
-        /// </summary>
-        public static ASTNode? ParseIdentifierWithContext(Token token, ParseContext context)
-        {
-            var identifierName = token.Lexeme;
-            
-            // Use VerbRegistry to classify the identifier
-            var verbInfo = VerbRegistry.GetVerb(identifierName);
-            if (verbInfo != null)
-            {
-                return verbInfo.Type switch
-                {
-                    VerbType.SystemVariable => CreateSystemVariableNode(identifierName),
-                    VerbType.Function => CreateFunctionNode(identifierName, verbInfo),
-                    VerbType.Operator => CreateOperatorNode(identifierName, verbInfo),
-                    _ => ASTNode.MakeVariable(identifierName)
-                };
-            }
-            
-            // Default to variable
-            return ASTNode.MakeVariable(identifierName);
-        }
-        
-        /// <summary>
-        /// Create function node
-        /// </summary>
-        private static ASTNode CreateFunctionNode(string functionName, VerbInfo verbInfo)
-        {
-            var node = new ASTNode(ASTNodeType.Variable);
-            node.Value = new SymbolValue(functionName);
-            node.Children.Add(ASTNode.MakeLiteral(new SymbolValue("function")));
-            return node;
-        }
-        
-        /// <summary>
-        /// Create operator node
-        /// </summary>
-        private static ASTNode CreateOperatorNode(string operatorName, VerbInfo verbInfo)
-        {
-            var node = new ASTNode(ASTNodeType.Variable);
-            node.Value = new SymbolValue(operatorName);
-            node.Children.Add(ASTNode.MakeLiteral(new SymbolValue("operator")));
-            return node;
-        }
     }
 }

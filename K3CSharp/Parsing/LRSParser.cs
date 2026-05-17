@@ -189,8 +189,8 @@ namespace K3CSharp.Parsing
         /// </summary>
         /// <param name="position">Starting position, updated to end of parsed expression</param>
         /// <returns>AST node representing the parsed expression</returns>
-        /// <remarks>DEPRECATED: use EvaluateFromRight or BuildParseTreeFromRight for proper LRS semantics.
-        /// This method uses the legacy parser path and does not apply full LRS rules inside bracket content.</remarks>
+        /// <remarks>This method reads expression tokens then applies bracket/projection handling
+        /// before delegating to EvaluateFromRight or BuildParseTreeFromRight for full LRS semantics.</remarks>
         public ASTNode? ParseExpression(ref int position)
         {
             // Step 1: Read entire expression until separator

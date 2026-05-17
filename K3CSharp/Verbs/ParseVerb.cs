@@ -45,44 +45,25 @@ namespace K3CSharp.Verbs
         {
             try
             {
-                // Use same pattern as Program.cs
                 var lexer = new Lexer(expressionText);
                 var tokens = lexer.Tokenize();
                 
-                // Check if we have a single CHARACTER_VECTOR token (from a quoted string)
+                // If input is a quoted string, extract and re-tokenize its content
                 if (tokens.Count == 2 && tokens[0].Type == TokenType.CHARACTER_VECTOR && tokens[1].Type == TokenType.EOF)
                 {
-                    // Extract the content from the quoted string and parse it
-                    var content = tokens[0].Lexeme;
-                    var contentLexer = new Lexer(content);
-                    var contentTokens = contentLexer.Tokenize();
-                    
-                    // Use LRS parser with parse tree building mode
-                    var lrsParser = new LRSParser(contentTokens, buildParseTree: true);
-                    var position = 0;
-                    var astNode = lrsParser.ParseExpression(ref position);
-                    
-                    if (astNode == null)
-                        throw new Exception("Failed to parse expression");
-                    
-                    // Convert AST to K list representation
-                    var result = ParseTreeConverter.ToKList(astNode);
-                    return result;
+                    var contentLexer = new Lexer(tokens[0].Lexeme);
+                    tokens = contentLexer.Tokenize();
                 }
-                else
-                {
-                    // Use LRS parser with parse tree building mode for _parse function
-                    var lrsParser = new LRSParser(tokens, buildParseTree: true);
-                    var position = 0;
-                    var astNode = lrsParser.ParseExpression(ref position);
-                    
-                    if (astNode == null)
-                        throw new Exception("Failed to parse expression");
-                    
-                    // Convert AST to K list representation
-                    var result = ParseTreeConverter.ToKList(astNode);
-                    return result;
-                }
+                
+                // Use LRS parser with parse tree building mode
+                var lrsParser = new LRSParser(tokens, buildParseTree: true);
+                var position = 0;
+                var astNode = lrsParser.ParseExpression(ref position);
+                
+                if (astNode == null)
+                    throw new Exception("Failed to parse expression");
+                
+                return ParseTreeConverter.ToKList(astNode);
             }
             catch (Exception ex)
             {

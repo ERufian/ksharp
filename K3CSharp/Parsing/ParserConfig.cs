@@ -10,20 +10,11 @@ using System.Collections.Generic;
 namespace K3CSharp.Parsing
 {
     /// <summary>
-    /// Parser configuration for gradual LRS migration
-    /// Controls feature flags and parsing modes
+    /// Parser configuration
+    /// Controls feature flags for the LRS parser
     /// </summary>
     public static class ParserConfig
     {
-        /// <summary>
-        /// Enable LRS parser as primary parsing mechanism
-        /// </summary>
-        public static bool UseLRSParser { get; set; } = true;
-        
-        /// <summary>
-        /// Enable fallback to legacy parser when LRS fails
-        /// </summary>
-        public static bool EnableFallback { get; set; } = false;
         
         /// <summary>
         /// Enable debugging output for parsing operations
@@ -35,12 +26,6 @@ namespace K3CSharp.Parsing
         /// </summary>
         public static bool BuildParseTree { get; set; } = false;
         
-        /// <summary>
-        /// Get current parsing mode
-        /// </summary>
-        public static ParsingMode CurrentMode => UseLRSParser ? 
-            (EnableFallback ? ParsingMode.LRSWithFallback : ParsingMode.LRSOnly) : 
-            ParsingMode.LegacyOnly;
         
         /// <summary>
         /// Parse with configuration-based mode selection
@@ -125,42 +110,13 @@ namespace K3CSharp.Parsing
             return wrapper.GetParsingStats();
         }
         
-        /// <summary>
-        /// Enable LRS parser with safe configuration
-        /// </summary>
-        public static void EnableLRSSafely()
-        {
-            UseLRSParser = true;
-            EnableFallback = true;
-            EnableDebugging = false;
-        }
-        
-        /// <summary>
-        /// Disable LRS parser (revert to legacy)
-        /// </summary>
-        public static void DisableLRS()
-        {
-            UseLRSParser = false;
-            EnableFallback = true;
-        }
-        
-        /// <summary>
-        /// Enable pure LRS mode (no fallback)
-        /// </summary>
-        public static void EnablePureLRS()
-        {
-            UseLRSParser = true;
-            EnableFallback = false;
-            EnableDebugging = true;
-        }
         
         /// <summary>
         /// Get configuration summary
         /// </summary>
         public static string GetConfigSummary()
         {
-            return $"LRS: {(UseLRSParser ? "Enabled" : "Disabled")}, " +
-                   $"Fallback: {(EnableFallback ? "Enabled" : "Disabled")}, " +
+            return $"LRS: Enabled, " +
                    $"Debug: {(EnableDebugging ? "Enabled" : "Disabled")}, " +
                    $"ParseTree: {(BuildParseTree ? "Enabled" : "Disabled")}";
         }

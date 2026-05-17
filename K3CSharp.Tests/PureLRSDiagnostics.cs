@@ -16,10 +16,8 @@ namespace K3CSharp.Tests
         {
             Console.WriteLine("=== Pure LRS Diagnostics ===");
             
-            // Enable Pure LRS mode WITH debugging for troubleshooting
-            ParserConfig.EnablePureLRS();
+            // Enable debugging for troubleshooting
             ParserConfig.EnableDebugging = true;
-            ParserConfig.LogConfigChange("Pure LRS Debug - Bracket Function Call Trace");
             
             // Test case 1: Simple vector (should create implicit vector)
             Console.WriteLine("\n--- Test 1: Simple vector '1 2 3 4 5' ---");

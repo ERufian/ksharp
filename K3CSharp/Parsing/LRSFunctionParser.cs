@@ -12,7 +12,7 @@ namespace K3CSharp.Parsing
 {
     /// <summary>
     /// Function call parsing for LRS parser
-    /// Handles function calls, special verbs, and anonymous functions without PrimaryParser dependency
+    /// Handles function calls, special verbs, and anonymous functions
     /// Supports verb-agnostic function parsing using VerbRegistry categories
     /// </summary>
     public class LRSFunctionParser
@@ -38,20 +38,19 @@ namespace K3CSharp.Parsing
                 
             var funcToken = tokens[0];
             
-            // Lambda expressions need legacy parser (LRS doesn't have lambda parsing yet)
+            // Lambda expressions use LRSGroupingParser for brace parsing
             if (funcToken.Type == TokenType.LEFT_BRACE)
             {
-                var sourceText = string.Join(" ", tokens.Select(t => t.Lexeme));
-                var context = new ParseContext(tokens, sourceText);
-                var parser = new FunctionParser();
-                var lambdaNode = parser.Parse(context);
+                var groupingParser = new LRSGroupingParser(tokens, buildParseTree);
+                int pos = 0;
+                var lambdaNode = groupingParser.ParseBraces(ref pos);
                 if (lambdaNode == null)
                     throw new Exception("Failed to parse lambda expression");
                 
                 // Check if there are remaining tokens after the lambda (e.g. {lambda}arg)
-                if (context.Current < tokens.Count)
+                if (pos < tokens.Count)
                 {
-                    var remainingTokens = tokens.GetRange(context.Current, tokens.Count - context.Current);
+                    var remainingTokens = tokens.GetRange(pos, tokens.Count - pos);
                     
                     // Direct lambda application: only if next token is not a dyadic operator
                     // (dyadic operators should bind to the lambda as left operand, not as function application)

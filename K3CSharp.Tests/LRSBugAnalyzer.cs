@@ -49,9 +49,6 @@ namespace K3CSharp.Tests
                 {
                     analyzed++;
                     
-                    // Test with LRS parser (Pure mode)
-                    ParserConfig.UseLRSParser = true;
-                    ParserConfig.EnableFallback = false;
                     ParserConfig.EnableDebugging = false;
                     
                     var lexerLRS = new Lexer(script);
