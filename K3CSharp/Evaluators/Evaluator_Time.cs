@@ -8,11 +8,21 @@ using System;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// Time/date verb implementations extracted from Evaluator.
+    /// </summary>
+    public class TimeHandler
     {
+        private readonly IEvaluatorContext ctx;
+
+        public TimeHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+
         // Time-related functions
         
-        public K3Value TimeFunction(K3Value operand)
+        internal K3Value TimeFunction(K3Value operand)
         {
             // _t is a niladic getter that returns an integer value representing current K-time
             // K-time is defined as seconds since the base timedate 12:00 AM, January 1, 2035 UTC
@@ -25,13 +35,13 @@ namespace K3CSharp
             return new IntegerValue((int)kTime);
         }
 
-        public K3Value DirectoryFunction(K3Value operand)
+        internal K3Value DirectoryFunction(K3Value operand)
         {
             // _d is a niladic getter that returns the current K tree branch name
-            return kTree.CurrentBranch ?? new SymbolValue("");
+            return ctx.KTree.CurrentBranch ?? new SymbolValue("");
         }
 
-        private K3Value TFunction(K3Value operand)
+        internal K3Value TFunction(K3Value operand)
         {
             // _T is a niladic getter that returns a float value representing current time in Days since the base timedate 12:00 AM, January 1, 2035
             // For times earlier than the base timedate it returns a negative value.
@@ -44,7 +54,7 @@ namespace K3CSharp
             return new FloatValue(daysSinceBase);
         }
 
-        private K3Value LtFunction(K3Value operand)
+        internal K3Value LtFunction(K3Value operand)
         {
             // _lt is a monadic operator that adds a GMT-to-local-time offset in seconds to a K-time value
             // E.g. if local time zone is US Eastern Standard Time (UTC-5), the offset is -18000 seconds and _lt will return the input value plus -18000
@@ -59,7 +69,7 @@ namespace K3CSharp
             throw new Exception("_lt requires integer argument representing K-time");
         }
 
-        private K3Value GtimeFunction(K3Value operand)
+        internal K3Value GtimeFunction(K3Value operand)
         {
             // _gtime is a monadic operator that converts an integer value representing a K-time to an integer vector of 2 integers
             // The first integer is result of 10000 * year + 100 * month + day
@@ -93,7 +103,7 @@ namespace K3CSharp
             throw new Exception("_gtime requires integer argument representing K-time");
         }
 
-        private K3Value JdFunction(K3Value operand)
+        internal K3Value JdFunction(K3Value operand)
         {
             // _jd is a monadic operator that converts an integer value that represents the result of 10000 * year + 100 * month + day to a J-Date (K Julian Date)
             // A J-Date is defined as an integer value representing the number of days since the base date of January 1, 2035
@@ -124,7 +134,7 @@ namespace K3CSharp
             throw new Exception("_jd requires integer argument representing year*10000 + month*100 + day");
         }
 
-        private K3Value DjFunction(K3Value operand)
+        internal K3Value DjFunction(K3Value operand)
         {
             // _dj is a monadic operator that converts a J-Date to an integer value that is the result of 10000 * year + 100 * month + day
             
@@ -148,7 +158,7 @@ namespace K3CSharp
             throw new Exception("_dj requires integer argument representing J-Date");
         }
 
-        private K3Value LtimeFunction(K3Value operand)
+        internal K3Value LtimeFunction(K3Value operand)
         {
             // _ltime is a monadic operator that converts an integer value representing a K-time to an integer vector of 2 integers that represents local time
             // It is equivalent to {[x] _gtime _lt x}

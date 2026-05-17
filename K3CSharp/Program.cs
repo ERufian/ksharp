@@ -486,7 +486,7 @@ namespace K3CSharp
                     if (arg == null)
                     {
                         // Display current branch
-                        var currentBranch = evaluator.DirFunction(new NullValue());
+                        var currentBranch = evaluator.varsHandler.DirFunction(new NullValue());
                         if (currentBranch is SymbolValue sym && !string.IsNullOrEmpty(sym.Value))
                         {
                             Console.WriteLine(sym.Value);
@@ -580,7 +580,7 @@ namespace K3CSharp
                 case "\\9":
                     // Reset K tree to default state (for testing purposes)
                     evaluator.ResetKTree();
-                    Evaluator.RandomSeed = -314159;
+                    RandHandler.RandomSeed = -314159;
                     break;
 
                 case "\\p":
@@ -604,13 +604,13 @@ namespace K3CSharp
                 case "\\r":
                     if (arg == null)
                     {
-                        Console.WriteLine(Evaluator.RandomSeed);
+                        Console.WriteLine(RandHandler.RandomSeed);
                     }
                     else
                     {
                         if (int.TryParse(arg, out int newSeed))
                         {
-                            Evaluator.RandomSeed = newSeed;
+                            RandHandler.RandomSeed = newSeed;
                         }
                         else
                         {

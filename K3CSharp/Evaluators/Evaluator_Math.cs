@@ -10,9 +10,19 @@ using System.Linq;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// Mathematical verb implementations extracted from Evaluator.
+    /// Standalone class — communicates with other verb handlers via IEvaluatorContext.
+    /// </summary>
+    public class MathHandler
     {
-        private K3Value MathLog(K3Value operand)
+        private readonly IEvaluatorContext ctx;
+
+        public MathHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+        internal K3Value MathLog(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -53,7 +63,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathExp(K3Value operand)
+        internal K3Value MathExp(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -82,7 +92,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathAbs(K3Value operand)
+        internal K3Value MathAbs(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -111,7 +121,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathSqr(K3Value operand)
+        internal K3Value MathSqr(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -140,7 +150,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathSqrt(K3Value operand)
+        internal K3Value MathSqrt(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -175,7 +185,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathFloor(K3Value operand)
+        internal K3Value MathFloor(K3Value operand)
         {
             // Mathematical floor operation that always returns floating point values
             if (operand is IntegerValue intValue)
@@ -205,7 +215,7 @@ namespace K3CSharp
             }
         }
         
-        private double GetNumericValue(K3Value value)
+        internal static double GetNumericValue(K3Value value)
         {
             if (value is IntegerValue intVal)
                 return intVal.Value;
@@ -217,7 +227,7 @@ namespace K3CSharp
                 throw new Exception("Numeric value required");
         }
         
-        private K3Value MathDot(K3Value left, K3Value right)
+        internal K3Value MathDot(K3Value left, K3Value right)
         {
             // Linear algebra dot product operation (binary)
             if (left is VectorValue leftVec && right is VectorValue rightVec)
@@ -334,7 +344,7 @@ namespace K3CSharp
             try
             {
                 // Try regular multiplication first
-                product = Times(left, right);
+                product = ctx.DispatchDyadic("*", left, right)!;
             }
             catch
             {
@@ -345,13 +355,13 @@ namespace K3CSharp
             // Then sum the result using the over adverb (/)
             // This is equivalent to +/product
             // For sum, we use 0 as initialization
-            return Over(new SymbolValue("+"), new IntegerValue(0), product);
+            return ctx.ApplyOver(new SymbolValue("+"), new IntegerValue(0), product);
         }
         
         private K3Value MultiplyWithBroadcasting(K3Value left, K3Value right)
         {
             // Handle scalar-matrix multiplication and other broadcasting cases
-            if (IsScalar(left) && right is VectorValue rightVec && IsMatrix(rightVec))
+            if (IsScalarValue(left) && right is VectorValue rightVec && IsMatrix(rightVec))
             {
                 // Scalar * matrix: multiply each element of matrix by scalar
                 var resultElements = new List<K3Value>();
@@ -362,7 +372,7 @@ namespace K3CSharp
                         var newRowElements = new List<K3Value>();
                         foreach (var element in rowVec.Elements)
                         {
-                            var elementProduct = Times(left, element);
+                            var elementProduct = ctx.DispatchDyadic("*", left, element)!;
                             newRowElements.Add(elementProduct);
                         }
                         resultElements.Add(new VectorValue(newRowElements));
@@ -370,7 +380,7 @@ namespace K3CSharp
                 }
                 return new VectorValue(resultElements);
             }
-            else if (IsScalar(right) && left is VectorValue leftVec && IsMatrix(leftVec))
+            else if (IsScalarValue(right) && left is VectorValue leftVec && IsMatrix(leftVec))
             {
                 // Matrix * scalar: multiply each element of matrix by scalar
                 var resultElements = new List<K3Value>();
@@ -381,7 +391,7 @@ namespace K3CSharp
                         var newRowElements = new List<K3Value>();
                         foreach (var element in rowVec.Elements)
                         {
-                            var elementProduct = Times(element, right);
+                            var elementProduct = ctx.DispatchDyadic("*", element, right)!;
                             newRowElements.Add(elementProduct);
                         }
                         resultElements.Add(new VectorValue(newRowElements));
@@ -401,7 +411,7 @@ namespace K3CSharp
                         var newRowElements = new List<K3Value>();
                         foreach (var element in rowVec.Elements)
                         {
-                            var elementProduct = Times(scalar, element);
+                            var elementProduct = ctx.DispatchDyadic("*", scalar, element)!;
                             newRowElements.Add(elementProduct);
                         }
                         resultElements.Add(new VectorValue(newRowElements));
@@ -421,7 +431,7 @@ namespace K3CSharp
                         var newRowElements = new List<K3Value>();
                         foreach (var element in rowVec.Elements)
                         {
-                            var elementProduct = Times(element, scalar);
+                            var elementProduct = ctx.DispatchDyadic("*", element, scalar)!;
                             newRowElements.Add(elementProduct);
                         }
                         resultElements.Add(new VectorValue(newRowElements));
@@ -441,7 +451,7 @@ namespace K3CSharp
                     K3Value leftElement = (i < leftVector.Elements.Count) ? leftVector.Elements[i] : new IntegerValue(1);
                     K3Value rightElement = (i < rightVector.Elements.Count) ? rightVector.Elements[i] : new IntegerValue(1);
                     
-                    var elementProduct = Times(leftElement, rightElement);
+                    var elementProduct = ctx.DispatchDyadic("*", leftElement, rightElement)!;
                     resultElements.Add(elementProduct);
                 }
                 
@@ -449,7 +459,7 @@ namespace K3CSharp
             }
             
             // Fallback: try Times again (will throw if still incompatible)
-            return Times(left, right);
+            return ctx.DispatchDyadic("*", left, right)!;
         }
         
                 
@@ -674,7 +684,13 @@ namespace K3CSharp
             return transposed;
         }
         
-        private K3Value MathMul(K3Value left, K3Value right)
+        private static bool IsScalarValue(K3Value value)
+        {
+            return value is IntegerValue || value is LongValue || value is FloatValue ||
+                   value is CharacterValue || value is SymbolValue || value is NullValue;
+        }
+
+        internal K3Value MathMul(K3Value left, K3Value right)
         {
             // _mul is equivalent to {x _dot\:y}
             if (left is VectorValue leftVec)
@@ -736,14 +752,14 @@ namespace K3CSharp
             return matrix;
         }
         
-        private K3Value MathInv(K3Value left, K3Value right)
+        internal K3Value MathInv(K3Value left, K3Value right)
         {
             // Linear algebra matrix inverse - for now implement as identity
             // Full matrix inverse would require proper matrix representation
             return right;
         }
         
-        private K3Value MathInv(K3Value operand)
+        internal K3Value MathInv(K3Value operand)
         {
             // Generic matrix inverse for any size square matrix
             if (operand is VectorValue matrix && IsMatrix(matrix))
@@ -869,7 +885,7 @@ namespace K3CSharp
             throw new Exception("_inv requires square matrix or scalar");
         }
         
-        private K3Value MathSin(K3Value operand)
+        internal K3Value MathSin(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -898,7 +914,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathCos(K3Value operand)
+        internal K3Value MathCos(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -927,7 +943,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathTan(K3Value operand)
+        internal K3Value MathTan(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -956,7 +972,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathAsin(K3Value operand)
+        internal K3Value MathAsin(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -994,7 +1010,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathAcos(K3Value operand)
+        internal K3Value MathAcos(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -1032,7 +1048,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathAtan(K3Value operand)
+        internal K3Value MathAtan(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -1061,7 +1077,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathSinh(K3Value operand)
+        internal K3Value MathSinh(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -1090,7 +1106,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathCosh(K3Value operand)
+        internal K3Value MathCosh(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -1119,7 +1135,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathTanh(K3Value operand)
+        internal K3Value MathTanh(K3Value operand)
         {
             if (operand is IntegerValue intValue)
             {
@@ -1148,7 +1164,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathDiv(K3Value left, K3Value right)
+        internal K3Value MathDiv(K3Value left, K3Value right)
         {
             // Integer division operation - only works with int/long types
             if (left is IntegerValue intLeft && right is IntegerValue intRight)
@@ -1190,7 +1206,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathAnd(K3Value left, K3Value right)
+        internal K3Value MathAnd(K3Value left, K3Value right)
         {
             // Bitwise AND operation
             if (left is IntegerValue intLeft && right is IntegerValue intRight)
@@ -1219,7 +1235,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathOr(K3Value left, K3Value right)
+        internal K3Value MathOr(K3Value left, K3Value right)
         {
             // Bitwise OR operation
             if (left is IntegerValue intLeft && right is IntegerValue intRight)
@@ -1248,7 +1264,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathXor(K3Value left, K3Value right)
+        internal K3Value MathXor(K3Value left, K3Value right)
         {
             // Bitwise XOR operation
             if (left is IntegerValue intLeft && right is IntegerValue intRight)
@@ -1277,7 +1293,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathNot(K3Value left)
+        internal K3Value MathNot(K3Value left)
         {
             // Bitwise NOT operation (monadic)
             if (left is IntegerValue intLeft)
@@ -1303,7 +1319,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathLsq(K3Value left, K3Value right)
+        internal K3Value MathLsq(K3Value left, K3Value right)
         {
             // Least squares regression: x _lsq y returns w where yw = x
             // x is a floating-point vector or matrix
@@ -1461,7 +1477,7 @@ namespace K3CSharp
             return result;
         }
         
-        private K3Value MathCeil(K3Value operand)
+        internal K3Value MathCeil(K3Value operand)
         {
             // Ceiling function - rounds up to nearest integer
             if (operand is IntegerValue intValue)
@@ -1492,7 +1508,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathRot(K3Value left, K3Value right)
+        internal K3Value MathRot(K3Value left, K3Value right)
         {
             // Bitwise rotation operation
             if (left is IntegerValue intLeft && right is IntegerValue intRight)
@@ -1511,7 +1527,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value MathShift(K3Value left, K3Value right)
+        internal K3Value MathShift(K3Value left, K3Value right)
         {
             // Bitwise shift operation
             if (left is IntegerValue intLeft && right is IntegerValue intRight)

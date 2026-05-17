@@ -6,8 +6,17 @@
 // Full license text: [LICENSE.txt](https://github.com/ERufian/ksharp/blob/main/LICENSE.txt)
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// Function Inverse verb implementations extracted from Evaluator.
+    /// </summary>
+    public class FunctionInverseHandler
     {
+        private readonly IEvaluatorContext ctx;
+
+        public FunctionInverseHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
         /// <summary>
         /// Function Inverse: f ? y
         /// Finds x such that f(x) = y using heuristics for known functions
@@ -16,7 +25,7 @@ namespace K3CSharp
         /// Max iterations: 20
         /// Default initial approximations: 0.9999 and 0.9998
         /// </summary>
-        private K3Value FunctionInverse(K3Value func, K3Value y, K3Value? initialGuess = null)
+        internal K3Value FunctionInverse(K3Value func, K3Value y, K3Value? initialGuess = null)
         {
             // Handle vector y: apply element-wise (atom function)
             if (y is VectorValue yVec)
@@ -26,10 +35,10 @@ namespace K3CSharp
                 {
                     results.Add(FunctionInverse(func, elem, initialGuess));
                 }
-                return new VectorValue(results, DetermineVectorType(results));
+                return new VectorValue(results, ctx.DetermineVectorType(results));
             }
 
-            double yVal = GetNumericValue(y);
+            double yVal = MathHandler.GetNumericValue(y);
 
             // Try heuristic: known invertible function
             var heuristicResult = TryHeuristicInverse(func, yVal);
@@ -42,7 +51,7 @@ namespace K3CSharp
             double x0, x1;
             if (initialGuess != null && !(initialGuess is NullValue))
             {
-                x0 = GetNumericValue(initialGuess);
+                x0 = MathHandler.GetNumericValue(initialGuess);
                 x1 = 0.9999 * x0;
             }
             else
@@ -227,18 +236,18 @@ namespace K3CSharp
             if (func is ProjectedFunctionValue proj)
             {
                 // Apply the projected function (system verb) to x
-                result = CallVariableFunction(proj.OperatorName, new List<K3Value> { xVal });
+                result = ctx.CallVariableFunction(proj.OperatorName, new List<K3Value> { xVal });
             }
             else if (func is FunctionValue fv)
             {
-                result = ExecuteFunction(fv, new List<K3Value> { xVal });
+                result = ctx.ExecuteFunction(fv, new List<K3Value> { xVal });
             }
             else
             {
                 throw new Exception("domain error");
             }
 
-            return GetNumericValue(result);
+            return MathHandler.GetNumericValue(result);
         }
 
 

@@ -6,60 +6,71 @@
 // Full license text: [LICENSE.txt](https://github.com/ERufian/ksharp/blob/main/LICENSE.txt)
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// System variable verb implementations extracted from Evaluator.
+    /// </summary>
+    public class VarsHandler
     {
+        private readonly IEvaluatorContext ctx;
+
+        public VarsHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+
         // Internal variable and system information functions
         
-        public K3Value DirFunction(K3Value operand)
+        internal K3Value DirFunction(K3Value operand)
         {
             // _d (directory) function - returns current directory/branch
-            return kTree.CurrentBranch != null ? kTree.CurrentBranch : new NullValue();
+            return ctx.KTree.CurrentBranch != null ? ctx.KTree.CurrentBranch : new NullValue();
         }
         
-        private K3Value NullFunction(K3Value operand)
+        internal K3Value NullFunction(K3Value operand)
         {
             // _n - null value
             // Return singleton null value for optimization purposes
             return new NullValue();
         }
         
-        private K3Value VarFunction(K3Value operand)
+        internal K3Value VarFunction(K3Value operand)
         {
             // _v - script name (without extension), or empty symbol if no script
-            return new SymbolValue(ScriptName);
+            return new SymbolValue(ctx.ScriptName);
         }
 
-        private K3Value IndexFunction(K3Value operand)
+        internal K3Value IndexFunction(K3Value operand)
         {
             // _i - command-line arguments as list of character vectors
-            if (CommandLineArgs.Count == 0)
+            if (ctx.CommandLineArgs.Count == 0)
                 return new VectorValue(new List<K3Value>());
 
-            var elements = CommandLineArgs.Select(arg =>
+            var elements = ctx.CommandLineArgs.Select(arg =>
                 (K3Value)new VectorValue(arg.Select(c => (K3Value)new CharacterValue(c.ToString())).ToList(), -3)
             ).ToList();
             return new VectorValue(elements);
         }
         
-        private K3Value FunctionFunction(K3Value operand)
+        internal K3Value FunctionFunction(K3Value operand)
         {
             // _f - current function value for self-reference
             // Inside a function body, _f[args] calls the currently-executing function.
-            if (currentFunctionValue != null)
+            if (ctx.CurrentFunctionValue != null)
             {
-                return currentFunctionValue;
+                return ctx.CurrentFunctionValue;
             }
             // Outside a function context, return the operand unchanged (no self to reference)
             return operand ?? new NullValue();
         }
         
-        private K3Value SpaceFunction(K3Value operand)
+        internal K3Value SpaceFunction(K3Value operand)
         {
             // _s - system memory information
             // Return information about memory usage of the system
@@ -74,32 +85,32 @@ namespace K3CSharp
             return new VectorValue(results);
         }
         
-        private K3Value HostFunction(K3Value operand)
+        internal K3Value HostFunction(K3Value operand)
         {
             // _h - preferred host for IPC connection tuples
-            return new SymbolValue(GetIpcHost());
+            return new SymbolValue(ctx.GetIpcHost());
         }
         
-        private K3Value PortFunction(K3Value operand)
+        internal K3Value PortFunction(K3Value operand)
         {
             // _p - port number
-            return new IntegerValue(GetListeningPort());
+            return new IntegerValue(ctx.GetListeningPort());
         }
         
-        private K3Value ProcessIdFunction(K3Value operand)
+        internal K3Value ProcessIdFunction(K3Value operand)
         {
             // _P - process ID
             // Return process ID of the current process as an integer
             return new IntegerValue(Environment.ProcessId);
         }
         
-        private K3Value WhoFunction(K3Value operand)
+        internal K3Value WhoFunction(K3Value operand)
         {
             // _w - current incoming IPC handle
-            return new IntegerValue(GetCurrentIncomingHandle());
+            return new IntegerValue(ctx.GetCurrentIncomingHandle());
         }
         
-        private K3Value UserFunction(K3Value operand)
+        internal K3Value UserFunction(K3Value operand)
         {
             // _u - username
             // Return username from calling process when responding to an IPC call
@@ -107,10 +118,10 @@ namespace K3CSharp
             return new SymbolValue(Environment.UserName ?? "");
         }
         
-        private K3Value AddressFunction(K3Value operand)
+        internal K3Value AddressFunction(K3Value operand)
         {
             // _a - IPv4 address
-            var address = GetCurrentIncomingAddress();
+            var address = ctx.GetCurrentIncomingAddress();
             if (address == null || address.AddressFamily != AddressFamily.InterNetwork)
             {
                 return new IntegerValue(0);
@@ -125,7 +136,7 @@ namespace K3CSharp
             return new IntegerValue(BitConverter.ToInt32(bytes, 0));
         }
         
-        private K3Value VersionFunction(K3Value operand)
+        internal K3Value VersionFunction(K3Value operand)
         {
             // _k - version
             // Return version of K# as a character vector: "3.33." + Program.Version
@@ -134,7 +145,7 @@ namespace K3CSharp
             return new VectorValue(chars, -3);
         }
         
-        private K3Value OsFunction(K3Value operand)
+        internal K3Value OsFunction(K3Value operand)
         {
             // _o - operating system
             // Return name of operating system as a symbol
@@ -150,14 +161,14 @@ namespace K3CSharp
             return new SymbolValue(os);
         }
         
-        private K3Value CoresFunction(K3Value operand)
+        internal K3Value CoresFunction(K3Value operand)
         {
             // _c - number of cores
             // Return number of cores of the machine as an integer
             return new IntegerValue(Environment.ProcessorCount);
         }
         
-        private K3Value RamFunction(K3Value operand)
+        internal K3Value RamFunction(K3Value operand)
         {
             // _r - amount of RAM
             // Return amount of RAM of the machine as an integer
@@ -166,7 +177,7 @@ namespace K3CSharp
             return new IntegerValue((int)(totalMemory / (1024 * 1024))); // Convert bytes to MB
         }
         
-        private K3Value MachineIdFunction(K3Value operand)
+        internal K3Value MachineIdFunction(K3Value operand)
         {
             // _m - machine ID
             // Return machine ID as a character vector
@@ -175,7 +186,7 @@ namespace K3CSharp
             return new VectorValue(chars);
         }
         
-        private K3Value StackFunction(K3Value operand)
+        internal K3Value StackFunction(K3Value operand)
         {
             // _y - stack trace
             // Return stack trace of the current call stack and arguments as a list

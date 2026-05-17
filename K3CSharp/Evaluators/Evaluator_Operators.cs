@@ -931,8 +931,8 @@ namespace K3CSharp
             if (aIsNumeric && bIsNumeric)
             {
                 // Convert both to double for tolerant comparison
-                double numA = GetNumericValue(a);
-                double numB = GetNumericValue(b);
+                double numA = MathHandler.GetNumericValue(a);
+                double numB = MathHandler.GetNumericValue(b);
 
                 // Tolerant equality for numeric types
                 if (numA == numB)

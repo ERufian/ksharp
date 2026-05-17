@@ -16,11 +16,11 @@ namespace K3CSharp
     /// </summary>
     public class K3ValueEqualityComparer : IEqualityComparer<K3Value>
     {
-        private readonly Evaluator _evaluator;
+        private readonly IEvaluatorContext _ctx;
 
-        public K3ValueEqualityComparer(Evaluator evaluator)
+        public K3ValueEqualityComparer(IEvaluatorContext context)
         {
-            _evaluator = evaluator;
+            _ctx = context;
         }
 
         public bool Equals(K3Value? x, K3Value? y)
@@ -29,7 +29,7 @@ namespace K3CSharp
             if (x is null || y is null) return false;
 
             // Use the Match function for proper K3 value comparison
-            var result = _evaluator.Match(x, y);
+            var result = _ctx.Match(x, y);
             return result is IntegerValue intVal && intVal.Value == 1;
         }
 
@@ -51,14 +51,24 @@ namespace K3CSharp
         }
     }
 
-    public partial class Evaluator
+    /// <summary>
+    /// Hashgroup verb implementations extracted from Evaluator.
+    /// </summary>
+    public class HashgroupHandler
     {
-        private K3Value Unique(K3Value a)
+        private readonly IEvaluatorContext ctx;
+
+        public HashgroupHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+
+        internal K3Value Unique(K3Value a)
         {
             if (a is VectorValue vecA)
             {
                 var uniqueElements = new List<K3Value>();
-                var comparer = new K3ValueEqualityComparer(this);
+                var comparer = new K3ValueEqualityComparer(ctx);
                 var seen = new HashSet<K3Value>(comparer);
 
                 foreach (var element in vecA.Elements)
@@ -75,11 +85,11 @@ namespace K3CSharp
             return a; // For scalars, return value itself
         }
 
-        private K3Value Group(K3Value a)
+        internal K3Value Group(K3Value a)
         {
             if (a is VectorValue vecA)
             {
-                var comparer = new K3ValueEqualityComparer(this);
+                var comparer = new K3ValueEqualityComparer(ctx);
                 var groups = new Dictionary<K3Value, List<int>>(comparer);
 
                 // First pass: collect indices for each unique value

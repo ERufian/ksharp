@@ -10,11 +10,15 @@ using System.Linq;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// Random/draw verb implementations extracted from Evaluator.
+    /// Standalone class — no external dependencies.
+    /// </summary>
+    public class RandHandler
     {
         private static int _randomSeed = -314159; // Default seed value
         
-        private K3Value Draw(K3Value left, K3Value right)
+        internal K3Value Draw(K3Value left, K3Value right)
         {
             // _draw function - dyadic implementation
             // It has 3 different cases depending on input types: Select, Deal and Probability

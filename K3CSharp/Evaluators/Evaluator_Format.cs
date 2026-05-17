@@ -10,9 +10,19 @@ using System.Linq;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// Format verb implementations ($) extracted from Evaluator.
+    /// Standalone class — no external dependencies.
+    /// </summary>
+    public class FormatHandler
     {
-        private K3Value Format(K3Value operand)
+        private readonly IEvaluatorContext ctx;
+
+        public FormatHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+        internal K3Value Format(K3Value operand)
         {
             // Monadic $ operator - convert to string representation
             // For vectors, preserve structure and convert each element to string
@@ -76,7 +86,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value Format(K3Value left, K3Value right)
+        internal K3Value Format(K3Value left, K3Value right)
         {
             // Binary $ operator - form/format according to updated K3 specification
             
@@ -84,7 +94,7 @@ namespace K3CSharp
             // Check if left is a SymbolValue with "{}"
             if (left is SymbolValue leftSym && leftSym.Value == "{}")
             {
-                return EvaluateStringExpression(right);
+                return ctx.EvaluateStringExpression(right);
             }
             
             // Check if left is a FunctionValue representing empty braces {}
@@ -97,7 +107,7 @@ namespace K3CSharp
                 // Check if it represents empty braces {} (with or without whitespace)
                 if (origText == "{}" || string.IsNullOrEmpty(bodyText))
                 {
-                    return EvaluateStringExpression(right);
+                    return ctx.EvaluateStringExpression(right);
                 }
             }
             
@@ -110,7 +120,7 @@ namespace K3CSharp
                 
                 if (origText2 == "{}" || string.IsNullOrEmpty(bodyText2))
                 {
-                    return EvaluateStringExpression(right);
+                    return ctx.EvaluateStringExpression(right);
                 }
             }
             
@@ -119,9 +129,9 @@ namespace K3CSharp
             // Type conversion happens ONLY when:
             // 1. First argument is a type conversion specifier AND
             // 2. Second argument is a character vector
-            if (IsTypeConversionSpecifier(left) && IsCharacterVectorOrList(right))
+            if (ctx.IsTypeConversionSpecifier(left) && ctx.IsCharacterVectorOrList(right))
             {
-                return PerformTypeConversion(left, right);
+                return ctx.PerformTypeConversion(left, right);
             }
             
             // Atomic iteration: dyadic format is a string-atomic function

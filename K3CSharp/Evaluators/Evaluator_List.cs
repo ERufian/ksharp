@@ -6,6 +6,7 @@
 // Full license text: [LICENSE.txt](https://github.com/ERufian/ksharp/blob/main/LICENSE.txt)
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -13,12 +14,22 @@ using K3CSharp;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    /// <summary>
+    /// List and system-related verb implementations extracted from Evaluator.
+    /// </summary>
+    public class ListHandler
     {
+        private readonly IEvaluatorContext ctx;
+
+        public ListHandler(IEvaluatorContext context)
+        {
+            ctx = context;
+        }
+
         // List and system-related functions
         
         // Helper method to extract string content from VectorValue
-        private string ExtractStringFromVector(VectorValue vecVal)
+        internal string ExtractStringFromVector(VectorValue vecVal)
         {
             // Check if this is a character vector (string)
             if (vecVal.Elements.All(e => e is CharacterValue))
@@ -40,7 +51,7 @@ namespace K3CSharp
         }
         
         // Dyadic implementations
-        private K3Value In(K3Value left, K3Value right)
+        internal K3Value In(K3Value left, K3Value right)
         {
             // _in (Find) function - searches for left argument in right argument
             // Returns 1 if found, 0 if not found (per K3 spec)
@@ -52,7 +63,7 @@ namespace K3CSharp
                 for (int i = 0; i < rightVec.Elements.Count; i++)
                 {
                     var element = rightVec.Elements[i];
-                    var matchResult = Match(left, element);
+                    var matchResult = ctx.Match(left, element);
                     
                     if (matchResult is IntegerValue intVal && intVal.Value == 1)
                     {
@@ -64,14 +75,14 @@ namespace K3CSharp
             else
             {
                 // Search for left in right scalar
-                var matchResult = Match(left, right);
+                var matchResult = ctx.Match(left, right);
                 return (matchResult is IntegerValue intVal && intVal.Value == 1) 
                     ? new IntegerValue(1) 
                     : new IntegerValue(0);
             }
         }
 
-        private K3Value Bin(K3Value left, K3Value right)
+        internal K3Value Bin(K3Value left, K3Value right)
         {
             // _bin (Binary Search) function - performs binary search on sorted list
             // According to spec: x _bin y where x is ascending list, y is atom
@@ -87,14 +98,14 @@ namespace K3CSharp
                 }
                 
                 // Check if first element is already >= right
-                var firstComparison = CompareValues(leftVec.Elements[0], right);
+                var firstComparison = ctx.CompareValues(leftVec.Elements[0], right);
                 if (firstComparison >= 0)
                 {
                     return new IntegerValue(0);
                 }
                 
                 // Check if last element is < right
-                var lastComparison = CompareValues(leftVec.Elements[leftVec.Elements.Count - 1], right);
+                var lastComparison = ctx.CompareValues(leftVec.Elements[leftVec.Elements.Count - 1], right);
                 if (lastComparison < 0)
                 {
                     return new IntegerValue(leftVec.Elements.Count);
@@ -109,7 +120,7 @@ namespace K3CSharp
                 {
                     int mid = (low + high) / 2;
                     var midValue = leftVec.Elements[mid];
-                    var comparison = CompareValues(midValue, right);
+                    var comparison = ctx.CompareValues(midValue, right);
                     
                     if (comparison >= 0)
                     {
@@ -127,12 +138,12 @@ namespace K3CSharp
             else
             {
                 // For non-vector left, return 0 if left >= right, 1 otherwise
-                var comparison = CompareValues(left, right);
+                var comparison = ctx.CompareValues(left, right);
                 return new IntegerValue(comparison >= 0 ? 0 : 1);
             }
         }
 
-        private K3Value Binl(K3Value left, K3Value right)
+        internal K3Value Binl(K3Value left, K3Value right)
         {
             // _binl (Binary Search Each-Left) function
             // According to spec: x _binl y where x is ascending list, y is list
@@ -159,7 +170,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value Lin(K3Value left, K3Value right)
+        internal K3Value Lin(K3Value left, K3Value right)
         {
             // _lin (List Intersection) function
             // Returns 1 for each element of left that is in right, 0 otherwise
@@ -188,7 +199,7 @@ namespace K3CSharp
                         {
                             foreach (var rightElement in rightVec.Elements)
                             {
-                                var matchResult = Match(leftElement, rightElement);
+                                var matchResult = ctx.Match(leftElement, rightElement);
                                 if (matchResult is IntegerValue intVal && intVal.Value == 1)
                                 {
                                     found = true;
@@ -210,7 +221,7 @@ namespace K3CSharp
                 {
                     foreach (var rightElement in rightVec.Elements)
                     {
-                        var matchResult = Match(left, rightElement);
+                        var matchResult = ctx.Match(left, rightElement);
                         if (matchResult is IntegerValue intVal && intVal.Value == 1)
                         {
                             return new IntegerValue(1);
@@ -221,7 +232,7 @@ namespace K3CSharp
                 else
                 {
                     // Scalar case
-                    var matchResult = Match(left, right);
+                    var matchResult = ctx.Match(left, right);
                     return (matchResult is IntegerValue intVal && intVal.Value == 1) 
                         ? new IntegerValue(1) 
                         : new IntegerValue(0);
@@ -230,26 +241,26 @@ namespace K3CSharp
         }
 
         // Monadic placeholder functions
-        private K3Value InFunction(K3Value operand)
+        internal K3Value InFunction(K3Value operand)
         {
             // _in function should be handled as dyadic in binary operations
             // This monadic case should not be reached in normal operation
             throw new Exception("_in (Find) function requires two arguments - use infix notation: x _in y");
         }
 
-        private K3Value BinFunction(K3Value operand)
+        internal K3Value BinFunction(K3Value operand)
         {
             throw new Exception("_bin (binary search) operation reserved for future use");
         }
 
-        private K3Value BinlFunction(K3Value operand)
+        internal K3Value BinlFunction(K3Value operand)
         {
             // _binl function should be handled as dyadic in binary operations
             // This monadic case should not be reached in normal operation
             throw new Exception("_binl (binary search each-left) function requires two arguments - use infix notation: x _binl y");
         }
 
-        private K3Value LinFunction(K3Value operand)
+        internal K3Value LinFunction(K3Value operand)
         {
             // _lin function should be handled as dyadic in binary operations
             // This monadic case should not be reached in normal operation
@@ -257,7 +268,7 @@ namespace K3CSharp
         }
 
         // Database and system functions (placeholders)
-        private K3Value Dv(K3Value left, K3Value right)
+        internal K3Value Dv(K3Value left, K3Value right)
         {
             // _dv (Delete by Value) function
             // Returns a copy of left with all occurrences of right removed
@@ -276,7 +287,7 @@ namespace K3CSharp
                 
                 foreach (var element in leftVec.Elements)
                 {
-                    var matchResult = Match(element, right);
+                    var matchResult = ctx.Match(element, right);
                     if (matchResult is IntegerValue intVal && intVal.Value != 1)
                     {
                         // Element doesn't match right, keep it
@@ -289,7 +300,7 @@ namespace K3CSharp
             else
             {
                 // For scalar left, return left if it doesn't match right, empty vector otherwise
-                var matchResult = Match(left, right);
+                var matchResult = ctx.Match(left, right);
                 if (matchResult is IntegerValue intVal && intVal.Value != 1)
                 {
                     return left;
@@ -301,7 +312,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value Dvl(K3Value left, K3Value right)
+        internal K3Value Dvl(K3Value left, K3Value right)
         {
             // _dvl (Delete by Value List) function
             // Equivalent to _dv/: - applies _dv with each-right adverb
@@ -331,7 +342,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value Di(K3Value left, K3Value right)
+        internal K3Value Di(K3Value left, K3Value right)
         {
             // _di (Delete by Index) function
             // Returns a copy of left with items removed at indices specified in right
@@ -348,7 +359,7 @@ namespace K3CSharp
                     foreach (var entry in leftDict.Entries)
                     {
                         var key = entry.Key;
-                        if (!Match(new SymbolValue(key.Value), rightSymbol).Equals(new IntegerValue(1)))
+                        if (!ctx.Match(new SymbolValue(key.Value), rightSymbol).Equals(new IntegerValue(1)))
                         {
                             newEntries.Add(entry);
                         }
@@ -440,7 +451,7 @@ namespace K3CSharp
             }
         }
         
-        private int GetIndexValue(K3Value value)
+        internal int GetIndexValue(K3Value value)
         {
             if (value is IntegerValue intValue)
             {
@@ -452,7 +463,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value Sv(K3Value left, K3Value right)
+        internal K3Value Sv(K3Value left, K3Value right)
         {
             // _sv (Scalar from Vector) function
             // Performs numeric base or radix conversion using Horner's method
@@ -554,7 +565,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value SvSingleBase(VectorValue radices, VectorValue digits)
+        internal K3Value SvSingleBase(VectorValue radices, VectorValue digits)
         {
             // Single radix case: use the first radix element for all digits
             bool hasFloat = radices.Elements[0] is FloatValue;
@@ -597,7 +608,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value SvMultipleRadices(VectorValue radices, VectorValue digitVec)
+        internal K3Value SvMultipleRadices(VectorValue radices, VectorValue digitVec)
         {
             bool hasFloat = false;
             foreach (var r in radices.Elements)
@@ -638,7 +649,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value Vs(K3Value left, K3Value right)
+        internal K3Value Vs(K3Value left, K3Value right)
         {
             // _vs (vector from scalar) function
             // Dyadic verb: x _vs y
@@ -717,7 +728,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value VsSingle(K3Value left, int value)
+        internal K3Value VsSingle(K3Value left, int value)
         {
             // Convert single integer to vector representation
             
@@ -750,7 +761,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value ConvertToBase(int value, int baseNum)
+        internal K3Value ConvertToBase(int value, int baseNum)
         {
             if (baseNum <= 0)
                 throw new Exception("_vs: base must be positive");
@@ -773,7 +784,7 @@ namespace K3CSharp
             return new VectorValue(digits.Select(d => (K3Value)new IntegerValue(d)).ToList());
         }
         
-        private K3Value ConvertToRadices(int value, List<int> radices)
+        internal K3Value ConvertToRadices(int value, List<int> radices)
         {
             var digits = new List<int>();
             int remaining = value;
@@ -793,7 +804,7 @@ namespace K3CSharp
             return new VectorValue(digits.Select(d => (K3Value)new IntegerValue(d)).ToList());
         }
 
-        private K3Value Ci(K3Value left)
+        internal K3Value Ci(K3Value left)
         {
             // _ci (character from integer) function - monadic version
             
@@ -825,7 +836,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value CiSingle(int intValue)
+        internal K3Value CiSingle(int intValue)
         {
             // Convert integer to ASCII character
             // Handle negative values and values > 255 by allowing unchecked overflow
@@ -834,7 +845,7 @@ namespace K3CSharp
             return new CharacterValue(charValue.ToString());
         }
 
-        private K3Value Ic(K3Value left)
+        internal K3Value Ic(K3Value left)
         {
             // _ic (integer from character) function - monadic version
             
@@ -882,7 +893,7 @@ namespace K3CSharp
             }
         }
         
-        private K3Value IcSingle(char charValue)
+        internal K3Value IcSingle(char charValue)
         {
             // Convert character to integer (ASCII value)
             return new IntegerValue((int)charValue);
@@ -890,7 +901,7 @@ namespace K3CSharp
 
         // Helper function to check if a value is a character vector
         // Used by string-atomic functions (_sm, _ss, $)
-        private bool IsCharacterVector(K3Value val)
+        internal bool IsCharacterVector(K3Value val)
         {
             if (val is VectorValue vec && vec.Elements.Count > 0)
             {
@@ -901,7 +912,7 @@ namespace K3CSharp
 
         // Helper function to convert character vector to string
         // Used by string-atomic functions (_sm, _ss, $)
-        private string CharacterVectorToString(K3Value val)
+        internal string CharacterVectorToString(K3Value val)
         {
             if (val is CharacterValue charVal)
                 return charVal.Value;
@@ -915,7 +926,7 @@ namespace K3CSharp
             throw new Exception("cannot convert to string");
         }
 
-        private K3Value Sm(K3Value left, K3Value right)
+        internal K3Value Sm(K3Value left, K3Value right)
         {
             // _sm (string match) function
             // Dyadic verb: x _sm y
@@ -1057,7 +1068,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value SsFunction(K3Value left, K3Value right)
+        internal K3Value SsFunction(K3Value left, K3Value right)
         {
             // _ss (string search) function
             // Dyadic verb: x _ss y
@@ -1191,7 +1202,7 @@ namespace K3CSharp
                 return new VectorValue(indicesDefault.Select(i => new IntegerValue(i)).Cast<K3Value>().ToList());
         }
 
-        private K3Value SsrFunction(K3Value text, K3Value pattern, K3Value replacement)
+        internal K3Value SsrFunction(K3Value text, K3Value pattern, K3Value replacement)
         {
             // _ssr (string search and replace) function
             // Ternary verb: _ssr[text;pattern;replacement]
@@ -1231,7 +1242,7 @@ namespace K3CSharp
                 // Pattern is treated as a regex to enable character classes like [sS]
                 // Get timeout from global variable .m.regex.timeout (default 1000ms)
                 int regexTimeoutMs = 1000; // Default 1 second
-                var timeoutValue = GetVariableValue(".m.regex.timeout");
+                var timeoutValue = ctx.GetVariableValue(".m.regex.timeout");
                 if (timeoutValue is IntegerValue timeoutInt)
                 {
                     regexTimeoutMs = timeoutInt.Value;
@@ -1258,7 +1269,7 @@ namespace K3CSharp
                             // Multi-character match: create a character vector
                             matchedValue = new VectorValue(match.Value.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());
                         }
-                        var funcResult = ExecuteFunction(func, new List<K3Value> { matchedValue });
+                        var funcResult = ctx.ExecuteFunction(func, new List<K3Value> { matchedValue });
                         return funcResult switch
                         {
                             CharacterValue charVal => charVal.Value,
@@ -1282,7 +1293,7 @@ namespace K3CSharp
             return new VectorValue(resultStr.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());
         }
 
-        private K3Value GetenvFunction(K3Value operand)
+        internal K3Value GetenvFunction(K3Value operand)
         {
             string varName = operand switch
             {
@@ -1299,7 +1310,7 @@ namespace K3CSharp
             return new VectorValue(value.Select(c => new CharacterValue(c.ToString())).Cast<K3Value>().ToList());
         }
 
-        private K3Value SetenvFunction(K3Value varNameArg, K3Value valueArg)
+        internal K3Value SetenvFunction(K3Value varNameArg, K3Value valueArg)
         {            
             string varName = varNameArg switch
             {
@@ -1320,7 +1331,7 @@ namespace K3CSharp
             return new NullValue(); // _setenv returns null (nothing) per spec
         }
 
-        private K3Value SizeFunction(K3Value operand)
+        internal K3Value SizeFunction(K3Value operand)
         {
             string fileName = operand switch
             {
@@ -1348,7 +1359,7 @@ namespace K3CSharp
             }
         }
 
-        private K3Value ExitFunction(K3Value operand)
+        internal K3Value ExitFunction(K3Value operand)
         {
             // _exit is a monadic verb, but can also be used niladically
             // According to speclet: if argument is _n (no argument provided, niladic usage), exit code will be 0
@@ -1371,11 +1382,11 @@ namespace K3CSharp
                 };
             }
             
-            RequestExit(exitCode);
+            ctx.RequestExit(exitCode);
             throw new K3ExitException(exitCode);
         }
 
-        private K3Value HostDnsFunction(K3Value operand)
+        internal K3Value HostDnsFunction(K3Value operand)
         {
             // _host i  -> IPv4 int32 to hostname symbol (reverse DNS)
             // _host s  -> hostname symbol/charvec to IPv4 int32 (forward DNS)

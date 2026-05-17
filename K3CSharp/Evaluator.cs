@@ -12,7 +12,7 @@ using K3CSharp.Parsing;
 
 namespace K3CSharp
 {
-    public partial class Evaluator
+    public partial class Evaluator : IEvaluatorContext
     {
         private readonly Dictionary<string, K3Value> globalVariables = new Dictionary<string, K3Value>();
         private readonly Dictionary<string, K3Value> localVariables = new Dictionary<string, K3Value>();
@@ -50,12 +50,30 @@ namespace K3CSharp
         // Adverb-aware evaluator for enhanced verb/adverb handling
         private readonly AdverbAwareEvaluator adverbAwareEvaluator;
 
+        // Extracted handler classes
+        internal readonly MathHandler mathHandler;
+        internal readonly FormatHandler formatHandler;
+        internal readonly RandHandler randHandler;
+        internal readonly TimeHandler timeHandler;
+        internal readonly VarsHandler varsHandler;
+        internal readonly FunctionInverseHandler functionInverseHandler;
+        internal readonly ListHandler listHandler;
+        internal readonly HashgroupHandler hashgroupHandler;
+
         /// <summary>
         /// Constructor for Evaluator
         /// </summary>
         public Evaluator()
         {
             adverbAwareEvaluator = new AdverbAwareEvaluator(this);
+            mathHandler = new MathHandler(this);
+            formatHandler = new FormatHandler(this);
+            randHandler = new RandHandler();
+            timeHandler = new TimeHandler(this);
+            varsHandler = new VarsHandler(this);
+            functionInverseHandler = new FunctionInverseHandler(this);
+            listHandler = new ListHandler(this);
+            hashgroupHandler = new HashgroupHandler(this);
         }
 
         /// <summary>
@@ -68,6 +86,14 @@ namespace K3CSharp
             // Inherit currentFunctionValue from parent for _f recursion support
             currentFunctionValue = parent?.currentFunctionValue;
             adverbAwareEvaluator = new AdverbAwareEvaluator(this);
+            mathHandler = new MathHandler(this);
+            formatHandler = new FormatHandler(this);
+            randHandler = new RandHandler();
+            timeHandler = new TimeHandler(this);
+            varsHandler = new VarsHandler(this);
+            functionInverseHandler = new FunctionInverseHandler(this);
+            listHandler = new ListHandler(this);
+            hashgroupHandler = new HashgroupHandler(this);
             // Inherit stack depth from parent to track recursion
             callDepth = (parent?.callDepth ?? -1) + 1;
         }
@@ -106,7 +132,7 @@ namespace K3CSharp
         public void ResetKTree()
         {
             kTree = new KTree();
-            Evaluator.RandomSeed = -314159;
+            RandHandler.RandomSeed = -314159;
             ObjectRegistry.Clear();
         }
 
@@ -124,26 +150,26 @@ namespace K3CSharp
         {
             return name switch
             {
-                "_d" => DirectoryFunction(new NullValue()),
-                "_n" => NullFunction(new NullValue()),
-                "_t" => TimeFunction(new NullValue()),
-                "_T" => TFunction(new NullValue()),
-                "_v" => VarFunction(new NullValue()),
-                "_i" => IndexFunction(new NullValue()),
-                "_f" => FunctionFunction(new NullValue()),
-                "_s" => SpaceFunction(new NullValue()),
-                "_h" => HostFunction(new NullValue()),
-                "_p" => PortFunction(new NullValue()),
-                "_P" => ProcessIdFunction(new NullValue()),
-                "_w" => WhoFunction(new NullValue()),
-                "_u" => UserFunction(new NullValue()),
-                "_a" => AddressFunction(new NullValue()),
-                "_k" => VersionFunction(new NullValue()),
-                "_o" => OsFunction(new NullValue()),
-                "_c" => CoresFunction(new NullValue()),
-                "_r" => RamFunction(new NullValue()),
-                "_m" => MachineIdFunction(new NullValue()),
-                "_y" => StackFunction(new NullValue()),
+                "_d" => varsHandler.DirFunction(new NullValue()),
+                "_n" => varsHandler.NullFunction(new NullValue()),
+                "_t" => timeHandler.TimeFunction(new NullValue()),
+                "_T" => timeHandler.TFunction(new NullValue()),
+                "_v" => varsHandler.VarFunction(new NullValue()),
+                "_i" => varsHandler.IndexFunction(new NullValue()),
+                "_f" => varsHandler.FunctionFunction(new NullValue()),
+                "_s" => varsHandler.SpaceFunction(new NullValue()),
+                "_h" => varsHandler.HostFunction(new NullValue()),
+                "_p" => varsHandler.PortFunction(new NullValue()),
+                "_P" => varsHandler.ProcessIdFunction(new NullValue()),
+                "_w" => varsHandler.WhoFunction(new NullValue()),
+                "_u" => varsHandler.UserFunction(new NullValue()),
+                "_a" => varsHandler.AddressFunction(new NullValue()),
+                "_k" => varsHandler.VersionFunction(new NullValue()),
+                "_o" => varsHandler.OsFunction(new NullValue()),
+                "_c" => varsHandler.CoresFunction(new NullValue()),
+                "_r" => varsHandler.RamFunction(new NullValue()),
+                "_m" => varsHandler.MachineIdFunction(new NullValue()),
+                "_y" => varsHandler.StackFunction(new NullValue()),
                 _ => throw new Exception($"Unknown system variable: {name}")
             };
         }
@@ -166,7 +192,7 @@ namespace K3CSharp
                     // Must check before general system variable handling
                     if (cleanName == "_f")
                     {
-                        return FunctionFunction(new NullValue());
+                        return varsHandler.FunctionFunction(new NullValue());
                     }
                     // Check if this is a system variable (like _d, _n, _t, etc.)
                     if (VerbRegistry.IsSystemVariable(cleanName))
@@ -558,7 +584,7 @@ namespace K3CSharp
             // _f should return the current function value for recursion, not be evaluated as a verb
             if (variableName == "_f")
             {
-                return FunctionFunction(new NullValue());
+                return varsHandler.FunctionFunction(new NullValue());
             }
             
             // Check if this is a niladic system variable (e.g., _t, _d, _T)
@@ -659,9 +685,9 @@ namespace K3CSharp
             
             // Handle monadic-only verbs that appear in dyadic context (use only left arg)
             if (opName == "_ci")
-                return Ci(left);
+                return listHandler.Ci(left);
             if (opName == "_ic")
-                return Ic(left);
+                return listHandler.Ic(left);
 
             // Look up in the centralized dyadic dispatch table
             if (DyadicDispatch.TryGetValue(opName, out var dyadicOp))
@@ -2442,11 +2468,11 @@ namespace K3CSharp
                 case "?":
                     // Monadic: unique; Dyadic: find or function inverse; Triadic: function inverse with guess
                     if (arguments.Count == 1)
-                        return Unique(arguments[0]);
+                        return hashgroupHandler.Unique(arguments[0]);
                     else if (arguments.Count == 2)
                         return Find(arguments[0], arguments[1]);
                     else if (arguments.Count == 3)
-                        return FunctionInverse(arguments[0], arguments[1], arguments[2]);
+                        return functionInverseHandler.FunctionInverse(arguments[0], arguments[1], arguments[2]);
                     throw new Exception("? operator requires 1-3 arguments");
                 case "!":
                     // Handle monadic enumerate operator
@@ -2484,15 +2510,15 @@ namespace K3CSharp
                         return IfFunction(ifArgs);
                     }
                 case "_t":
-                    return TimeFunction(new NullValue());
+                    return timeHandler.TimeFunction(new NullValue());
                 case "_d":
-                    return DirectoryFunction(new NullValue());
+                    return timeHandler.DirectoryFunction(new NullValue());
                 case "_getenv":
-                    return GetenvFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                    return listHandler.GetenvFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_size":
-                    return SizeFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                    return listHandler.SizeFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_host":
-                    return HostDnsFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                    return listHandler.HostDnsFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_gethint":
                     return GetHintFunction(arguments);
                 case "_sethint":
@@ -2502,9 +2528,9 @@ namespace K3CSharp
                 case "_unmarshall":
                     return UnmarshallFunction(arguments);
                 case "_exit":
-                    return ExitFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
+                    return listHandler.ExitFunction(arguments.Count > 0 ? arguments[0] : new NullValue());
                 case "_ssr":
-                    if (arguments.Count == 3) return SsrFunction(arguments[0], arguments[1], arguments[2]);
+                    if (arguments.Count == 3) return listHandler.SsrFunction(arguments[0], arguments[1], arguments[2]);
                     throw new Exception("_ssr requires 3 arguments: text;pattern;replacement");
                 case ":":
                     // Check if this is conditional evaluation (3+ arguments) or regular assignment
@@ -2650,7 +2676,7 @@ namespace K3CSharp
                     throw new Exception("> operator requires 2 arguments");
                 case "=":
                     if (arguments.Count >= 2) return Equal(arguments[0], arguments[1]);
-                    if (arguments.Count == 1) return Group(arguments[0]);
+                    if (arguments.Count == 1) return hashgroupHandler.Group(arguments[0]);
                     throw new Exception("= operator requires 1 or 2 arguments");
                 case ",":
                     if (arguments.Count >= 2) return Join(arguments[0], arguments[1]);
@@ -2662,62 +2688,62 @@ namespace K3CSharp
                     throw new Exception("# operator requires 1 or 2 arguments");
                 // Mathematical functions
                 case "_abs":
-                    if (arguments.Count == 1) return MathAbs(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathAbs(arguments[0]);
                     throw new Exception("_abs requires 1 argument");
                 case "_sqr":
-                    if (arguments.Count == 1) return MathSqr(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathSqr(arguments[0]);
                     throw new Exception("_sqr requires 1 argument");
                 case "_sqrt":
-                    if (arguments.Count == 1) return MathSqrt(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathSqrt(arguments[0]);
                     throw new Exception("_sqrt requires 1 argument");
                 case "_floor":
-                    if (arguments.Count == 1) return MathFloor(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathFloor(arguments[0]);
                     throw new Exception("_floor requires 1 argument");
                 case "_sin":
-                    if (arguments.Count == 1) return MathSin(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathSin(arguments[0]);
                     throw new Exception("_sin requires 1 argument");
                 case "_cos":
-                    if (arguments.Count == 1) return MathCos(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathCos(arguments[0]);
                     throw new Exception("_cos requires 1 argument");
                 case "_tan":
-                    if (arguments.Count == 1) return MathTan(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathTan(arguments[0]);
                     throw new Exception("_tan requires 1 argument");
                 case "_asin":
-                    if (arguments.Count == 1) return MathAsin(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathAsin(arguments[0]);
                     throw new Exception("_asin requires 1 argument");
                 case "_acos":
-                    if (arguments.Count == 1) return MathAcos(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathAcos(arguments[0]);
                     throw new Exception("_acos requires 1 argument");
                 case "_atan":
-                    if (arguments.Count == 1) return MathAtan(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathAtan(arguments[0]);
                     throw new Exception("_atan requires 1 argument");
                 case "_sinh":
-                    if (arguments.Count == 1) return MathSinh(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathSinh(arguments[0]);
                     throw new Exception("_sinh requires 1 argument");
                 case "_cosh":
-                    if (arguments.Count == 1) return MathCosh(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathCosh(arguments[0]);
                     throw new Exception("_cosh requires 1 argument");
                 case "_tanh":
-                    if (arguments.Count == 1) return MathTanh(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathTanh(arguments[0]);
                     throw new Exception("_tanh requires 1 argument");
                 case "_log":
-                    if (arguments.Count == 1) return MathLog(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathLog(arguments[0]);
                     throw new Exception("_log requires 1 argument");
                 case "_exp":
-                    if (arguments.Count == 1) return MathExp(arguments[0]);
+                    if (arguments.Count == 1) return mathHandler.MathExp(arguments[0]);
                     throw new Exception("_exp requires 1 argument");
                 // Database functions
                 case "_ic":
-                    if (arguments.Count == 1) return Ic(arguments[0]);
+                    if (arguments.Count == 1) return listHandler.Ic(arguments[0]);
                     throw new Exception("_ic requires 1 argument");
                 case "_ci":
-                    if (arguments.Count == 1) return Ci(arguments[0]);
+                    if (arguments.Count == 1) return listHandler.Ci(arguments[0]);
                     throw new Exception("_ci requires 1 argument");
                 case "_sv":
-                    if (arguments.Count == 2) return Sv(arguments[0], arguments[1]);
+                    if (arguments.Count == 2) return listHandler.Sv(arguments[0], arguments[1]);
                     throw new Exception("_sv requires 2 arguments");
                 case "_vs":
-                    if (arguments.Count == 2) return Vs(arguments[0], arguments[1]);
+                    if (arguments.Count == 2) return listHandler.Vs(arguments[0], arguments[1]);
                     throw new Exception("_vs requires 2 arguments");
                 case "_val":
                     if (arguments.Count == 1) return ValFunction(arguments[0]);
@@ -2860,7 +2886,7 @@ namespace K3CSharp
             // Function Inverse: f ? y — when left is a function, compute inverse
             if (left is ProjectedFunctionValue || left is FunctionValue)
             {
-                return FunctionInverse(left, right);
+                return functionInverseHandler.FunctionInverse(left, right);
             }
 
             // Find operator: d ? y
@@ -5874,12 +5900,12 @@ namespace K3CSharp
             else if (opName == "_ssr")
             {
                 // _ssr is a ternary system function: _ssr[text;pattern;replacement]
-                return SsrFunction(arg1Eval!, arg2Eval!, arg3Eval!);
+                return listHandler.SsrFunction(arg1Eval!, arg2Eval!, arg3Eval!);
             }
             else if (opName == "?")
             {
                 // Triadic ?: ?[f; y; x] — Function Inverse with initial guess x
-                return FunctionInverse(arg1Eval!, arg2Eval!, arg3Eval);
+                return functionInverseHandler.FunctionInverse(arg1Eval!, arg2Eval!, arg3Eval);
             }
             else
             {
@@ -6115,8 +6141,8 @@ namespace K3CSharp
                     "@" => evaluator.AtIndex(arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     "#" => arguments.Length == 1 ? evaluator.Count(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("#", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     "_" => arguments.Length == 1 ? evaluator.Floor(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("_", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
-                    "?" => arguments.Length == 1 ? evaluator.Unique(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("?", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
-                    "$" => arguments.Length == 1 ? evaluator.Format(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("$", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "?" => arguments.Length == 1 ? evaluator.hashgroupHandler.Unique(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("?", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
+                    "$" => arguments.Length == 1 ? evaluator.formatHandler.Format(arguments[0]) : evaluator.EvaluateDyadicOperatorWithRegistry("$", arguments[0], arguments[1] ?? throw new ArgumentNullException(nameof(arguments))),
                     _ => VerbRegistry.HasVerb(verb) && VerbRegistry.GetVerb(verb) is { } vInfo
                         ? (arguments.Length == 1
                             ? evaluator.ApplyMonadicVerb(verb, arguments[0])
@@ -6494,173 +6520,4 @@ namespace K3CSharp
         #endregion
         }
 
-    // Custom comparer for K3Value to use in HashSet operations
-    public class K3ValueComparer : IEqualityComparer<K3Value>
-    {
-        public bool Equals(K3Value? x, K3Value? y)
-        {
-            if (ReferenceEquals(x, y)) return true;
-            if (x is null || y is null) return false;
-            
-            // Use Match function for comparison (same as _in uses)
-            var evaluator = new Evaluator();
-            var matchResult = evaluator.Match(x, y);
-            
-            if (matchResult is IntegerValue intVal)
-            {
-                return intVal.Value == 1;
-            }
-            
-            return false;
-        }
-
-        public int GetHashCode(K3Value obj)
-        {
-            if (obj is null) return 0;
-            
-            // Generate hash code based on type and value
-            return obj.Type switch
-            {
-                ValueType.Integer => obj is IntegerValue iv ? iv.Value.GetHashCode() : 0,
-                ValueType.Long => obj is LongValue lv ? lv.Value.GetHashCode() : 0,
-                ValueType.Float => obj is FloatValue fv ? fv.Value.GetHashCode() : 0,
-                ValueType.Character => obj is CharacterValue cv ? cv.Value.GetHashCode() : 0,
-                ValueType.Symbol => obj is SymbolValue sv ? sv.Value.GetHashCode() : 0,
-                ValueType.Vector => obj is VectorValue vv ? vv.Elements.Count.GetHashCode() : 0,
-                _ => obj.ToString().GetHashCode()
-            };
-        }
-    }
-
-    /// <summary>
-    /// Represents a verb with its attached adverbs for proper evaluation
-    /// </summary>
-    public class VerbWithAdverbs
-    {
-        public string BaseVerb { get; }
-        public List<string> Adverbs { get; }
-        public int Position { get; }
-
-        public VerbWithAdverbs(string baseVerb, List<string> adverbs, int position = -1)
-        {
-            BaseVerb = baseVerb;
-            Adverbs = adverbs ?? new List<string>();
-            Position = position;
-        }
-
-        /// <summary>
-        /// Get the effective arity of the verb with adverbs applied
-        /// </summary>
-        public int GetEffectiveArity()
-        {
-            // Base arity depends on the verb
-            int baseArity = GetBaseVerbArity(BaseVerb);
-            
-            // Apply adverb arity modifications
-            foreach (var adverb in Adverbs)
-            {
-                baseArity = ApplyAdverbArityModification(baseArity, adverb);
-            }
-            
-            return baseArity;
-        }
-
-        private int GetBaseVerbArity(string verb)
-        {
-            // Determine base verb arity using VerbRegistry
-            var verbInfo = VerbRegistry.GetVerb(verb);
-            if (verbInfo != null && verbInfo.SupportedArities.Length > 0)
-            {
-                // Return the minimum supported arity as the base arity
-                return verbInfo.SupportedArities.Min();
-            }
-            return 1; // Default to monadic
-        }
-
-        private int ApplyAdverbArityModification(int currentArity, string adverb)
-        {
-            return adverb switch
-            {
-                "/" => currentArity, // Over: same arity
-                "\\" => currentArity, // Scan: same arity  
-                "'" => currentArity, // Each: same arity
-                "/:" => Math.Max(currentArity, 2), // Each-right: at least dyadic
-                "\\:" => Math.Max(currentArity, 2), // Each-left: at least dyadic
-                "':" => Math.Max(currentArity, 2), // Each-prior: at least dyadic
-                _ => currentArity
-            };
-        }
-    }
-
-    /// <summary>
-    /// Parser for extracting verbs and their attached adverbs from AST nodes
-    /// </summary>
-    public class VerbAdverbParser
-    {
-        /// <summary>
-        /// Parse a verb with adverbs from an AST node
-        /// </summary>
-        /// <param name="node">AST node to parse</param>
-        /// <returns>VerbWithAdverbs object or null if not a verb with adverbs</returns>
-        public static VerbWithAdverbs? ParseVerbWithAdverbs(ASTNode node)
-        {
-            // Handle simple literal verbs (like +, -, *, etc.)
-            if (node.Type == ASTNodeType.Literal && node.Value is SymbolValue symbolValue)
-            {
-                var verbSymbol = symbolValue.Value.ToString();
-                if (IsVerb(verbSymbol))
-                {
-                    return new VerbWithAdverbs(verbSymbol, new List<string>(), node.StartPosition);
-                }
-                return null;
-            }
-            
-            // Don't handle Variable nodes here - let them fall through to legacy evaluation
-            // where the verb will be evaluated to a FunctionValue before reaching the adverb handler
-            
-            if (node.Type != ASTNodeType.DyadicOp || node.Value == null)
-                return null;
-
-            var opSymbol = node.Value.ToString();
-            
-            // Check if this is an adverb
-            if (IsAdverb(opSymbol))
-            {
-                // Parse the left side to find the base verb and any nested adverbs
-                var leftResult = ParseVerbWithAdverbs(node.Children[0]);
-                if (leftResult != null)
-                {
-                    // Add this adverb to the list
-                    var adverbs = new List<string>(leftResult.Adverbs) { opSymbol };
-                    return new VerbWithAdverbs(leftResult.BaseVerb, adverbs, node.StartPosition);
-                }
-                else if (node.Children[0].Type == ASTNodeType.Literal && node.Children[0].Value is SymbolValue leftSymbolValue)
-                {
-                    // Base verb found
-                    var baseVerb = leftSymbolValue.Value.ToString();
-                    return new VerbWithAdverbs(baseVerb, new List<string> { opSymbol }, node.StartPosition);
-                }
-            }
-            
-            // Check if this is a base verb
-            if (IsVerb(opSymbol))
-            {
-                return new VerbWithAdverbs(opSymbol, new List<string>(), node.StartPosition);
-            }
-
-            return null;
-        }
-
-        private static bool IsAdverb(string symbol)
-        {
-            return symbol == "/" || symbol == "\\" || symbol == "'" || 
-                   symbol == "/:" || symbol == "\\:" || symbol == "':";
-        }
-
-        private static bool IsVerb(string symbol)
-        {
-            // Check if this is a known verb symbol
-            return VerbRegistry.IsVerb(symbol);
-        }
-    }
 }

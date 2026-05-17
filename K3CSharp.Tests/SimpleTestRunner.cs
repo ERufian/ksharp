@@ -3512,7 +3512,7 @@ namespace K3CSharp.Tests
 
                                         {
 
-                                            Evaluator.RandomSeed = newSeed;
+                                            RandHandler.RandomSeed = newSeed;
 
                                         }
 

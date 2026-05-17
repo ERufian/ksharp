@@ -51,7 +51,7 @@ namespace K3CSharp
                 '_' => FloorBinary(left, right),
                 '@' => AtIndex(left, right),
                 '.' => DotApply(left, right),
-                '$' => Format(left, right),
+                '$' => formatHandler.Format(left, right),
                 '~' => Match(left, right),
                 '?' => Find(left, right),
                 _ => throw new Exception($"Unknown operator: {op}")
