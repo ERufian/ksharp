@@ -69,80 +69,9 @@ namespace K3CSharp
 
         private K3Value ApplyMonadicVerb(string verbName, K3Value operand)
         {
-            // Use VerbRegistry to handle all monadic verbs dynamically
-            if (VerbRegistry.HasVerb(verbName))
-            {
-                var verbInfo = VerbRegistry.GetVerb(verbName);
-                if (verbInfo != null && verbInfo.SupportedArities.Contains(1))
-                {
-                    // Handle system verbs with dedicated methods
-                    return verbName switch
-                    {
-                        "_ci" => Ci(operand),
-                        "_ic" => Ic(operand),
-                        // Basic operators
-                        "+" => Transpose(operand),  
-                        "+:" => Transpose(operand),  // Monadic transpose
-                        "-" => ArithmeticNegate(operand),
-                        "-:" => ArithmeticNegate(operand),  // Monadic negate
-                        "*" => First(operand),
-                        "*:" => First(operand),  // Monadic first
-                        "%" => Reciprocal(operand),
-                        "%:" => Reciprocal(operand),  // Monadic reciprocal
-                        "&" => Where(operand),
-                        "&:" => Where(operand),  // Monadic where
-                        "|" => Reverse(operand),
-                        "|:" => Reverse(operand),  // Monadic reverse
-                        "^" => Shape(operand),
-                        "^:" => Shape(operand),  // Monadic shape
-                        "!" => Enumerate(operand),
-                        "!:" => Enumerate(operand),  // Monadic enumerate
-                        "," => Enlist(operand),
-                        ",:" => Enlist(operand),  // Monadic enlist
-                        "#" => Count(operand),
-                        "#:" => Count(operand),  // Monadic count
-                        "_" => Floor(operand),
-                        "_:" => Floor(operand),  // Monadic floor
-                        "?" => Unique(operand),
-                        "?:" => Unique(operand),  // Monadic unique
-                        "=" => Group(operand),
-                        "=:" => Group(operand),  // Monadic group
-                        "." => MakeFunction(operand),  // Monadic make/execute
-                        ".:" => MakeFunction(operand),  // Monadic make/execute
-                        "~" => Negate(operand),
-                        "~:" => Negate(operand),  // Monadic negate
-                        "<" => GradeUp(operand),
-                        "<:" => GradeUp(operand),  // Monadic grade up
-                        ">" => GradeDown(operand),
-                        ">:" => GradeDown(operand),  // Monadic grade down
-                        "$" => Format(operand),
-                        "$:" => Format(operand),  // Monadic format
-                        "@" => Atom(operand),
-                        "@:" => Atom(operand),  // Monadic atom
-                        "STRING_REPRESENTATION" => IoVerbMonadic(operand, 5),
-                        "IO_VERB_0" => IoVerbMonadic(operand, 0),
-                        "IO_VERB_1" => IoVerbMonadic(operand, 1),
-                        "IO_VERB_2" => IoVerbMonadic(operand, 2),
-                        "IO_VERB_3" => IoVerbMonadic(operand, 3),
-                        "IO_VERB_4" => IoVerbMonadic(operand, 4),
-                        "IO_VERB_5" => IoVerbMonadic(operand, 5),
-                        "IO_VERB_6" => IoVerbMonadic(operand, 6),
-                        "IO_VERB_7" => IoVerbMonadic(operand, 7),
-                        "IO_VERB_8" => IoVerbMonadic(operand, 8),
-                        "IO_VERB_9" => IoVerbMonadic(operand, 9),
-                        "_exp" => MathExp(operand),
-                        "_abs" => MathAbs(operand),
-                        "_sqrt" => MathSqrt(operand),
-                        "_sin" => MathSin(operand),
-                        "_cos" => MathCos(operand),
-                        "_tan" => MathTan(operand),
-                        "_log" => MathLog(operand),
-                        "_floor" => MathFloor(operand),
-                        "_ceil" => MathCeil(operand),
-                        _ => throw new Exception($"Verb '{verbName}' is registered as monadic but not implemented in ApplyMonadicVerb")
-                    };
-                }
-            }
+            var result = DispatchMonadic(verbName, operand);
+            if (result != null)
+                return result;
             
             throw new Exception($"Unknown monadic verb: {verbName}");
         }

@@ -356,104 +356,10 @@ namespace K3CSharp
                         return new VectorValue(monoResults, DetermineVectorType(monoResults));
                     }
 
-                    // Use the same monadic operator evaluation as in EvaluateDyadicOp
-                    var monoResult = verbSymbol.Value switch
-                    {
-                        "-" => MonadicMinus(operand),
-                        "+" => Transpose(operand),
-                        "*" => First(operand),
-                        "%" => Reciprocal(operand),
-                        "&" => Where(operand),
-                        "|" => Reverse(operand),
-                        "TYPE" => IoVerbMonadic(operand, 4),
-                        "STRING_REPRESENTATION" => IoVerbMonadic(operand, 5),
-                        "IO_VERB_0" => IoVerbMonadic(operand, 0),
-                        "IO_VERB_1" => IoVerbMonadic(operand, 1),
-                        "IO_VERB_2" => IoVerbMonadic(operand, 2),
-                        "IO_VERB_3" => IoVerbMonadic(operand, 3),
-                        "IO_VERB_4" => IoVerbMonadic(operand, 4),
-                        "IO_VERB_5" => IoVerbMonadic(operand, 5),
-                        "IO_VERB_6" => IoVerbMonadic(operand, 6),
-                        "IO_VERB_7" => IoVerbMonadic(operand, 7),
-                        "IO_VERB_8" => IoVerbMonadic(operand, 8),
-                        "IO_VERB_9" => IoVerbMonadic(operand, 9),
-                        "<" => GradeUp(operand),
-                        ">" => GradeDown(operand),
-                        "^" => Shape(operand),
-                        "!" => Enumerate(operand),
-                        "," => Enlist(operand),
-                        "#" => Count(operand),
-                        "_" => Floor(operand),
-                        "?" => Unique(operand),
-                        "=" => Group(operand),
-                        "$" => Format(operand),
-                        "@" => Atom(operand),
-                        "." => MakeFunction(operand),
-                        "~" => Negate(operand),
-                        "_log" => MathLog(operand),
-                        "_exp" => MathExp(operand),
-                        "_abs" => MathAbs(operand),
-                        "_sqr" => MathSqr(operand),
-                        "_sqrt" => MathSqrt(operand),
-                        "_floor" => MathFloor(operand),
-                        "_sin" => MathSin(operand),
-                        "_cos" => MathCos(operand),
-                        "_tan" => MathTan(operand),
-                        "_asin" => MathAsin(operand),
-                        "_acos" => MathAcos(operand),
-                        "_atan" => MathAtan(operand),
-                        "_sinh" => MathSinh(operand),
-                        "_cosh" => MathCosh(operand),
-                        "_tanh" => MathTanh(operand),
-                        "_inv" => MathInv(operand),
-                        "_ceil" => MathCeil(operand),
-                        "_lt" => LtFunction(operand),
-                        "_jd" => JdFunction(operand),
-                        "_dj" => DjFunction(operand),
-                        "_T" => TFunction(operand),
-                        "_in" => InFunction(operand),
-                        "_bin" => BinFunction(operand),
-                        "_binl" => BinlFunction(operand),
-                        "_lin" => LinFunction(operand),
-                        "_gtime" => GtimeFunction(operand),
-                        "_ltime" => LtimeFunction(operand),
-                        "_bd" => BdFunction(operand),
-                        "_db" => DbFunction(operand),
-                        "_ci" => Ci(operand),
-                        "_ic" => Ic(operand),
-                        "_v" => VarFunction(operand),
-                        "_i" => IndexFunction(operand),
-                        "_f" => FunctionFunction(operand),
-                        "_n" => NullFunction(operand),
-                        "_s" => SpaceFunction(operand),
-                        "_h" => HostFunction(operand),
-                        "_p" => PortFunction(operand),
-                        "_P" => ProcessIdFunction(operand),
-                        "_w" => WhoFunction(operand),
-                        "_u" => UserFunction(operand),
-                        "_a" => AddressFunction(operand),
-                        "_k" => VersionFunction(operand),
-                        "_o" => OsFunction(operand),
-                        "_c" => CoresFunction(operand),
-                        "_r" => RamFunction(operand),
-                        "_m" => MachineIdFunction(operand),
-                        "_y" => StackFunction(operand),
-                        "_while" => WhileFunction(operand),
-                        "_if" => IfFunction(operand),
-                        "_d" => DirFunction(operand),
-                        "_getenv" => GetenvFunction(operand),
-                        "_size" => SizeFunction(operand),
-                        "_host" => HostDnsFunction(operand),
-                        "_exit" => ExitFunction(operand),
-                        "_not" => MathNot(operand),
-                        "_parse" => Verbs.ParseVerbHandler.Parse(new[] { operand }),
-                        "_eval" => EvaluateEvalVerb(operand),
-                        "GETHINT" => GetHintFunction(new List<K3Value> { operand }),
-                        "_gethint" => GetHintFunction(new List<K3Value> { operand }),
-                        "DISPOSE" => DisposeFunction(new List<K3Value> { operand }),
-                        "_dispose" => DisposeFunction(new List<K3Value> { operand }),
-                        _ => throw new Exception($"Unknown monadic operator: {verbSymbol.Value}")
-                    };
+                    // Dispatch via centralized monadic verb table
+                    var monoResult = DispatchMonadic(verbSymbol.Value, operand);
+                    if (monoResult == null)
+                        throw new Exception($"Unknown monadic operator: {verbSymbol.Value}");
                     return monoResult;
 
                 case ASTNodeType.TetradicOp:
@@ -474,14 +380,9 @@ namespace K3CSharp
             }
         }
 
-        private static bool IsBuiltInOperator(string operatorName)
+        private bool IsBuiltInOperator(string operatorName)
         {
-            // List of built-in operators that can be used as functions
-            return operatorName == "+" || operatorName == "-" || operatorName == "*" || operatorName == "%" ||
-                   operatorName == "^" || operatorName == "<" || operatorName == ">" || operatorName == "=" ||
-                   operatorName == "," || operatorName == "." || operatorName == "!" || operatorName == "@" ||
-                   operatorName == "#" || operatorName == "_" || operatorName == "?" || operatorName == "$" ||
-                   operatorName == ":";
+            return operatorName == ":" || MonadicDispatch.ContainsKey(operatorName) || DyadicDispatch.ContainsKey(operatorName);
         }
 
         private static bool IsColon(K3Value value)
@@ -756,81 +657,14 @@ namespace K3CSharp
                 throw new Exception("IDENTIFIER should not reach EvaluateDyadicOperatorWithRegistry");
             }
             
-            // Special cases for system functions that ignore left argument
-            if (opName == "_bd" || opName == "_db")
-            {
-                // These are monadic functions that ignore the left argument
-                return opName == "_bd" ? BdFunction(right) : DbFunction(right);
-            }
-            
-            // Handle dyadic underscore (cut/drop operation)
-            if (opName == "_")
-            {
-                return DropOrCut(left, right);
-            }
-            
-            // Handle single-argument operators first
+            // Handle monadic-only verbs that appear in dyadic context (use only left arg)
             if (opName == "_ci")
-            {
                 return Ci(left);
-            }
             if (opName == "_ic")
-            {
                 return Ic(left);
-            }
 
-            // Use dictionary lookup for standard dyadic operators
-            var dyadicOps = new Dictionary<string, Func<K3Value, K3Value, K3Value>>
-            {
-                { "+", Plus },
-                { "-", Minus },
-                { "*", Times },
-                { "%", Divide },
-                { "^", Power },
-                { "POWER", Power },
-                { "!", ModRotate },
-                { "&", Min },
-                { "|", Max },
-                { "<", Less },
-                { ">", More },
-                { "=", Equal },
-                { "~", Match },
-                { ",", Join },
-                { "#", Take },
-                { "_", DropOrCut },
-                { "@", AtIndex },
-                { ".", DotApply },
-                { "$", Format },
-                { "::", GlobalAssignment },
-                { "_in", In },
-                { "_draw", Draw },
-                { "_bin", Bin },
-                { "_div", MathDiv },
-                { "_dot", MathDot },
-                { "_mul", MathMul },
-                { "_inv", MathInv },
-                { "_lsq", MathLsq },
-                { "_and", MathAnd },
-                { "_or", MathOr },
-                { "_xor", MathXor },
-                { "_rot", MathRot },
-                { "_shift", MathShift },
-                { "_binl", Binl },
-                { "_lin", Lin },
-                { "_dv", Dv },
-                { "_dvl", Dvl },
-                { "_di", Di },
-                { "_sm", Sm },
-                { "_sv", Sv },
-                { "_vs", Vs },
-                { "_ss", SsFunction },
-                { "_setenv", SetenvFunction },
-                { "_bd", (left, right) => BdFunction(right) },  // _bd is monadic, ignore left
-                { "_db", (left, right) => DbFunction(right) },  // _db is monadic, ignore left
-                { "?", Find }
-            };
-
-            if (dyadicOps.TryGetValue(opName, out var dyadicOp))
+            // Look up in the centralized dyadic dispatch table
+            if (DyadicDispatch.TryGetValue(opName, out var dyadicOp))
             {
                 // Check for atomic function - apply implicit iteration if applicable
                 var verbInfo = VerbRegistry.GetVerb(opName);
@@ -874,33 +708,6 @@ namespace K3CSharp
                 }
                 
                 return dyadicOp(left, right);
-            }
-
-            // Handle special cases with lambda expressions
-            switch (opName)
-            {
-                // Adverbs must be agnostic to the verb they modify
-                // Pass the actual verb (left operand) to the adverb handler
-                // For over/scan: left argument is the initialization value (per spec)
-                case "over": return Over(left, left, right);
-                case "scan": return Scan(left, left, right);
-                case "each": return HandleAdverbTick(left, new NullValue(), right);
-                case "/:": return EachRight(left, new NullValue(), right);
-                case "\\:": return EachLeft(left, new NullValue(), right);
-                case "TYPE": return IoVerbDyadic(left, right, 4);
-                case "STRING_REPRESENTATION": return IoVerbMonadic(right, 5);
-                case "IO_VERB_0": return IoVerbDyadic(left, right, 0);
-                case "IO_VERB_1": return IoVerbDyadic(left, right, 1);
-                case "IO_VERB_2": return IoVerbDyadic(left, right, 2);
-                case "IO_VERB_3": return IoVerbDyadic(left, right, 3);
-                case "IO_VERB_4": return IoVerbDyadic(left, right, 4);
-                case "IO_VERB_5": return IoVerbDyadic(left, right, 5);
-                case "IO_VERB_6": return IoVerbDyadic(left, right, 6);
-                case "IO_VERB_7": return IoVerbDyadic(left, right, 7);
-                case "IO_VERB_8": return IoVerbDyadic(left, right, 8);
-                case "IO_VERB_9": return IoVerbDyadic(left, right, 9);
-                case "SETHINT":
-                case "_sethint": return SetHintFunction(new List<K3Value> { left, right });
             }
 
             // Handle any other verb names by checking VerbRegistry first
@@ -969,128 +776,15 @@ namespace K3CSharp
                     return new VectorValue(dyadicMonoResults, DetermineVectorType(dyadicMonoResults));
                 }
 
-                return op.Value switch
-                {
-                    "-" => MonadicMinus(operand),
-                    "+" => Transpose(operand),
-                    "*" => First(operand),
-                    "%" => Reciprocal(operand),
-                    "&" => Where(operand),
-                    "|" => Reverse(operand),
-                    "TYPE" => IoVerbMonadic(operand, 4),
-                    "STRING_REPRESENTATION" => IoVerbMonadic(operand, 5),
-                    "IO_VERB_0" => IoVerbMonadic(operand, 0),
-                    "IO_VERB_1" => IoVerbMonadic(operand, 1),
-                    "IO_VERB_2" => IoVerbMonadic(operand, 2),
-                    "IO_VERB_3" => IoVerbMonadic(operand, 3),
-                    "IO_VERB_4" => IoVerbMonadic(operand, 4),
-                    "IO_VERB_5" => IoVerbMonadic(operand, 5),
-                    "IO_VERB_6" => IoVerbMonadic(operand, 6),
-                    "IO_VERB_7" => IoVerbMonadic(operand, 7),
-                    "IO_VERB_8" => IoVerbMonadic(operand, 8),
-                    "IO_VERB_9" => IoVerbMonadic(operand, 9),
-                                        "<" => GradeUp(operand),
-                    ">" => GradeDown(operand),
-                    "^" => Shape(operand),
-                    "!" => Enumerate(operand),
-                    "," => Enlist(operand),
-                    "#" => Count(operand),
-                    "_" => Floor(operand),
-                    "?" => Unique(operand),
-                    "=" => Group(operand),
-                    "$" => Format(operand),
-                    "." => DotApply(new NullValue(), operand),
-                    "~" => Negate(operand),
-                    "_log" => MathLog(operand),
-                    "_exp" => MathExp(operand),
-                    "_abs" => MathAbs(operand),
-                    "ABS" => MathAbs(operand),  // Handle token mapping issue
-                    "_sqr" => MathSqr(operand),
-                    "SQR" => MathSqr(operand),  // Handle token mapping issue
-                    "_sqrt" => MathSqrt(operand),
-                    "SQRT" => MathSqrt(operand),  // Handle token mapping issue
-                    "_floor" => MathFloor(operand),
-                    "FLOOR_MATH" => MathFloor(operand),  // Handle token mapping issue
-                    "_sin" => MathSin(operand),
-                    "SIN" => MathSin(operand),  // Handle token mapping issue
-                    "_cos" => MathCos(operand),
-                    "COS" => MathCos(operand),  // Handle token mapping issue
-                    "_tan" => MathTan(operand),
-                    "TAN" => MathTan(operand),  // Handle token mapping issue
-                    "_asin" => MathAsin(operand),
-                    "ASIN" => MathAsin(operand),  // Handle token mapping issue
-                    "_acos" => MathAcos(operand),
-                    "ACOS" => MathAcos(operand),  // Handle token mapping issue
-                    "_atan" => MathAtan(operand),
-                    "ATAN" => MathAtan(operand),  // Handle token mapping issue
-                    "_sinh" => MathSinh(operand),
-                    "SINH" => MathSinh(operand),  // Handle token mapping issue
-                    "_cosh" => MathCosh(operand),
-                    "COSH" => MathCosh(operand),  // Handle token mapping issue
-                    "_tanh" => MathTanh(operand),
-                    "TANH" => MathTanh(operand),  // Handle token mapping issue
-                    "_inv" => MathInv(operand),
-                    "INV" => MathInv(operand),  // Handle token mapping issue
-                    "_ceil" => MathCeil(operand),
-                    "CEIL" => MathCeil(operand),  // Handle token mapping issue
-                    "_lt" => LtFunction(operand),
-                    "_jd" => JdFunction(operand),
-                    "_dj" => DjFunction(operand),
-                    "_T" => TFunction(operand),
-                    "_in" => InFunction(operand),
-                    "_bin" => BinFunction(operand),
-                    "_binl" => BinlFunction(operand),
-                    "_lin" => LinFunction(operand),
-                    "_gtime" => GtimeFunction(operand),
-                    "_ltime" => LtimeFunction(operand),
-                    "_bd" => BdFunction(operand),
-                    "_db" => DbFunction(operand),
-                    "_ci" => Ci(operand),
-                    "_ic" => Ic(operand),
-                    "_v" => VarFunction(operand),
-                    "_i" => IndexFunction(operand),
-                    "_f" => FunctionFunction(operand),
-                    "_n" => NullFunction(operand),
-                    "_s" => SpaceFunction(operand),
-                    "_h" => HostFunction(operand),
-                    "_p" => PortFunction(operand),
-                    "_P" => ProcessIdFunction(operand),
-                    "_w" => WhoFunction(operand),
-                    "_u" => UserFunction(operand),
-                    "_a" => AddressFunction(operand),
-                    "_k" => VersionFunction(operand),
-                    "_o" => OsFunction(operand),
-                    "_c" => CoresFunction(operand),
-                    "_r" => RamFunction(operand),
-                    "_m" => MachineIdFunction(operand),
-                    "_y" => StackFunction(operand),
-                    "_while" => WhileFunction(operand),
-                    "_if" => IfFunction(operand),
-                    "_d" => DirFunction(operand),
-                    "do" => DoFunction(operand),
-                    "while" => WhileFunction(operand),
-                    "if" => IfFunction(operand),
-                    "_exit" => ExitFunction(operand),
-                    "_host" => HostDnsFunction(operand),
-                    "_getenv" => GetenvFunction(operand),
-                    "_size" => SizeFunction(operand),
-                    "_not" => MathNot(operand),
-                    "MIN" => operand, // Identity operation for monadic min
-                    "MAX" => operand, // Identity operation for monadic max
-                    "over" => ApplyAdverbSlash(operand, new NullValue(), new NullValue()),
-                    "scan" => ApplyAdverbBackslash(operand, new NullValue(), new NullValue()),
-                    "each" => ApplyAdverbTick(operand, new NullValue(), new NullValue()),
-                    "each-right" => ApplyAdverbSlashColon(operand, new NullValue(), new NullValue()),
-                    "each-left" => ApplyAdverbBackslashColon(operand, new NullValue(), new NullValue()),
-                    "each-prior" => ApplyAdverbTickColon(operand, new NullValue(), new NullValue()),
-                    "_parse" => Verbs.ParseVerbHandler.Parse(new[] { operand }),
-                    "_eval" => EvaluateEvalVerb(operand),
-                    "GETHINT" => GetHintFunction(new List<K3Value> { operand }),
-                    "_gethint" => GetHintFunction(new List<K3Value> { operand }),
-                    "DISPOSE" => DisposeFunction(new List<K3Value> { operand }),
-                    "_dispose" => DisposeFunction(new List<K3Value> { operand }),
-                    _ => throw new Exception($"Unknown monadic operator: {op.Value}")
-                };
+                // Special case: "." in DyadicOp context uses DotApply (amend/apply semantics)
+                if (op.Value == ".")
+                    return DotApply(new NullValue(), operand);
+
+                // Dispatch via centralized monadic verb table
+                var dyadicMonoResult = DispatchMonadic(op.Value, operand);
+                if (dyadicMonoResult != null)
+                    return dyadicMonoResult;
+                throw new Exception($"Unknown monadic operator: {op.Value}");
             }
 
             // Special handling for ' adverb with multiple children (adverb evaluation)
