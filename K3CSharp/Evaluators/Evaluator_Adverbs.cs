@@ -1735,5 +1735,146 @@ namespace K3CSharp
                 _ => 0                      // Default to generic list
             };
         }
+
+        private K3Value TransitiveClosureOver(VectorValue graph, K3Value start)
+        {
+            if (start is VectorValue startVec)
+            {
+                var results = new List<K3Value>();
+                foreach (var elem in startVec.Elements)
+                    results.Add(TransitiveClosureOver(graph, elem));
+                return new VectorValue(results);
+            }
+
+            int idx = GetIntValue(start);
+            var visited = new HashSet<int>();
+            int current = idx;
+            while (true)
+            {
+                if (visited.Contains(current))
+                    return new IntegerValue(current);
+                if (current < 0 || current >= graph.Elements.Count)
+                    throw new Exception($"Index error: {current} out of bounds for vector of length {graph.Elements.Count}");
+                int next = GetIntValue(graph.Elements[current]);
+                visited.Add(current);
+                if (visited.Contains(next))
+                    return new IntegerValue(current);
+                current = next;
+            }
+        }
+
+        private K3Value TransitiveClosureScan(VectorValue graph, K3Value start)
+        {
+            if (start is VectorValue startVec)
+            {
+                var paths = new List<List<int>>();
+                foreach (var elem in startVec.Elements)
+                    paths.Add(TransitiveClosureScanPath(graph, elem));
+                int maxLen = paths.Max(p => p.Count);
+                var rows = new List<K3Value>();
+                for (int i = 0; i < maxLen; i++)
+                {
+                    var row = new List<K3Value>();
+                    foreach (var path in paths)
+                    {
+                        int val = i < path.Count ? path[i] : path[path.Count - 1];
+                        row.Add(new IntegerValue(val));
+                    }
+                    rows.Add(new VectorValue(row));
+                }
+                return new VectorValue(rows);
+            }
+
+            var singlePath = TransitiveClosureScanPath(graph, start);
+            var result = singlePath.Select(i => (K3Value)new IntegerValue(i)).ToList();
+            return new VectorValue(result);
+        }
+
+        private List<int> TransitiveClosureScanPath(VectorValue graph, K3Value start)
+        {
+            int idx = GetIntValue(start);
+            var path = new List<int>();
+            var visited = new HashSet<int>();
+            int current = idx;
+            while (true)
+            {
+                if (visited.Contains(current))
+                    break;
+                path.Add(current);
+                visited.Add(current);
+                if (current < 0 || current >= graph.Elements.Count)
+                    throw new Exception($"Index error: {current} out of bounds for vector of length {graph.Elements.Count}");
+                int next = GetIntValue(graph.Elements[current]);
+                current = next;
+            }
+            return path;
+        }
+
+        private K3Value StateTransitionOver(VectorValue matrix, VectorValue states)
+        {
+            if (states.Elements.Count == 0)
+                throw new Exception("Length error: state transition requires at least one state");
+
+            int acc = GetIntValue(states.Elements[0]);
+            for (int i = 1; i < states.Elements.Count; i++)
+            {
+                int n = GetIntValue(states.Elements[i]);
+                if (acc < 0 || acc >= matrix.Elements.Count)
+                    throw new Exception($"Index error: row {acc} out of bounds for matrix with {matrix.Elements.Count} rows");
+                var row = matrix.Elements[acc] as VectorValue;
+                if (row == null)
+                    throw new Exception("Type error: state transition matrix must be a matrix");
+                if (n < 0 || n >= row.Elements.Count)
+                    throw new Exception($"Index error: column {n} out of bounds for row of length {row.Elements.Count}");
+                acc = GetIntValue(row.Elements[n]);
+            }
+            return new IntegerValue(acc);
+        }
+
+        private K3Value StateTransitionScan(VectorValue matrix, VectorValue states)
+        {
+            if (states.Elements.Count == 0)
+                throw new Exception("Length error: state transition requires at least one state");
+
+            var results = new List<K3Value> { new IntegerValue(GetIntValue(states.Elements[0])) };
+            int acc = GetIntValue(states.Elements[0]);
+            for (int i = 1; i < states.Elements.Count; i++)
+            {
+                int n = GetIntValue(states.Elements[i]);
+                if (acc < 0 || acc >= matrix.Elements.Count)
+                    throw new Exception($"Index error: row {acc} out of bounds for matrix with {matrix.Elements.Count} rows");
+                var row = matrix.Elements[acc] as VectorValue;
+                if (row == null)
+                    throw new Exception("Type error: state transition matrix must be a matrix");
+                if (n < 0 || n >= row.Elements.Count)
+                    throw new Exception($"Index error: column {n} out of bounds for row of length {row.Elements.Count}");
+                acc = GetIntValue(row.Elements[n]);
+                results.Add(new IntegerValue(acc));
+            }
+            return new VectorValue(results);
+        }
+
+        private K3Value StateTransitionEachPrior(VectorValue matrix, VectorValue states)
+        {
+            if (states.Elements.Count < 2)
+                return new VectorValue(new List<K3Value>());
+
+            var results = new List<K3Value>();
+            for (int i = 0; i < states.Elements.Count - 1; i++)
+            {
+                int a = GetIntValue(states.Elements[i]);
+                int b = GetIntValue(states.Elements[i + 1]);
+                if (b < 0 || b >= matrix.Elements.Count)
+                    throw new Exception($"Index error: row {b} out of bounds for matrix with {matrix.Elements.Count} rows");
+                var row = matrix.Elements[b] as VectorValue;
+                if (row == null)
+                    throw new Exception("Type error: state transition matrix must be a matrix");
+                if (a < 0 || a >= row.Elements.Count)
+                    throw new Exception($"Index error: column {a} out of bounds for row of length {row.Elements.Count}");
+                int val = GetIntValue(row.Elements[a]);
+                results.Add(new IntegerValue(val));
+            }
+            return new VectorValue(results);
+        }
     }
 }
