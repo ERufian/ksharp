@@ -1,4 +1,4 @@
-# kharp - k version 3 Language Interpreter in C#
+# ksharp - k version 3 Language Interpreter in C#
 
 A comprehensive implementation of the K programming language, version 3, a vector programming language from the APL family. 
 
