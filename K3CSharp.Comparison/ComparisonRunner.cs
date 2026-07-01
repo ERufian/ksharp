@@ -106,7 +106,7 @@ namespace K3CSharp.Comparison
         static ComparisonRunner()
         {
             // Enable Safe LRS mode with fallback - critical for correct parsing
-            ParserConfig.EnableLRSSafely();
+            // LRS is always enabled - no configuration needed
             ParserConfig.EnableDebugging = false;
         }
 
@@ -463,7 +463,7 @@ namespace K3CSharp.Comparison
                     var parts = trimmedLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2 && int.TryParse(parts[1], out int newSeed))
                     {
-                        Evaluator.RandomSeed = newSeed;
+                        RandHandler.RandomSeed = newSeed;
                     }
                     continue;
                 }
